@@ -13,6 +13,7 @@ K = 5
 # Threshold calibrated for paraphrase-multilingual-MiniLM-L12-v2 at size=1000/overlap=200:
 # on-topic questions score 0.16-0.29, deliberate nonsense scores 0.66-0.95.
 # Recalibrate after changing the embedding model or the chunk size.
+# The margin between on-topic and off-topic is about 0.37, so the threshold isn't fragile
 SUSPICIOUS = 0.45
 
 QUESTIONS = [
