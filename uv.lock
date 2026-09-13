@@ -851,6 +851,7 @@ dependencies = [
     { name = "ollama" },
     { name = "pypdf" },
     { name = "pytest" },
+    { name = "pyyaml" },
     { name = "requests" },
     { name = "sentence-transformers" },
 ]
@@ -867,6 +868,7 @@ requires-dist = [
     { name = "ollama", specifier = ">=0.6.2" },
     { name = "pypdf", specifier = ">=6.18.0" },
     { name = "pytest", specifier = ">=9.1.1" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "sentence-transformers", specifier = ">=6.0.1" },
 ]

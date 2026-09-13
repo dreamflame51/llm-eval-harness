@@ -13,6 +13,7 @@ dependencies = [
     "ollama>=0.6.2",
     "pypdf>=6.18.0",
     "pytest>=9.1.1",
+    "pyyaml>=6.0.2",
     "requests>=2.34.2",
     "sentence-transformers>=6.0.1",
 ]
@@ -30,8 +31,12 @@ dev = [
 ]
 
 [tool.ruff]
-src = ["src", "algorithms", "tests"]
+src = ["src", "practice", "tests"]
 
 [tool.pytest.ini_options]
+# Only the harness runs by default. practice/ is interview drill code - it hits
+# the network and is allowed to sit red while a task is in progress, so it must
+# not decide whether the project is green. Run it on purpose:
+#     uv run pytest practice
 testpaths = ["tests"]
-pythonpath = ["src", "algorithms"]
+pythonpath = ["src"]

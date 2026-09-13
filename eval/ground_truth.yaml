@@ -1,0 +1,345 @@
+# Ground-truth Q/A pairs for the NIST corpus
+# Sources: SP 800-37r2, SP 800-30r1, SP 800-53Ar5, SP 800-171Ar3, SP 800-78-5
+#
+# Production method: LLM-assisted drafting of candidate questions and answers,
+# followed by verification against the source PDFs. Answers are constrained to
+# claims supported by the listed contexts.
+#
+# Contexts are exact contiguous spans of the text produced by loader.load_pdf(),
+# NOT of the PDF as it looks on screen. That text is what the retriever actually
+# indexes, so the gold spans must match it character for character - extraction
+# artifacts included. Expect to see spliced footnote markers ("process43"),
+# spurious intra-word spaces ("t ogether"), split drop caps ("T he"), hyphen
+# breaks ("Rivest-Shamir- Adleman") and flattened table rows. Removing them
+# would make the fixture prettier and wrong: a perfect retrieval would score as
+# a miss, and the metric would measure pypdf rather than the RAG pipeline.
+#
+# validate.check_contexts() enforces this. Re-run it after any change to the
+# corpus, to loader.py, or to the chunk size.
+#
+# Refusal-test design (answerable: false):
+#   - in_corpus_gap: document is present; the specific fact is absent.
+#     Retrieval returns related chunks; model must still refuse.
+#   - out_of_corpus: document is absent entirely (baseline grounding check).
+#   Report the two classes separately. These records MUST NOT be scored with
+#   RAGAS context-recall / faithfulness (empty contexts → NaN).
+#
+# Schema per record:
+#   question: str
+#   answer: str
+#   contexts: list[str]          # supporting exact spans (empty for refusal items)
+#   answerable: bool             # false → system should decline / refuse
+#   source: str                  # primary document id (matches chunk metadata for joins)
+#   refusal_type: str | null     # "in_corpus_gap" | "out_of_corpus" (only when answerable=false)
+#   page: str | null             # approximate page or section reference
+
+# ---------------------------------------------------------------------------
+# SP 800-37 Revision 2  (5 pairs)
+# ---------------------------------------------------------------------------
+- question: "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?"
+  answer: "Prepare, Categorize, Select, Implement, Assess, Authorize, and Monitor."
+  contexts:
+    - "There are seven steps in the RMF; a preparatory step to ensure that organizations are ready to execute the process and six main steps. All seven steps are essential for the successful execution of the RMF. The steps are:"
+    - "Prepare to execute the RMF from an organization- and a system-level perspective by establishing a context and priorities for managing security and privacy risk."
+    - "Categorize the system and the information processed, stored, and transmitted by the system based on an analysis of the impact of loss."
+    - "Select an initial set of controls for the system and tailor the controls as needed to reduce risk to an acceptable level based on an assessment of risk."
+    - "Implement the controls and describe how the controls are employed within the system and its environment of operation."
+    - "Assess the controls to determine if the controls are implemented correctly, operating as intended, and producing the desired outcomes with respect to satisfying the security and privacy requirements."
+    - "Authorize the system or common controls based on a determination that the risk to organizational operations and assets, individuals, other organizations, and the Nation is acceptable."
+    - "Monitor the system and the associated controls on an ongoing basis to include assessing control effectiveness, documenting changes to the system and environment of operation, conducting risk assessments and impact analyses, and reporting the security and privacy posture of the system."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  page: "2.2 / ~p.12-13"
+
+- question: "What is a common control according to SP 800-37 Revision 2?"
+  answer: "Common controls are controls that can be inherited by one or more information systems and are allocated to organizational entities designated as common control providers."
+  contexts:
+    - "Common controls are controls that can be inherited by one or more information systems."
+    - "Organizations identify and select the set of common controls and allocate those controls to the organizational entities designated as common control providers."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  page: "3.1 / ~p.32"
+
+- question: "What is the difference between a common control and a hybrid control in the RMF?"
+  answer: "A common control is fully inherited from a common-control provider. A hybrid control occurs when a requirement is only partially met by a common control; the remaining portion must be provided at the system level, and the control is noted as hybrid."
+  contexts:
+    - "Common controls are controls that can be inherited by one or more information systems."
+    - "A requirement may not be fully met by a common control. In such cases, the control is considered a hybrid control and is noted as such by the organization, including specifying which parts of the control requirement are provided for inheritance by the common control and which parts are to be provided at the system level."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  page: "3.1 / ~p.32"
+
+- question: "What is the purpose of the Prepare step in the RMF?"
+  answer: "To establish a context and priorities for managing security and privacy risk from both an organization-level and a system-level perspective so that organizations are ready to execute the remainder of the RMF."
+  contexts:
+    - "Prepare to execute the RMF from an organization- and a system-level perspective by establishing a context and priorities for managing security and privacy risk."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  page: "2.2 / ~p.12"
+
+- question: "What key artifacts are included in an authorization package under SP 800-37r2?"
+  answer: "Security and privacy assessment reports, the plan of action and milestones, and related security and privacy plans that form the authorization package."
+  contexts:
+    - "The plan of action and milestones is included as part of the authorization package."
+    - "Completed security and privacy assessment reports detailing the assessor findings"
+    - "The unified and collaborative approach to bring security and privacy evidence t ogether in a single authorization package will support authorizing officials with critical information from security and privacy professionals to help inform the authorization decision."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  page: "3.5 / ~p.57+"
+
+# ---------------------------------------------------------------------------
+# SP 800-30 Revision 1  (5 pairs)
+# ---------------------------------------------------------------------------
+- question: "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?"
+  answer: "Prepare for the assessment; conduct the assessment; communicate assessment results; and maintain the assessment."
+  contexts:
+    - "The risk assessment process43 is composed of four steps: (i) prepare for the assessment; (ii) conduct the assessment; (iii) communicate assessment results; and (iv) maintain the assessment.44"
+  answerable: true
+  source: "nistspecialpublication800-30r1"
+  page: "Chapter 3 / ~p.23"
+
+- question: "What are the four components of the overall risk management process in SP 800-30r1?"
+  answer: "Frame risk, assess risk, respond to risk, and monitor risk."
+  contexts:
+    - "assessing risk; (iii) responding to risk; and (iv) monitoring risk. Figure 1 illustrates the four steps in the risk management process—including the risk assessment step"
+    - "The first component of risk management addresses how organizations frame risk or establish a risk context"
+  answerable: true
+  source: "nistspecialpublication800-30r1"
+  page: "Chapter 2 / ~p.6"
+
+- question: "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?"
+  answer: "Organization level (Tier 1), mission/business process level (Tier 2), and information system level (Tier 3)."
+  contexts:
+    - "how risk assessments can be applied across the organization’s risk management tiers (i.e., organization level, mission/business process level, and information system level)."
+  answerable: true
+  source: "nistspecialpublication800-30r1"
+  page: "Chapter 2"
+
+- question: "What risk factors are considered when conducting a risk assessment per SP 800-30?"
+  answer: "Threats, vulnerabilities, impact (of loss), and likelihood of occurrence."
+  contexts:
+    - "Impact of loss is one of four risk factors considered during risk assessment activities—the other three factors being threats, vulnerabilities, and likelihood of occurrence [SP 800-30]."
+  answerable: true
+  source: "nistspecialpublication800-30r1"
+  page: "cross-ref / Chapter 2"
+
+- question: "What is the purpose of the risk framing component of the risk management process?"
+  answer: "To produce a risk management strategy that addresses how the organization intends to assess risk, respond to risk, and monitor risk."
+  contexts:
+    # The source sentence continues "—making explicit and transparent the risk
+    # management decisions", but footnote 12 is spliced into the middle of it by
+    # text extraction, so the gold span stops before the splice.
+    - "The purpose of the risk framing component is to produce a risk management strategy that addresses how organizations intend to assess risk, respond to risk, and monitor risk"
+  answerable: true
+  source: "nistspecialpublication800-30r1"
+  page: "Chapter 2"
+
+# ---------------------------------------------------------------------------
+# SP 800-53A Revision 5  (5 pairs)
+# ---------------------------------------------------------------------------
+- question: "What is the primary purpose of NIST SP 800-53A Revision 5?"
+  answer: "To provide a methodology and a set of procedures for conducting assessments of security and privacy controls employed within systems and organizations, consistent with the controls in SP 800-53 Revision 5."
+  contexts:
+    - "This publication provides a methodology and set of procedures for conducting assessments of security and privacy controls employed within systems and organizations within an effective risk management framework. The assessment procedures, executed at various phases of the system development life cycle, are consistent with the security and privacy controls in NIST Special Publication 800-53, Revision 5."
+  answerable: true
+  source: "NIST.SP.800-53Ar5"
+  page: "Abstract / ~p.iii"
+
+- question: "Name the three primary assessment methods defined in SP 800-53A."
+  answer: "Examine, Interview, and Test."
+  contexts:
+    - "Assessment methods define the nature of the assessor actions and include examine, interview, and test."
+  answerable: true
+  source: "NIST.SP.800-53Ar5"
+  page: "2.4.2 / ~p.11"
+
+- question: "What does the Examine assessment method involve?"
+  answer: "The process of reviewing, inspecting, observing, studying, or analyzing one or more assessment objects (specifications, mechanisms, or activities) to facilitate assessor understanding, achieve clarification, or obtain evidence."
+  contexts:
+    - "The examine method is the process of reviewing, inspecting, observing, studying, or analyzing one or more assessment objects (i.e., specifications, mechanisms, or activities) to facilitate assessor understanding, achieve clarification, or obtain evidence."
+  answerable: true
+  source: "NIST.SP.800-53Ar5"
+  page: "2.4.2 / ~p.11"
+
+- question: "What is the difference between the Examine and Test assessment methods in SP 800-53A?"
+  answer: "Examine is the process of reviewing, inspecting, observing, studying, or analyzing assessment objects to obtain evidence. Test is the process of exercising one or more assessment objects (activities or mechanisms) under specified conditions to compare the actual state of the object to the desired state or expected behavior."
+  contexts:
+    - "The examine method is the process of reviewing, inspecting, observing, studying, or analyzing one or more assessment objects (i.e., specifications, mechanisms, or activities) to facilitate assessor understanding, achieve clarification, or obtain evidence."
+    - "The test method is the process of exercising one or more assessment objects (i.e., activities or mechanisms) under specified conditions to compare the actual state of the object to the desired state or expected behavior of the object."
+  answerable: true
+  source: "NIST.SP.800-53Ar5"
+  page: "2.4.2 / ~p.11"
+
+- question: "How do the depth and coverage attributes of assessment methods affect the assessment?"
+  answer: "Depth addresses the rigor and level of detail in the examination, interview, and testing activities. Coverage addresses the scope or breadth of the assessment. Both attributes are hierarchical and help define the level of effort for the assessment."
+  contexts:
+    - "Assessment methods have a set of associated attributes – depth and coverage – which help define the level of effort for the assessment. The attributes are hierarchical in nature, providing the means to define the rigor and scope of the assessment for the increased assurances that may be needed for some systems."
+    - "The depth attribute addresses the rigor and level of detail in the examination, interview, and"
+  answerable: true
+  source: "NIST.SP.800-53Ar5"
+  page: "2.4.2 / ~p.11"
+
+# ---------------------------------------------------------------------------
+# SP 800-171A Revision 3  (5 pairs)
+# ---------------------------------------------------------------------------
+- question: "What is the purpose of NIST SP 800-171A Revision 3?"
+  answer: "To provide organizations with assessment procedures and a methodology that can be used to conduct assessments of the security requirements in NIST SP 800-171 (Protecting Controlled Unclassified Information in Nonfederal Systems and Organizations)."
+  contexts:
+    - "This publication provides organizations with assessment procedures and a methodology that can be used to conduct assessments of the security requirements in NIST Special Publication 800-171, Protecting Controlled Unclassified Information in Nonfederal Systems and Organizations."
+  answerable: true
+  source: "NIST.SP.800-171Ar3"
+  page: "Abstract"
+
+- question: "What does CUI stand for and why is its protection important according to SP 800-171Ar3?"
+  answer: "Controlled Unclassified Information. Its protection is of paramount importance to federal agencies and can directly impact the ability of the Federal Government to successfully conduct its essential missions and functions."
+  contexts:
+    - "T he protection of Controlled Unclassified Information (CUI) is of paramount importance to federal agencies and can directly impact the ability of the Federal Government to successfully conduct its essential missions and functions."
+  answerable: true
+  source: "NIST.SP.800-171Ar3"
+  page: "Abstract"
+
+- question: "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?"
+  answer: "The assessment procedures are flexible and can be customized; assessments can be applied with various degrees of rigor based on customer-defined depth and coverage attributes, and may be independent third-party or government-sponsored."
+  contexts:
+    - "The assessment procedures are flexible and can be customized to the needs of organizations and assessors. Assessments can be conducted as independent, third-party assessments or as government-sponsored assessments. The assessments can be applied with various degrees of rigor based on customer-defined depth and coverage attributes."
+  answerable: true
+  source: "NIST.SP.800-171Ar3"
+  page: "Abstract"
+
+- question: "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?"
+  answer: "The procedures have been derived from the assessment procedures in SP 800-53A."
+  contexts:
+    - "The procedures have been derived from the assessment procedures in SP 800-53A [5]."
+  answerable: true
+  source: "NIST.SP.800-171Ar3"
+  page: "~p.6"
+
+- question: "How many security requirement families are defined in SP 800-171Ar3, and name them?"
+  answer: "17 families: Access Control; Awareness and Training; Audit and Accountability; Configuration Management; Identification and Authentication; Incident Response; Maintenance; Media Protection; Personnel Security; Physical Protection; Risk Assessment; Security Assessment and Monitoring; System and Communications Protection; System and Information Integrity; Planning; System and Services Acquisition; Supply Chain Risk Management."
+  contexts:
+    - "The security requirements in SP 800-171 are organized into 17 families, as illustrated in Table 1."
+    - "Table 1. Security Requirement Families"
+    - "Access Control                                 Maintenance                              Security Assessment and Monitoring"
+    - "Awareness and Training                         Media Protection                         System and Communications Protection"
+    - "Audit and Accountability                       Personnel Security                       System and Information Integrity"
+    - "Configuration Management                       Physical Protection                      Planning"
+    - "Identification and Authentication              Risk Assessment                          System and Services Acquisition"
+    - "Incident Response                                                                       Supply Chain Risk Management"
+  answerable: true
+  source: "NIST.SP.800-171Ar3"
+  page: "2.1 / Table 1"
+
+# ---------------------------------------------------------------------------
+# SP 800-78-5  (5 pairs)
+# ---------------------------------------------------------------------------
+- question: "What is the scope of NIST SP 800-78-5?"
+  answer: "It specifies the cryptographic algorithms and key sizes for the mandatory and optional cryptographic keys used in Personal Identity Verification (PIV) credentials as defined by FIPS 201-3, as well as supporting infrastructure requirements that rely on cryptographic functions."
+  contexts:
+    - "This document contains the technical specifications needed for the mandatory and optional cryptographic keys specified in FIPS 201-3, as well as the supporting infrastructure specified in FIPS 201-3 and the related NIST Special Publication (SP) 800-73, Interfaces for Personal Identity Verification, and SP 800-76, Biometric Specifications for Personal Identity Verification, which rely on cryptographic functions."
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "Abstract / 1.1"
+
+- question: "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?"
+  answer: "FIPS 201-3 (Personal Identity Verification of Federal Employees and Contractors)."
+  contexts:
+    - "Federal Information Processing Standard 201-3 (FIPS 201-3) defines the requirements for Personal Identity Verification (PIV) life cycle activities, including identity proofing, registration, PIV Card issuance, and PIV Card usage."
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "Abstract / 1.1"
+
+- question: "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?"
+  answer: "65537"
+  contexts:
+    - "Rivest-Shamir- Adleman (RSA) keys must be generated using a public exponent of 65537."
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "3.1 / p.6"
+
+- question: "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?"
+  answer: "RSA (2048 or 3072 bits) or ECDSA (Curve P-256 or P-384)."
+  contexts:
+    # Table 1 flattens to a single row of text during extraction; the two
+    # visual columns (through 2030 / 2031 and beyond) end up concatenated.
+    - "PIV Authentication key RSA (2048 or 3072 bits) ECDSA (Curve P-256 or P-384) RSA 3072 bits ECDSA (Curve P-256 or P-384)"
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "Table 1 / p.6"
+
+- question: "What elliptic curves are recommended for PIV keys in SP 800-78-5?"
+  answer: "Curve P-256 or Curve P-384 (from FIPS 186)."
+  contexts:
+    - "Elliptic curve keys must correspond to one of the following recommended curves from [FIPS186]:"
+    - "•     Curve P-256 or"
+    - "•     Curve P-384."
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "3.1 / p.6"
+
+# ---------------------------------------------------------------------------
+# Multi-hop / cross-document (still answerable from corpus)
+# ---------------------------------------------------------------------------
+- question: "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
+  answer: "The Assess step determines whether controls are implemented correctly, operating as intended, and producing the desired outcomes. SP 800-53A supplies the concrete assessment methods (Examine, Interview, Test) and procedures used to obtain that determination."
+  contexts:
+    - "Assess the controls to determine if the controls are implemented correctly, operating as intended, and producing the desired outcomes with respect to satisfying the security and privacy requirements."
+    - "Assessment methods define the nature of the assessor actions and include examine, interview, and test."
+    - "The assessment procedures, executed at various phases of the system development life cycle, are consistent with the security and privacy controls in NIST Special Publication 800-53, Revision 5."
+  answerable: true
+  source: "NIST.SP.800-37r2 + NIST.SP.800-53Ar5"
+  page: "RMF 2.2 + 53A 2.4.2"
+
+# ---------------------------------------------------------------------------
+# Refusal-test set (answerable: false)
+# Evaluated under a separate refusal criterion — NOT with RAGAS context-recall
+# or faithfulness (empty contexts would produce NaN).
+#
+# Two difficulty classes, report separately:
+#   in_corpus_gap  – document is present; fact is absent. Retrieval returns
+#                    topically related chunks; model must still refuse.
+#   out_of_corpus  – document is absent entirely (baseline grounding check).
+#
+# Absence evidence (manual verification, 2026-09-13):
+#   - Authorization-review interval: full-text search of SP 800-37r2 for
+#     "maximum time", "authorization frequency", "every N year/month",
+#     "reauthorization period" yields only organization-defined / ongoing
+#     authorization language; no fixed numeric maximum is stated.
+#   - Monitoring frequency for common controls: same document; frequencies
+#     are explicitly "organization-defined" or derived from the continuous
+#     monitoring strategy; no prescribed minimum interval appears.
+# ---------------------------------------------------------------------------
+- question: "What is the maximum time permitted between authorization reviews under SP 800-37r2?"
+  answer: "Not answerable from the provided corpus. SP 800-37r2 discusses ongoing authorization and continuous monitoring but does not prescribe a fixed maximum interval between authorization reviews."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-37r2"
+  refusal_type: "in_corpus_gap"
+  page: null
+  # verified: search("maximum time|authorization frequency|reauthorization period|[0-9] year") — only org-defined / ongoing language; no fixed interval
+
+- question: "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?"
+  answer: "Not answerable from the provided corpus. SP 800-37r2 requires organizations to define monitoring frequencies in their continuous monitoring strategy; no fixed minimum interval is prescribed."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-37r2"
+  refusal_type: "in_corpus_gap"
+  page: null
+  # verified: search("minimum frequency|monitoring frequency|organization-defined") — frequencies are organization-defined; no numeric minimum stated
+
+- question: "What is the maximum allowable password length specified in SP 800-63B?"
+  answer: "Not answerable from the provided corpus."
+  contexts: []
+  answerable: false
+  source: "out-of-corpus"
+  refusal_type: "out_of_corpus"
+  page: null
+  # verified: SP 800-63B is not among the five source PDFs
+
+- question: "What is the recommended minimum key size for AES in FIPS 197?"
+  answer: "Not answerable from the provided corpus."
+  contexts: []
+  answerable: false
+  source: "out-of-corpus"
+  refusal_type: "out_of_corpus"
+  page: null
+  # verified: FIPS 197 is not among the five source PDFs
