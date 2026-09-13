@@ -1,5 +1,4 @@
 import pytest
-
 from top_k_frequent import top_k_frequent, top_k_frequent_buckets, top_k_frequent_sorted
 
 CASES = [

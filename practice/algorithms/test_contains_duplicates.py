@@ -1,5 +1,4 @@
 import pytest
-
 from contains_duplicate import (
     contains_duplicate_brute_force,
     contains_duplicate_set,

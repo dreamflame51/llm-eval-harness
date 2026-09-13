@@ -1,5 +1,4 @@
 import pytest
-
 from two_sum import two_sum, two_sum_brute
 
 

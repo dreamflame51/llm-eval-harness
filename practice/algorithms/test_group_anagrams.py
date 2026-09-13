@@ -1,5 +1,4 @@
 import pytest
-
 from group_anagrams import group_anagrams
 
 CASES = [

@@ -1,5 +1,4 @@
 import pytest
-
 from anagram_palindrome import (
     is_anagram,
     is_anagram_counter,
