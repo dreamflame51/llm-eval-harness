@@ -30,6 +30,22 @@
 #
 # Leave note free-form; it is where a case that resists both flags gets
 # described.
+#
+# Decided at the keyboard on 2026-09-14, and written down because at least four
+# records share the shape. An answer that recites what the corpus does say
+# around the question and then names the asked-for specific as absent -
+# "a maximum authorization period can be specified by the authorizing official,
+# but it does not specify what that maximum time period is" - is refused=true.
+# It names what is missing and puts nothing of its own in the gap; the recited
+# part is context, not an answer to what was asked.
+#
+# The hedge rule in "refused" above is about the other shape, where the
+# disclaimer is followed by a substituted answer: "not specified, but it is
+# typically three years". That one is refused=false.
+#
+# Apply this to every record of that shape, not only the first one noticed. A
+# rule applied unevenly across twelve records measures the labeller's mood, and
+# agreement with a judge stops meaning anything.
 
 - question: What is the maximum time permitted between authorization reviews under SP 800-37r2?
   source: NIST.SP.800-37r2
