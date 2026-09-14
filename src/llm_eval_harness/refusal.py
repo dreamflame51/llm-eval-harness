@@ -52,6 +52,14 @@ REFUSAL_MARKERS = (
     "does not mention",
     "doesn't mention",
     "does not state",
+    # Third widening, third time the score moved with the system untouched
+    # (2026-09-14). The new SP 800-30r1 gap record drew a textbook refusal -
+    # "it does not define a specific acceptable level of residual risk" - and
+    # the list scored it as a failure because it knew "does not specify" and
+    # "does not state" but not "does not define". This is the argument for the
+    # judge, now with three data points rather than one.
+    "does not define",
+    "doesn't define",
     "not provided",
     "not specified",
     "not mentioned",

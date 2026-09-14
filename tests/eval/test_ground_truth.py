@@ -19,16 +19,19 @@ pytestmark = pytest.mark.skipif(
 
 # Gold contexts that are present in the extracted text but longer than the
 # chunk overlap and unlucky with the boundary, so no single chunk holds them
-# whole. The retriever cannot return these - context recall will never credit
-# them. Keyed by a prefix of the context.
+# whole. Keyed by a prefix of the context.
 #
 # This is a baseline, not an approval: it fails both when a new context starts
 # being cut and when one of these stops being cut. Re-run
 # `uv run python -m llm_eval_harness.validate` after changing chunk size or
 # overlap and update the set deliberately.
+#
 # At 800/160 these are the only two, and each is the sole context of its
-# record, so both records are unreachable for hit@k: the metric ceiling is
-# 24/26, not 26/26. Do not read the missing 2 as a retrieval failure.
+# record, so for hit@k both records are unreachable: that metric's ceiling is
+# 24/26, not 26/26, and the missing 2 are not a retrieval failure. coverage@k
+# does reach them - it accepts a span rebuilt from two retrieved chunks - so
+# its ceiling is 26/26 and the two metrics are not comparable record for
+# record. That gap is the point of reporting both; see evaluator.py.
 KNOWN_SPLIT = {
     "The examine method is the process of reviewing",
     "This publication provides organizations with assessment procedures",

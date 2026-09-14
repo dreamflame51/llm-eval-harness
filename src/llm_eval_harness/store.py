@@ -15,11 +15,19 @@ collection = client.get_or_create_collection("docs", embedding_function=EMBEDDER
 
 
 def build_index(chunks, coll=None):
-    (coll or collection).upsert(
-        ids=[c["chunk_id"] for c in chunks],
-        documents=[c["text"] for c in chunks],
-        metadatas=[{"source": c["source"]} for c in chunks],
-    )
+    # Chroma refuses an upsert larger than its own limit (5461 here), and the
+    # chunk count depends on the chunk size: 5054 at 800/160 fits, 8085 at
+    # 500/100 does not. Batching here rather than at the call site keeps that
+    # limit from deciding which chunk sizes the project is able to index.
+    target = coll or collection
+    batch = client.get_max_batch_size()
+    for start in range(0, len(chunks), batch):
+        window = chunks[start : start + batch]
+        target.upsert(
+            ids=[c["chunk_id"] for c in window],
+            documents=[c["text"] for c in window],
+            metadatas=[{"source": c["source"]} for c in window],
+        )
 
 
 def search(query, k=5, coll=None):

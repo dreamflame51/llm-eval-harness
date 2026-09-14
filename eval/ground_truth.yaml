@@ -32,6 +32,7 @@
 #   source: str                  # primary document id (matches chunk metadata for joins)
 #   refusal_type: str | null     # "in_corpus_gap" | "out_of_corpus" (only when answerable=false)
 #   page: str | null             # approximate page or section reference
+#   topic_in_corpus: bool        # refusal records only - see the refusal section below
 
 # ---------------------------------------------------------------------------
 # SP 800-37 Revision 2  (5 pairs)
@@ -299,14 +300,77 @@
 #                    topically related chunks; model must still refuse.
 #   out_of_corpus  – document is absent entirely (baseline grounding check).
 #
-# Absence evidence (manual verification, 2026-09-13):
-#   - Authorization-review interval: full-text search of SP 800-37r2 for
-#     "maximum time", "authorization frequency", "every N year/month",
-#     "reauthorization period" yields only organization-defined / ongoing
-#     authorization language; no fixed numeric maximum is stated.
-#   - Monitoring frequency for common controls: same document; frequencies
-#     are explicitly "organization-defined" or derived from the continuous
-#     monitoring strategy; no prescribed minimum interval appears.
+# topic_in_corpus records a second, independent fact about each question: is the
+# SUBJECT of the question represented anywhere in the corpus, regardless of which
+# document is present? It is not scored. It exists because refusal_type turned
+# out to be a poor predictor of difficulty: the one reproducible failure in the
+# set is out_of_corpus (FIPS 197 is absent) yet the model answers confidently,
+# because SP 800-78-5 lists AES key sizes and retrieval serves them. Document
+# presence is what refusal_type measures; topic presence is what appears to make
+# a question hard. Recorded now, while the evidence is in hand, so the classes
+# can be re-cut later without re-verifying 12 records.
+#
+# Measured, not guessed: 10 of these 12 questions are topically present. That is
+# a property of a five-document corpus on one subject, and it means the "easy"
+# end of this set is nearly empty - do not read a high refusal rate here as
+# evidence that the system handles easy refusals well, because it is barely
+# being asked any.
+#
+# Absence evidence. Method: search the text load_pdf() produces (not the PDF as
+# it looks on screen, and not a memory of what the standard says), per document,
+# and record the search that was run. Counts below are occurrences in the
+# extracted text, verified 2026-09-14 unless noted.
+#
+#   - Authorization-review interval (2026-09-13): full-text search of
+#     SP 800-37r2 for "maximum time", "authorization frequency", "every N
+#     year/month", "reauthorization period" yields only organization-defined /
+#     ongoing authorization language; no fixed numeric maximum is stated.
+#   - Monitoring frequency for common controls (2026-09-13): same document;
+#     frequencies are explicitly "organization-defined" or derived from the
+#     continuous monitoring strategy; no prescribed minimum interval appears.
+#   - Risk-tolerance threshold: "risk tolerance" appears 24x in SP 800-30r1,
+#     always as *organizational* risk tolerance ("exceeding organizational risk
+#     tolerance", "consistent with organizational risk tolerance"). No numeric
+#     or otherwise fixed threshold is defined.
+#   - Assessor training hours: "hours" appears exactly once in all of
+#     SP 800-53Ar5, inside control PE-03(03) ("24 hours per day, 7 days per
+#     week"). Assessor competence and independence are discussed; no training
+#     requirement is quantified.
+#   - SP 800-171A passing score: "score", "scoring" and "SPRS" appear zero
+#     times in SP 800-171Ar3. Scoring belongs to DFARS/SPRS, not to this
+#     document - a confusion worth testing precisely because it is common.
+#   - PIV PIN length: "PIN" as a standalone word appears zero times in the
+#     entire corpus. PIN policy lives in FIPS 201-3 and SP 800-73, neither of
+#     which is here.
+#   - Absent documents: SP 800-63B, FIPS 197, FIPS 140-3, SP 800-73, SP 800-76
+#     and FIPS 201-3 are not among the five source PDFs. The last four are
+#     cited by documents that ARE here ("800-73" appears 23x in SP 800-78-5,
+#     "800-76" 8x, FIPS 140-3 in its reference list), which is the point: the
+#     model sees the reference and must not answer as though it had the
+#     document.
+#
+# Rejected candidates - do not add these back without re-reading this note.
+# An absent document is NOT sufficient grounds for a refusal record. The test
+# is stricter: can the corpus answer the question anyway? A citing document
+# often restates what it cites, and then declining stops being the only correct
+# response and the record grades a correct answer as a failure.
+#
+#   - FIPS 199, "the three impact levels": rejected. SP 800-37r2's glossary
+#     restates the definitions in full ("high-impact system [FIPS 200] A system
+#     in which at least one security objective ... is assigned a FIPS
+#     Publication 199 potential impact value of high"), and "limited /serious /
+#     severe adverse effect" appear across three documents. The corpus answers
+#     this second-hand.
+#   - SP 800-39, "tasks of the risk framing component": rejected. SP 800-30r1
+#     contains the list verbatim ("Risk framing identifies ... policies and
+#     requirements for conducting risk assessments, specific assessment
+#     methodologies to be employed, procedures for selecting risk factors ...").
+#     SP 800-30r1 is the assessment volume of the SP 800-39 series and restates
+#     much of it; treat the whole document as unusable for this purpose.
+#
+# Both were caught by gemma4 answering them well from the corpus and the run
+# scoring that as a failure - the failing answers are printed in full for
+# exactly this reason.
 # ---------------------------------------------------------------------------
 - question: "What is the maximum time permitted between authorization reviews under SP 800-37r2?"
   answer: "Not answerable from the provided corpus. SP 800-37r2 discusses ongoing authorization and continuous monitoring but does not prescribe a fixed maximum interval between authorization reviews."
@@ -315,6 +379,7 @@
   source: "NIST.SP.800-37r2"
   refusal_type: "in_corpus_gap"
   page: null
+  topic_in_corpus: true   # authorization and ongoing authorization are discussed at length
   # verified: search("maximum time|authorization frequency|reauthorization period|[0-9] year") — only org-defined / ongoing language; no fixed interval
 
 - question: "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?"
@@ -324,6 +389,7 @@
   source: "NIST.SP.800-37r2"
   refusal_type: "in_corpus_gap"
   page: null
+  topic_in_corpus: true   # continuous monitoring is a whole RMF step in this document
   # verified: search("minimum frequency|monitoring frequency|organization-defined") — frequencies are organization-defined; no numeric minimum stated
 
 - question: "What is the maximum allowable password length specified in SP 800-63B?"
@@ -333,6 +399,7 @@
   source: "out-of-corpus"
   refusal_type: "out_of_corpus"
   page: null
+  topic_in_corpus: true   # passwords appear as a control topic: 34x in 53Ar5, 18x in 171Ar3
   # verified: SP 800-63B is not among the five source PDFs
 
 - question: "What is the recommended minimum key size for AES in FIPS 197?"
@@ -342,4 +409,89 @@
   source: "out-of-corpus"
   refusal_type: "out_of_corpus"
   page: null
+  topic_in_corpus: true   # SP 800-78-5 lists AES-128/192/256 - the reason this record fails
   # verified: FIPS 197 is not among the five source PDFs
+
+# --- in_corpus_gap, one per remaining document -----------------------------
+- question: "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?"
+  answer: "Not answerable from the provided corpus. SP 800-30r1 treats risk tolerance as organization-defined and speaks of risk 'exceeding organizational risk tolerance'; it does not define an acceptable level."
+  contexts: []
+  answerable: false
+  source: "nistspecialpublication800-30r1"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # "risk tolerance" 24x in this document, always organization-defined
+  # verified: search("risk tolerance") — 24 hits, all organizational; no threshold, numeric or otherwise
+
+- question: "How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?"
+  answer: "Not answerable from the provided corpus. SP 800-53Ar5 discusses assessor competence and independence but does not quantify a training requirement."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-53Ar5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # training is a control family (AT); the assessor's own training is not
+  # verified: search("hours") — one hit in the whole document, inside PE-03(03) "24 hours per day"
+
+- question: "What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?"
+  answer: "Not answerable from the provided corpus. SP 800-171Ar3 records each requirement as satisfied or not satisfied and defines no score or passing threshold."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-171Ar3"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: false  # "score", "scoring", "SPRS": zero hits in this document
+  # verified: search("scor(e|es|ing)|SPRS") — zero hits; scoring belongs to DFARS/SPRS, not to this publication
+
+- question: "What is the minimum PIN length required for a PIV Card according to SP 800-78-5?"
+  answer: "Not answerable from the provided corpus. SP 800-78-5 specifies cryptographic algorithms and key sizes; PIN policy is set by FIPS 201-3 and SP 800-73, which are not in the corpus."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-78-5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: false  # "PIN" as a standalone word: zero hits in the entire corpus
+  # verified: search(r"\bPIN\b|\bPINs\b") across all five documents — zero hits
+
+# --- out_of_corpus, documents cited by the corpus but absent from it -------
+- question: "What are the four security levels defined in FIPS 140-3 for cryptographic modules?"
+  answer: "Not answerable from the provided corpus. FIPS 140-3 is not among the source documents; SP 800-78-5 cites it and refers to validated implementations without describing its security levels."
+  contexts: []
+  answerable: false
+  source: "out-of-corpus"
+  refusal_type: "out_of_corpus"
+  page: null
+  topic_in_corpus: true   # "cryptographic module" appears in four of the five documents
+  # verified: FIPS 140-3 is not among the five source PDFs; cited in the SP 800-78-5 reference list
+  # verified: search("Level 4") — zero hits corpus-wide; the one "security level" in 53Ar5 is the withdrawn control SC-04(01)
+
+- question: "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?"
+  answer: "Not answerable from the provided corpus. SP 800-76 is not among the source documents; SP 800-78-5 cites it as the biometric specification but states none of its formats."
+  contexts: []
+  answerable: false
+  source: "out-of-corpus"
+  refusal_type: "out_of_corpus"
+  page: null
+  topic_in_corpus: true   # "biometric" 10x in SP 800-78-5, 16x in 53Ar5; "800-76" cited 8x
+  # verified: SP 800-76 is not among the five source PDFs
+  # verified: search("minutiae|iris|facial image") — zero hits corpus-wide; "fingerprint" appears once, in passing
+
+- question: "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?"
+  answer: "Not answerable from the provided corpus. SP 800-73 is not among the source documents, although SP 800-78-5 cites it as the interface specification."
+  contexts: []
+  answerable: false
+  source: "out-of-corpus"
+  refusal_type: "out_of_corpus"
+  page: null
+  topic_in_corpus: true   # "800-73" cited 23x in SP 800-78-5; "contactless" appears there once
+  # verified: SP 800-73 is not among the five source PDFs
+
+- question: "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?"
+  answer: "Not answerable from the provided corpus. FIPS 201-3 is not among the source documents. SP 800-78-5 names identity proofing as one of the life-cycle activities FIPS 201-3 governs, but does not state its requirements."
+  contexts: []
+  answerable: false
+  source: "out-of-corpus"
+  refusal_type: "out_of_corpus"
+  page: null
+  topic_in_corpus: true   # "identity proofing" 2x in SP 800-78-5, "FIPS 201" 34x - named, never specified
+  # verified: FIPS 201-3 is not among the five source PDFs

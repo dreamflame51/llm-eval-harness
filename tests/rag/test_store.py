@@ -3,6 +3,7 @@ import uuid
 import chromadb
 import pytest
 
+from llm_eval_harness import store
 from llm_eval_harness.store import EMBEDDER, build_index, search
 
 CHUNKS = [
@@ -45,6 +46,16 @@ def test_empty_index_returns_nothing(empty_coll):
 
 def test_build_index(filled_coll):
     assert filled_coll.count() == 3
+
+
+def test_build_index_splits_batches_without_losing_chunks(empty_coll, monkeypatch):
+    # Chroma rejects an upsert bigger than its own limit, and the chunk count
+    # follows the chunk size: 500/100 over this corpus produces 8085 chunks
+    # against a limit of 5461. A batch size of 2 here exercises the same loop
+    # without embedding thousands of documents.
+    monkeypatch.setattr(store.client, "get_max_batch_size", lambda: 2)
+    build_index(CHUNKS, empty_coll)
+    assert empty_coll.count() == len(CHUNKS)
 
 
 def test_search_returns_k_results(filled_coll):
