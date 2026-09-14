@@ -20,6 +20,12 @@ Question: {question}"""
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": prompt},
         ],
+        # Greedy decoding with a fixed seed. Sampling made the same question
+        # answer differently every run, which moved the refusal metric by 0.25
+        # across five identical runs and left it unable to tell a regression
+        # from noise. Nothing here wants creative variation anyway: the answer
+        # is supposed to be whatever the retrieved context supports.
+        options={"temperature": 0, "seed": 0},
     )
     return {
         "question": question,
