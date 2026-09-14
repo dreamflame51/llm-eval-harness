@@ -27,21 +27,40 @@ that was answering a different question. One record of difference at n=12 suppor
 all, in either direction. Reported separately because they are different
 questions, not because one of them is known to be harder.
 
-Detection is deliberately crude: a refusal is recognised by matching phrases
-against REFUSAL_MARKERS. This is brittle in both directions - a model that
-declines in unanticipated wording counts as a failure, and a model that hedges
-("the context does not say, but it is typically 3 years") counts as a success
-while still having fabricated. Treat the number as a regression tripwire, not
-as a measurement. The sound version of this check is an LLM judge, which is why
-the CLI prints every answer it scored as a failure: the phrase list is meant to
-be corrected against what the model actually says.
+What is scored, and by whom
+---------------------------
+The headline number is judged, not matched: an answer counts only when it
+declined AND invented nothing, the two decided separately by an LLM judge
+against the chunks the generator actually saw (judge.py). It is computed over
+the frozen answers in eval/refusal_answers.yaml from verdicts committed under
+eval/judge_cache/, so it needs no model and does not move between runs.
 
-Run:  uv run python -m llm_eval_harness.refusal
+The phrase list below stays, demoted to a tripwire. It costs nothing, it needs
+no model, and the gap between the two is now measured rather than asserted: on
+the twelve labelled answers it scored four as refusals that the judge and the
+hand labels both scored as answers, all of them the same shape - a disclaimer
+followed by an answer. It is reported underneath the headline, with every
+disagreement printed.
+
+The judge is qwen3:8b, chosen by measurement and not by size: against the hand
+labels it agrees 11/12 on the headline decision, gemma4 8/12. gemma4's misses
+are systematic rather than random - it reads a recital of nearby corpus
+content as an answer where the labels read a refusal - and it judged its own
+answers, which is why a second judge was run at all. Both judges pass
+scripts/calibrate_judge.py, so a verdict of "nothing fabricated" is a verdict
+and not a stuck axis.
+
+Run:  uv run python -m llm_eval_harness.refusal          judged, from the cache
+      uv run python -m llm_eval_harness.refusal --live   generate and match
 """
 
 import re
 
 from llm_eval_harness.dataset import refusal_records
+from llm_eval_harness.judge import decided_records
+
+# Measured, not assumed. See the module docstring and scripts/judge_report.py.
+JUDGE = "qwen3:8b"
 
 REFUSAL_MARKERS = (
     # Bare "is missing" rather than "answer is missing": gemma names the thing
@@ -141,10 +160,108 @@ def evaluate_refusals(records=None, answer_fn=None):
     }
 
 
-if __name__ == "__main__":
-    result = evaluate_refusals()
+def evaluate_judged(model=JUDGE, rows=None):
+    """
+    Score the frozen answers with the judge's cached verdicts.
 
-    print(f"{result['n']} unanswerable questions")
+    Returns {"model", "n", "clean", "clean_rate", "by_class", "undecided",
+    "phrase_rate", "results"}, where results holds one dict per record with
+    refused, fabricated, clean, and what the phrase list said about the same
+    answer.
+
+    clean is the headline: declined and invented nothing. An answer that
+    declined and then invented is not clean, and neither is one that only
+    declined in a wording the phrase list happens to know.
+
+    rows is injectable for tests; by default it is the join of
+    eval/refusal_answers.yaml with the committed cache.
+    """
+    if rows is None:
+        rows, _ = decided_records(model)
+
+    results = []
+    for record, refused, fabricated in rows:
+        results.append(
+            {
+                "question": record["question"],
+                "refusal_type": record.get("refusal_type"),
+                "refused": refused,
+                "fabricated": fabricated,
+                # None where either axis has no verdict: undecided is not the
+                # same as failed, and averaging it in as a failure would
+                # understate a system for a gap in the cache.
+                "clean": None
+                if refused is None or fabricated is None
+                else (refused and not fabricated),
+                "phrase": looks_like_refusal(record["answer"]),
+                "answer": record["answer"],
+            }
+        )
+
+    decided = [r for r in results if r["clean"] is not None]
+    by_class = {}
+    for result in results:
+        bucket = by_class.setdefault(
+            result["refusal_type"], {"n": 0, "clean": 0, "refused": 0, "fabricated": 0}
+        )
+        bucket["n"] += 1
+        bucket["clean"] += bool(result["clean"])
+        bucket["refused"] += bool(result["refused"])
+        bucket["fabricated"] += bool(result["fabricated"])
+
+    n = len(decided)
+    clean = sum(1 for r in decided if r["clean"])
+    return {
+        "model": model,
+        "n": len(results),
+        "clean": clean,
+        "clean_rate": clean / n if n else 0.0,
+        "undecided": len(results) - n,
+        "by_class": by_class,
+        "phrase_rate": (
+            sum(1 for r in results if r["phrase"]) / len(results) if results else 0.0
+        ),
+        "results": results,
+    }
+
+
+def print_judged(result):
+    yes_no = {True: "yes", False: "no", None: "-"}
+    print(f"{result['n']} unanswerable questions, judged by {result['model']}")
+    print(
+        f"clean (declined, invented nothing): {result['clean']}/"
+        f"{result['n'] - result['undecided']}"
+    )
+    if result["undecided"]:
+        print(f"no verdict for {result['undecided']} - run scripts/judge_refusals.py")
+    for refusal_type, bucket in sorted(result["by_class"].items(), key=lambda x: str(x[0])):
+        print(
+            f"  {refusal_type}: {bucket['clean']}/{bucket['n']} clean "
+            f"({bucket['refused']} refused, {bucket['fabricated']} fabricated)"
+        )
+
+    print(f"\nphrase list (tripwire): refusal rate {result['phrase_rate']:.2f}")
+    disagreements = [
+        r for r in result["results"] if r["refused"] is not None and r["phrase"] != r["refused"]
+    ]
+    print(f"disagrees with the judge on {len(disagreements)} of {result['n']}")
+    for r in disagreements:
+        print(
+            f"  phrases={yes_no[r['phrase']]:<3} judge={yes_no[r['refused']]:<3} "
+            f"fabricated={yes_no[r['fabricated']]:<3} {r['question'][:56]}"
+        )
+
+    blind = [r for r in result["results"] if r["refused"] and r["fabricated"]]
+    if blind:
+        print(f"\ndeclined and invented anyway ({len(blind)}) - invisible to the phrase list")
+        for r in blind:
+            print(f"  {r['question'][:64]}")
+
+    print("\nscripts/judge_report.py for the second judge and the hand labels.")
+
+
+def print_live(result):
+    print(f"{result['n']} unanswerable questions, generated now and phrase-matched")
     print(f"refusal rate: {result['refusal_rate']:.3f}")
     for refusal_type, bucket in sorted(result["by_class"].items(), key=lambda x: str(x[0])):
         print(f"  {refusal_type}: {bucket['refused']}/{bucket['n']} ({bucket['rate']:.3f})")
@@ -162,3 +279,30 @@ if __name__ == "__main__":
             numbers = _NUMBER.findall(text)
             if numbers:
                 print(f"    !! concrete figures in the answer: {sorted(set(numbers))}")
+
+    print(
+        "\nThese answers are not the ones the judge scored: generation drifts "
+        "between processes (docs/lessons.md #17)."
+    )
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Refusal check over the unanswerable records")
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="generate answers now and score them with the phrase list only",
+    )
+    parser.add_argument("--judge", default=JUDGE, help="model whose cached verdicts to read")
+    args = parser.parse_args()
+
+    if args.live:
+        print_live(evaluate_refusals())
+    else:
+        print_judged(evaluate_judged(args.judge))
+
+
+if __name__ == "__main__":
+    main()

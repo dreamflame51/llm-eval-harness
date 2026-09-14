@@ -35,7 +35,7 @@ from llm_eval_harness.judge import (
     AXES,
     CACHE_DIR,
     agreement,
-    decision,
+    decided_records,
     load_cache,
     matrix,
     quote_missing,
@@ -57,22 +57,9 @@ def models(cache_dir=CACHE_DIR):
 
 
 def decisions(model, records, cache_dir=CACHE_DIR):
-    """[(record, refused, fabricated)] in fixture order, None where unjudged."""
-    found, conflicts = verdicts_by_question(model, cache_dir)
-    rows = []
-    for record in records:
-        by_axis = found.get(record["question"], {})
-        rows.append(
-            tuple(
-                [record]
-                + [
-                    decision(axis, by_axis[axis]["verdict"])
-                    if axis in by_axis
-                    else None
-                    for axis in AXES
-                ]
-            )
-        )
+    """Rows for the report: the join, plus the raw entries the quote check reads."""
+    rows, conflicts = decided_records(model, records, cache_dir)
+    found, _ = verdicts_by_question(model, cache_dir)
     return rows, found, conflicts
 
 

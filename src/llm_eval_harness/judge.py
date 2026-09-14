@@ -62,7 +62,7 @@ import pathlib
 import re
 import time
 
-from llm_eval_harness.dataset import ROOT
+from llm_eval_harness.dataset import ROOT, refusal_answers
 
 CACHE_DIR = ROOT / "eval" / "judge_cache"
 
@@ -584,6 +584,34 @@ def verdicts_by_question(model, cache_dir=CACHE_DIR):
             conflicts.append((entry["question"], entry["axis"]))
         slot[entry["axis"]] = entry
     return latest, conflicts
+
+
+def decided_records(model, records=None, cache_dir=CACHE_DIR):
+    """
+    [(record, refused, fabricated)] in fixture order, plus the conflicts.
+
+    The join between the frozen answers and one model's cached verdicts, in
+    one place because three callers need it and a second implementation of it
+    would drift. Either decision is None where that axis was never judged or
+    would not parse - absence of a verdict, kept visible rather than counted
+    as a no.
+    """
+    if records is None:
+        records = refusal_answers()
+    found, conflicts = verdicts_by_question(model, cache_dir)
+    rows = []
+    for record in records:
+        by_axis = found.get(record["question"], {})
+        rows.append(
+            (
+                record,
+                *(
+                    decision(axis, by_axis[axis]["verdict"]) if axis in by_axis else None
+                    for axis in AXES
+                ),
+            )
+        )
+    return rows, conflicts
 
 
 def matrix(decisions):
