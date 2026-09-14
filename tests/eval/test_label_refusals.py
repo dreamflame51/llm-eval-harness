@@ -58,9 +58,13 @@ def test_saving_touches_only_that_record(copy):
     after = copy.read_text(encoding="utf-8").splitlines()
 
     differing = [i for i, (a, b) in enumerate(zip(before, after, strict=True)) if a != b]
-    assert len(differing) == 3
     _, spans = label_lines("\n".join(before))
-    assert differing == sorted(spans[5].values())
+    # A subset, not all three: once the file is labelled, a save may agree
+    # with a value already there. What must hold is that no line outside this
+    # record's label block moved.
+    assert differing
+    assert set(differing) <= set(spans[5].values())
+    assert refusal_answers(copy)[5]["labels"]["note"] == "clear case"
 
 
 def test_the_frozen_text_is_not_reformatted(copy):
