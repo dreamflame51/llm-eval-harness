@@ -1,5 +1,14 @@
-SIZE = 1000
-OVERLAP = 200
+# Chosen by sweep against eval/ground_truth.yaml, not by feel: at 800/160 the
+# retriever scores hit@5 0.423 / MRR 0.277, against 0.308 / 0.218 at 1000/200
+# and 0.308 / 0.167 at 500/100 (same embedding model each time).
+#
+# Smaller is not automatically better here. A gold context only counts as
+# retrieved when one chunk holds it whole, so shrinking the window below the
+# length of the contexts lowers the ceiling of the metric itself: at 300/60
+# only 12 of 26 records stay reachable at all. Re-run the sweep, and check the
+# reachable count, before trusting a smaller window.
+SIZE = 800
+OVERLAP = 160
 
 
 def chunk_text(text, source, size=SIZE, overlap=OVERLAP):

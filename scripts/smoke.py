@@ -10,11 +10,13 @@ from llm_eval_harness.store import search
 
 K = 5
 
-# Threshold calibrated for paraphrase-multilingual-MiniLM-L12-v2 at size=1000/overlap=200:
-# on-topic questions score 0.16-0.29, deliberate nonsense scores 0.66-0.95.
-# Recalibrate after changing the embedding model or the chunk size.
-# The margin between on-topic and off-topic is about 0.37, so the threshold isn't fragile
-SUSPICIOUS = 0.45
+# Threshold calibrated for all-MiniLM-L6-v2 at size=800/overlap=160:
+# on-topic questions score 0.19-0.32, deliberate nonsense scores 0.69-0.89.
+# The gap between the two clusters is 0.37, so a threshold in the middle of it
+# is not fragile. Recalibrate after changing the embedding model or the chunk
+# size - distances from a previous model say nothing about the current one:
+#     uv run python scripts/calibrate.py
+SUSPICIOUS = 0.50
 
 QUESTIONS = [
     {

@@ -26,9 +26,12 @@ pytestmark = pytest.mark.skipif(
 # being cut and when one of these stops being cut. Re-run
 # `uv run python -m llm_eval_harness.validate` after changing chunk size or
 # overlap and update the set deliberately.
+# At 800/160 these are the only two, and each is the sole context of its
+# record, so both records are unreachable for hit@k: the metric ceiling is
+# 24/26, not 26/26. Do not read the missing 2 as a retrieval failure.
 KNOWN_SPLIT = {
-    "The unified and collaborative approach to bring security",
-    "Federal Information Processing Standard 201-3 (FIPS 201-3)",
+    "The examine method is the process of reviewing",
+    "This publication provides organizations with assessment procedures",
 }
 
 
