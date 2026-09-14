@@ -56,8 +56,8 @@
     be specified by the authorizing official, but it does not specify what that maximum time
     period is.
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-37r2
@@ -126,8 +126,8 @@
   answer: The required minimum assessment frequency for continuous monitoring of common controls
     is missing.
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-37r2
@@ -195,8 +195,8 @@
   topic_in_corpus: true
   answer: Answer is missing
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-53Ar5
@@ -266,9 +266,9 @@
   answer: The context lists support for AES-128, AES-192, and AES-256. The minimum key size
     listed is 128 bits.
   labels:
-    refused: null
-    fabricated: null
-    note: ''
+    refused: false
+    fabricated: true
+    note: "Symmetric Card Authentication key AES-128 Encryption and Decryption for AES-128, but this is not related to question. There was no explisit answers in chanks"
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.3904
@@ -337,8 +337,8 @@
   topic_in_corpus: true
   answer: Answer is missing
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: nistspecialpublication800-30r1
@@ -408,8 +408,8 @@
   topic_in_corpus: true
   answer: Answer is missing
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-53Ar5
@@ -479,8 +479,8 @@
   topic_in_corpus: false
   answer: Answer is missing
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-171Ar3
@@ -549,8 +549,8 @@
   topic_in_corpus: false
   answer: Answer is missing
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-78-5
@@ -619,8 +619,8 @@
   topic_in_corpus: true
   answer: Answer is missing
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-171Ar3
@@ -691,8 +691,8 @@
     but it does not specify the biometric data formats that SP 800-76 defines for PIV cardholder
     authentication.
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-78-5
@@ -767,8 +767,8 @@
 
     The provided context does not specify which of these interfaces is used for contactless authentication.
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-78-5
@@ -840,8 +840,8 @@
     activities, including identity proofing, but it does not specify what those identity proofing
     requirements are.
   labels:
-    refused: null
-    fabricated: null
+    refused: true
+    fabricated: false
     note: ''
   retrieved:
   - source: NIST.SP.800-78-5

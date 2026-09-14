@@ -109,6 +109,19 @@ def print_by_class(rows, indent="  "):
         )
 
 
+def axis_pairs(rows, axis):
+    """
+    [(hand label, judge's verdict)] for one axis.
+
+    A named function because indexing it inline went wrong once: rows are
+    (record, refused, fabricated), the tail is two long, and an off-by-one
+    scored the refused summary against the fabricated column while the
+    disagreement list printed underneath it used the right one.
+    """
+    i = AXES.index(axis)
+    return [(record["labels"][axis], row[i]) for record, *row in rows]
+
+
 def print_quote_check(model, found, indent="  "):
     missing = [
         (question, axis)
@@ -195,7 +208,7 @@ def print_against_labels(by_model, records, indent="  "):
         for i, axis in enumerate(AXES):
             # agreement() drops the pairs where either side is silent, so an
             # unlabelled record costs nothing here beyond a smaller n.
-            pairs = [(record["labels"][axis], row[i + 1]) for record, *row in by_model[model]]
+            pairs = axis_pairs(by_model[model], axis)
             result = agreement(pairs)
             print(
                 f"{indent}{axis:<11} {result['agree']}/{result['n']} "
