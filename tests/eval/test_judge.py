@@ -16,18 +16,21 @@ import pytest
 from llm_eval_harness import judge
 from llm_eval_harness.judge import (
     PROMPT_VERSION,
+    agreement,
     build_messages,
     cache_key,
     decision,
     extract_json,
     judge_records,
     load_cache,
+    matrix,
     mode_string,
     parse_verdict,
     quote_missing,
     strip_thinking,
     thinking_default,
     user_prompt,
+    verdicts_by_question,
     write_cache,
 )
 
@@ -427,6 +430,89 @@ def test_an_unparsable_reply_is_cached_as_a_failure(tmp_path):
     # Kept so the failure can be diagnosed without another slow run.
     assert entry["raw"] == "I think it refused, honestly."
     assert entry["mode"] and entry["prompt_version"] == PROMPT_VERSION
+
+
+# --- matrix and agreement --------------------------------------------------
+
+
+def test_the_cells_count_the_four_combinations():
+    result = matrix([(True, False), (True, False), (True, True), (False, True)])
+    assert result["cells"][(True, False)] == 2
+    # The cell the phrase list cannot see: declined, then invented anyway.
+    assert result["cells"][(True, True)] == 1
+    assert result["cells"][(False, True)] == 1
+    assert result["cells"][(False, False)] == 0
+
+
+def test_an_undecided_record_is_counted_not_dropped():
+    # A parse failure must not quietly shrink the denominator.
+    result = matrix([(True, False), (None, False), (True, None)])
+    assert result["undecided"] == 2
+    assert sum(result["cells"].values()) + result["undecided"] == result["n"] == 3
+
+
+def test_agreement_counts_only_pairs_where_both_spoke():
+    result = agreement([(True, True), (False, False), (True, False), (None, True)])
+    assert result["n"] == 3
+    assert result["agree"] == 2
+    assert result["rate"] == pytest.approx(2 / 3)
+    assert result["skipped"] == 1
+
+
+def test_kappa_is_undefined_when_neither_rater_varies():
+    # The expected case on twelve records: both say "not fabricated" every
+    # time. Reported as None, because 0.0 would read as "no agreement" when
+    # what happened is perfect agreement with nothing to measure against.
+    result = agreement([(False, False)] * 5)
+    assert result["rate"] == 1.0
+    assert result["kappa"] is None
+
+
+def test_kappa_discounts_agreement_by_chance():
+    pairs = [(True, True)] * 4 + [(False, False)] * 4 + [(True, False), (False, True)]
+    result = agreement(pairs)
+    assert result["rate"] == pytest.approx(0.8)
+    assert result["kappa"] == pytest.approx(0.6)
+
+
+def test_agreement_with_nothing_to_compare():
+    result = agreement([(None, True), (None, None)])
+    assert result["n"] == 0
+    assert result["rate"] == 0.0
+    assert result["kappa"] is None
+
+
+# --- reading the cache back ------------------------------------------------
+
+
+def test_verdicts_are_indexed_by_question_and_axis(tmp_path):
+    chat_fn, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
+    judge_records(
+        [record("q1"), record("q2")], "m", chat_fn=chat_fn, cache_dir=tmp_path
+    )
+    found, conflicts = verdicts_by_question("m", cache_dir=tmp_path)
+    assert set(found) == {"q1", "q2"}
+    assert set(found["q1"]) == {"refused", "fabricated"}
+    assert conflicts == []
+
+
+def test_a_question_judged_twice_in_different_modes_is_a_conflict(tmp_path):
+    # Two experiments, not two samples. The later one is used and the earlier
+    # one is surfaced rather than averaged in.
+    chat_fn, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
+    judge_records(
+        [record("q1")], "m", axes=("refused",), chat_fn=chat_fn, cache_dir=tmp_path
+    )
+    judge_records(
+        [record("q1")],
+        "m",
+        axes=("refused",),
+        chat_fn=chat_fn,
+        structured=False,
+        cache_dir=tmp_path,
+    )
+    _, conflicts = verdicts_by_question("m", cache_dir=tmp_path)
+    assert conflicts == [("q1", "refused")]
 
 
 def test_progress_is_reported_per_verdict(tmp_path):

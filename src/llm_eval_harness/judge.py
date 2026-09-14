@@ -567,6 +567,87 @@ def judge_record(
     return key, entry, False
 
 
+def verdicts_by_question(model, cache_dir=CACHE_DIR):
+    """
+    {question: {axis: entry}} from a model's cache, newest entry winning.
+
+    Indexed by what is inside the entries rather than by recomputing the key,
+    so the report does not have to know which mode a run used. When the same
+    question and axis were judged twice in different modes the later verdict
+    wins and the earlier one is returned as a conflict for the caller to
+    mention: silently averaging two experiments would be the worst option.
+    """
+    latest, conflicts = {}, []
+    for entry in sorted(load_cache(model, cache_dir).values(), key=lambda e: e["judged"]):
+        slot = latest.setdefault(entry["question"], {})
+        if entry["axis"] in slot:
+            conflicts.append((entry["question"], entry["axis"]))
+        slot[entry["axis"]] = entry
+    return latest, conflicts
+
+
+def matrix(decisions):
+    """
+    Counts of the four cells, keyed (refused, fabricated).
+
+    Records the judge could not decide - a parse failure on either axis, or an
+    axis never run - are counted separately under "undecided" rather than
+    dropped, so the cells always add up to the number of records.
+    """
+    cells = {(r, f): 0 for r in (True, False) for f in (True, False)}
+    undecided = 0
+    for refused, fabricated in decisions:
+        if refused is None or fabricated is None:
+            undecided += 1
+        else:
+            cells[(refused, fabricated)] += 1
+    return {"cells": cells, "undecided": undecided, "n": len(decisions)}
+
+
+def agreement(pairs):
+    """
+    How often two raters said the same thing, over the pairs where both spoke.
+
+    pairs is a list of (a, b) booleans; a pair with a None in it is skipped and
+    counted, because an unlabelled record and a verdict that would not parse
+    are both absence of an opinion, not disagreement.
+
+    Returns {"n", "agree", "rate", "kappa", "cells", "skipped"}. kappa is
+    Cohen's kappa, and it is None when it is undefined - which happens
+    whenever both raters answered the same way every time. That is not a
+    degenerate case here but the expected one on twelve records, and reporting
+    it as 0.0 would read as "no agreement" when the truth is "perfect
+    agreement, no variance to measure against".
+    """
+    both = [(a, b) for a, b in pairs if a is not None and b is not None]
+    cells = {(a, b): 0 for a in (True, False) for b in (True, False)}
+    for pair in both:
+        cells[pair] += 1
+
+    n = len(both)
+    agree = sum(1 for a, b in both if a == b)
+    result = {
+        "n": n,
+        "agree": agree,
+        "rate": agree / n if n else 0.0,
+        "cells": cells,
+        "skipped": len(pairs) - n,
+        "kappa": None,
+    }
+    if not n:
+        return result
+
+    observed = agree / n
+    expected = sum(
+        (sum(1 for a, _ in both if a is value) / n)
+        * (sum(1 for _, b in both if b is value) / n)
+        for value in (True, False)
+    )
+    if expected < 1.0:
+        result["kappa"] = (observed - expected) / (1 - expected)
+    return result
+
+
 def judge_records(
     records,
     model,
