@@ -14,8 +14,18 @@ Two difficulty classes, reported separately because they are not equally hard:
     in_corpus_gap   the document is in the corpus, the specific fact is not.
                     Retrieval returns related text, which is exactly what
                     tempts a model into filling the gap.
-    out_of_corpus   the document is absent entirely. A baseline check: a
-                    system that fails this one is not grounded at all.
+    out_of_corpus   the document is absent entirely.
+
+The split was made on the expectation that out_of_corpus is the easier class -
+a baseline that only an ungrounded system fails. The hand labels do not show
+that. Across the twelve labelled answers: in_corpus_gap 6/6 declined without
+fabricating, out_of_corpus 5/6, and the single failure of the set is an
+out_of_corpus record: asked for the minimum AES key size in FIPS 197, which is
+not in the corpus, the model answered "128 bits" from a chunk that mentions
+AES-128 as a card authentication key - the right number pulled out of text
+that was answering a different question. One record of difference at n=12 supports no ordering at
+all, in either direction. Reported separately because they are different
+questions, not because one of them is known to be harder.
 
 Detection is deliberately crude: a refusal is recognised by matching phrases
 against REFUSAL_MARKERS. This is brittle in both directions - a model that
