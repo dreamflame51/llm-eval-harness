@@ -56,9 +56,10 @@ anything.**
 | The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16) |
 | The ruler has a limit, and the limit moves | [5](#5), [6](#6), [14](#14) |
 | What measuring changed | [7](#7), [8](#8), [15](#15) |
-| Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17) |
-| Checks that check nothing | [10](#10) |
+| Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21) |
+| Checks that check nothing | [10](#10), [20](#20) |
 | What the system actually gets wrong | [11](#11) |
+| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20) |
 
 ---
 
@@ -709,3 +710,183 @@ loading, and model loading was the variable. The second half costs nothing and
 would have saved this: **record what the system said, not only what the metric
 made of it.** A number that moves is an invitation to investigate, and the
 investigation needs the text.
+
+---
+
+<a id="18"></a>
+
+## 18. The replacement was not better than the thing it replaced
+
+**Symptom.** The phrase list in `refusal.py` had been called brittle for
+several entries running ([#12](#12) three times, [#17](#17)), so it was
+replaced with an LLM judge: two axes, `refused` and `fabricated`, decided
+separately against the chunks the generator had actually seen. Then the twelve
+recorded answers were labelled by hand, and the judge was scored against the
+labels - along with, for the first time, the phrase list itself.
+
+```
+refused axis, against the hand labels
+  phrase list   12/12   kappa 1.00
+  qwen3:8b      11/12   kappa 0.62
+  gemma4        8/12    kappa 0.23
+
+headline (declined AND invented nothing)
+  hand labels   11/12
+  phrase list   11/12   same record fails
+  qwen3:8b      10/12
+```
+
+The list the replacement was built to retire scored the refusal axis perfectly,
+and neither judge matched it.
+
+**Diagnosis.** Every argument against the phrase list was an argument from what
+it *could* do: miss a refusal worded unexpectedly, pass a hedge that declines
+and then invents. Both are real failure modes and both are demonstrable - the
+tests in `tests/eval/test_refusal.py` pin them with hand-written strings. What
+was never checked is whether those shapes occur in the answers this generator
+actually produces. On these twelve, they do not. The one failure of the set is
+an answer that does not decline at all, which the phrase list scores as a
+failure correctly and for the right reason.
+
+The judge does measure something the list cannot: the list has no opinion about
+fabrication, so an answer that declines and then invents a figure is a pass for
+it, unconditionally. But the cell where that would show up is empty on this
+fixture - no labelled answer declined and then invented - so even that advantage
+is currently unexercised.
+
+**Fix.** Keep both, and say which is which. The judged number is the headline
+because it decides two things instead of one; the phrase list stays underneath
+it as a tripwire, with every disagreement printed. The claim in the docstring
+that the list is brittle was replaced with the measurement.
+
+**Lesson.** "This is brittle" is a hypothesis, and a hypothesis about a
+component is testable against the same labels that test the component's
+replacement. **Score the incumbent.** It is one line of code next to work that
+already exists, and without it the replacement gets credit by default.
+
+A second-order version of the same mistake nearly happened here. Before the
+labels existed, gemma4's verdicts said the phrase list was wrong on 4 of 12,
+and the conclusion "the list overcounts refusals by a third" was written down
+and told to someone. It came from the judge's errors, not the list's. An
+unvalidated instrument reporting on another instrument produces confident
+nonsense in both directions.
+
+---
+
+<a id="19"></a>
+
+## 19. The control found the opposite of what it was watching for
+
+**Symptom.** gemma4 wrote the twelve answers. Having gemma4 also judge them is
+an obvious conflict, so qwen3 was run as a self-preference control - the
+expectation being that gemma would go easy on its own work, in particular by
+calling its own fabrications clean.
+
+It did the opposite. gemma4 was the **stricter** judge, and systematically:
+4 of 12 answers it scored as not-refusals where both qwen3 and the hand labels
+scored refusals. All four are the same shape - the answer recites what the
+corpus does say around the question, then names the asked-for specific as
+absent:
+
+```
+"... a maximum authorization period can be specified by the authorizing
+ official, but it does not specify what that maximum time period is."
+
+ gemma4      answered anyway -> not a refusal
+ hand label  refusal
+```
+
+**Diagnosis.** Not favouritism in either direction: a reading difference, and
+one the prompt itself caused. The brief says a hedge that declines and then
+answers anyway is not a refusal - written to catch "not specified, but it is
+typically three years". gemma applied that rule to any answer containing
+corpus content, including content that answers a *different* question than the
+one asked. The instruction written to prevent one failure produced another.
+
+**Fix.** The rule was written down where the labelling happens - the header of
+`eval/refusal_answers.yaml` - as a decision about this specific shape, so that
+it is applied the same way across all twelve records and by anyone labelling
+later. The judge prompt was left alone: tuning it until it agreed with the
+labels would be fitting the prompt to the test set, which is the one thing a
+twelve-record set cannot survive.
+
+**Lesson.** A control is set up to catch bias in a direction you already
+suspect, and it will happily report bias in the other one if you let it. Read
+it in both. And when a judge's errors are all the same shape, that is not noise
+to be averaged away - it is a sentence in the prompt, and it can be found by
+reading four verdicts.
+
+---
+
+<a id="20"></a>
+
+## 20. Ninety-two percent agreement that meant nothing
+
+**Symptom.** On the `fabricated` axis, gemma4 agreed with the hand labels 11
+times out of 12 - 92%, the best agreement number in the whole report. It got
+there by answering "not fabricated" to every single record. The labels contain
+exactly one fabrication, so a stuck "no" scores 92%.
+
+qwen3 looked worse and was more informative: 10/12, **kappa -0.09** - below
+chance. It missed the real fabrication (the AES key size answer) and raised a
+false one, quoting as the unsupported claim a sentence that is the answer's own
+disclaimer:
+
+```
+unsupported_claim: "The provided context does not specify which of these
+                    interfaces is used for contactless authentication."
+```
+
+That is a refusal, not an invention, and the same sentence is the evidence it
+cited on the other axis.
+
+**Diagnosis.** Three separate things, all visible only because the report prints
+more than one number:
+
+- A percentage over an unbalanced set measures the base rate. With 1 positive
+  in 12, a constant "no" is 92% correct and worth nothing.
+- Cohen's kappa says so - 0.00 for gemma - but kappa has a hole of its own:
+  when neither rater varies at all it is undefined, and printing 0.0 there
+  would read as "no agreement" when the truth is "perfect agreement, no
+  variance to discount against". The report prints `undefined (no variance)`.
+- A stuck axis and a correct axis produce the same 92%. Distinguishing them
+  needs a case where the axis is supposed to fire.
+
+**Fix.** `scripts/calibrate_judge.py`: four synthetic answers built on real
+chunks, verdicts fixed in advance - an invented figure, the same figure behind
+a disclaimer, a sentence copied out of the chunks, a plain refusal. None of
+them is in the labelled set, and they are judged into a throwaway cache. Both
+judges answer all four correctly, so "nothing fabricated" is a verdict and not
+a stuck output. The evidence quote in the verdict contract paid for itself
+here: the false positive was diagnosable by reading one field, without
+re-running anything.
+
+**Lesson.** An agreement number needs the base rate next to it or it cannot be
+read. And an instrument that always returns the same reading is indistinguishable
+from a correct one until you feed it something it must react to - so **ship the
+calibration cases with the instrument**, in the repository, runnable, rather
+than performing the check once by hand and remembering the outcome.
+
+---
+
+<a id="21"></a>
+
+## 21. The forty-nine-minute call that took twenty-five seconds
+
+**Symptom.** One verdict in the qwen3 run took **2938 seconds**, against a
+median of about 25, and produced 148 bytes of output. It was tempting to write
+it down as a property of that record - the longest chunks, some pathological
+interaction with the JSON schema constraint.
+
+**Diagnosis.** Repeating the identical call afterwards took **25.1 s** and
+returned a byte-identical verdict. Nothing about the record was slow. The
+machine was: the 9.6 GB generator had been resident shortly before, on a box
+with 4 GB of VRAM, and the run happened to cross that pressure.
+
+**Lesson.** A latency outlier is a measurement of the machine at that moment,
+not of the input. Repeat it before attributing it. The repeat cost 25 seconds
+because the verdict had been cached with its latency and its cache key made the
+exact call addressable - and because the cache is written after every call
+rather than at the end of the run, which is the same property that made the
+run itself resumable. Cheap repeatability is what turns an anomaly into a
+question rather than a note in a document.

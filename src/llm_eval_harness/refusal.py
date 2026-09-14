@@ -35,15 +35,24 @@ against the chunks the generator actually saw (judge.py). It is computed over
 the frozen answers in eval/refusal_answers.yaml from verdicts committed under
 eval/judge_cache/, so it needs no model and does not move between runs.
 
-The phrase list below stays, demoted to a tripwire. It costs nothing, it needs
-no model, and the gap between the two is now measured rather than asserted: on
-the twelve labelled answers it scored four as refusals that the judge and the
-hand labels both scored as answers, all of them the same shape - a disclaimer
-followed by an answer. It is reported underneath the headline, with every
-disagreement printed.
+The phrase list below stays, and the measurement did not demote it. Against the
+twelve hand labels it called the refused axis correctly 12 out of 12, kappa
+1.00 - better than either judge (qwen3 11/12, gemma4 8/12). Its headline number
+on this set is 11/12, the same as the labels, failing on the same single
+record. Every claim previously made here about it being brittle was an argument
+from what it might do, not from what it did.
+
+What it still cannot do is the other axis. The phrase list decides refusal and
+nothing else, so an answer that declines and then invents a figure counts as a
+success for it, unconditionally. That is the judge's only measured advantage,
+and this fixture does not yet exercise it: no labelled answer falls in the
+declined-and-invented cell. The judge is kept because it measures a second
+thing, not because it beat the first - and if a record of that shape is ever
+added, the phrase list will pass it and the judge will have to catch it.
 
 The judge is qwen3:8b, chosen by measurement and not by size: against the hand
-labels it agrees 11/12 on the headline decision, gemma4 8/12. gemma4's misses
+labels it agrees 11/12 on the headline decision, gemma4 8/12. Neither reaches
+the phrase list on the refused axis alone. gemma4's misses
 are systematic rather than random - it reads a recital of nearby corpus
 content as an answer where the labels read a refusal - and it judged its own
 answers, which is why a second judge was run at all. Both judges pass

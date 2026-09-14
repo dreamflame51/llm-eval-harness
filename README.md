@@ -56,11 +56,22 @@ and `upsert` will not remove them.
 |---|---|
 | `uv run python -m llm_eval_harness.validate` | is the reference set still valid? |
 | `uv run python -m llm_eval_harness.evaluator` | does retrieval find the supporting text? |
-| `uv run python -m llm_eval_harness.refusal` | does the model decline when it should? |
+| `uv run python -m llm_eval_harness.refusal` | did it decline **and** invent nothing? (from the cache, no model) |
+| `uv run python scripts/judge_report.py` | both judges, the hand labels, and where they disagree |
 | `uv run python scripts/smoke.py` | quick eyeball on three known questions |
 | `uv run python scripts/calibrate.py` | recalibrate the distance threshold |
 | `uv run python scripts/stability.py` | is the refusal score reproducible? |
 | `uv run python scripts/sweep.py` | which chunk size retrieves best? (minutes) |
+
+Rerun only when the judging itself changes - each needs Ollama and takes ~15
+minutes on this hardware:
+
+| command | answers |
+|---|---|
+| `uv run python scripts/judge_refusals.py --model qwen3:8b` | judge the frozen answers, fill the cache |
+| `uv run python scripts/calibrate_judge.py --model qwen3:8b` | can this judge return the verdicts it must? |
+| `uv run python scripts/label_refusals.py` | label the frozen answers by hand |
+| `uv run python scripts/record_answers.py` | re-freeze the answers (discards the labels) |
 | `uv run pytest` | the harness test suite |
 | `uv run pytest practice` | interview drill code, kept out of the main suite |
 
@@ -136,26 +147,45 @@ The report splits the failures by what actually went wrong - span found but
 spread over several chunks, span found in part, span not found at all - because
 those are three different defects that `hit@k` reported as one number.
 
-**`refusal`** - grounding. Share of unanswerable questions the model declined.
+**`refusal`** - grounding. An unanswerable question is answered correctly only
+when the model **declined and invented nothing**. Those are two separate
+questions, decided separately by an LLM judge: `refused` from the answer alone,
+`fabricated` against the five chunks the generator actually saw.
 
-| class | last run | previous run |
-|---|---|---|
-| `in_corpus_gap` | 6/6 | 5/6 |
-| `out_of_corpus` | 6/6 | 5/6 |
+| | declined, invented nothing |
+|---|---|
+| hand labels | **11/12** |
+| judge, `qwen3:8b` | 10/12 |
+| phrase list (tripwire) | 11/12 |
 
-**Read those as samples, not as measurements.** The two runs are of the same
-system on the same fixture. One of the two differences is explained - the phrase
-list gained a marker between them, see below. The other is not: the FIPS 197
-record declined in the second run and answered in the first, with nothing
-changed. Sampling that one question across six separate processes: it declined
-once, answered five times, and worded the answer differently almost every time.
+by class, by the labels: `in_corpus_gap` 6/6, `out_of_corpus` 5/6.
 
-Detection matches phrases from a list, so it measures the phrase list too.
-It scores an unexpected wording as a failure, and misses a hedge that declines
-and then invents anyway. The report prints every failing answer in full for
-exactly that reason - and it has now widened the list three times, each time
-moving the score with the system untouched. That is the case for replacing it
-with a judge.
+**These numbers do not move between runs.** The twelve answers are frozen in
+`eval/refusal_answers.yaml`, hand-labelled, and the judge's verdicts are
+committed under `eval/judge_cache/`, so `refusal` reads them back without
+loading a model. Earlier refusal numbers in this README were samples of a
+drifting generator; these are not.
+
+**The judge did not beat the phrase list, and that is a result.** Against the
+hand labels on the refusal axis: phrase list 12/12 (kappa 1.00), `qwen3:8b`
+11/12, `gemma4` 8/12. The list had been called brittle for three entries of
+[docs/lessons.md](docs/lessons.md) running - it misses a refusal worded
+unexpectedly, it passes a hedge that declines and then invents - but neither
+shape occurs in the answers this generator actually produced. What the list
+cannot do is the second axis: it has no opinion about fabrication, so an answer
+that declines and then invents a figure is a pass for it, unconditionally. The
+cell where that shows up is empty on this fixture, so even that advantage is
+unexercised. Both are kept, and every disagreement between them is printed.
+See [#18](docs/lessons.md#18).
+
+`gemma4` judged its own answers, which is why a second judge was run at all.
+The self-preference it was set up to catch did not appear; the opposite did,
+systematically, on four records of the same shape - [#19](docs/lessons.md#19).
+
+`scripts/calibrate_judge.py` exists because a judge that answers "nothing
+fabricated" to everything scores 92% against a set with one fabrication in it.
+Four synthetic answers with the verdicts fixed in advance; both judges pass, so
+a clean verdict is a verdict and not a stuck axis - [#20](docs/lessons.md#20).
 
 `pipeline.py` decodes greedily with a fixed seed, which removed the variation
 between repeated runs **inside one process** - `uv run python
@@ -214,9 +244,11 @@ Two things that reading gives:
 ```
 src/llm_eval_harness/   pipeline and harness
 eval/ground_truth.yaml  reference set
+eval/refusal_answers.yaml  frozen answers to the refusal questions, hand-labelled
+eval/judge_cache/       the judge's verdicts, committed so the numbers reproduce
 tests/                  harness tests
 docs/                   problem log, Russian versions
-scripts/                smoke check, threshold calibration, stability, sweep
+scripts/                judging, labelling, smoke check, calibration, sweep
 practice/               interview drills, outside the main test run
 data/corpus/            the five source PDFs
 data/chroma/            the index, rebuilt by ingest, not in git
