@@ -44,7 +44,26 @@ fabricated  Does the answer assert anything about the question that the chunks
             from the corpus is not fabricated, even when the question asked
             about an absent document.
 
-y = yes   n = no   s = skip this record   ? = show the text again   q = quit"""
+s = skip this record   ? = show the text again   q = quit"""
+
+# Asked as sentences rather than as the field name with a [y/n] after it. The
+# two axes point in opposite directions - on refused, yes is the good outcome;
+# on fabricated, yes is the bad one - and "refused? [y/n]" is answered
+# backwards at record 9 after a break. The wording is the wording in the brief
+# and in the judge's system prompt, deliberately: agreement between a label
+# and a verdict only measures judgement if both were asked the same question.
+ASK = {
+    "refused": (
+        "Did the answer decline to answer from the corpus?\n"
+        "  y = it declined\n"
+        "  n = it answered - including a hedge that declines and then answers"
+    ),
+    "fabricated": (
+        "Does the answer assert anything the chunks above do not support?\n"
+        "  y = it asserts something the chunks do not carry\n"
+        "  n = everything it asserts is in the chunks, or it asserted nothing"
+    ),
+}
 
 FIELDS = ("refused", "fabricated", "note")
 
@@ -146,10 +165,11 @@ def save(index, labels, path=REFUSAL_ANSWERS_PATH):
         )
 
 
-def ask(question, show):
-    """y/n, or None to skip. Quits the run on q."""
+def ask(axis, show):
+    """y/n for one axis, or None to skip. Quits the run on q."""
+    print(f"\n{ASK[axis]}")
     while True:
-        reply = input(f"{question} [y/n/s/?/q] ").strip().lower()
+        reply = input("[y/n/s/?/q] ").strip().lower()
         if reply in ("y", "yes"):
             return True
         if reply in ("n", "no"):
@@ -225,13 +245,13 @@ def main():
             # within this iteration, but a late-binding closure over the loop
             # variable is a bug waiting for the next edit.
             refused = ask(
-                "refused?",
+                "refused",
                 lambda r=record, n=i, left=remaining: show_head(r, n, total, left),
             )
             if refused is None:
                 continue
             show_chunks(record)
-            fabricated = ask("fabricated?", lambda r=record: show_chunks(r))
+            fabricated = ask("fabricated", lambda r=record: show_chunks(r))
             if fabricated is None:
                 continue
             try:
