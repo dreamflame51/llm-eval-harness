@@ -13,5 +13,8 @@ wheels/
 .pytest_cache/
 .deepeval/
 
-# Local corpus / datasets
-data/
+# Chroma index - derived, rebuilt by ingest, and tied to the embedding model
+# and chunk size. The corpus PDFs under data/corpus/ are tracked on purpose:
+# eval/ground_truth.yaml quotes exact spans of those exact files, so without
+# them the reference set cannot be checked and no metric can be reproduced.
+data/chroma/

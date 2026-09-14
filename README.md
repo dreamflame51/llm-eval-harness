@@ -7,7 +7,6 @@ The point is the measurement. Retrieval that "looks relevant" is easy; the
 harness scores whether the retrieved text really supports the answer, and
 whether the model declines when the corpus has no answer at all.
 
-Russian: [docs/README.ru.md](docs/README.ru.md) ·
 Problem log: [docs/lessons.md](docs/lessons.md)
 
 ## How it works
@@ -37,15 +36,19 @@ Needs Python 3.14, [uv](https://docs.astral.sh/uv/), and Ollama with `gemma4`
 uv sync
 ```
 
-The PDFs are not in git. Put them in `data/corpus/`, then:
+The five source PDFs are in `data/corpus/`. Build the index:
 
 ```bash
 uv run python -m llm_eval_harness.ingest    # ~5000 chunks, a few minutes
 ```
 
-Rebuild from zero (`rm -rf data/chroma`) after changing the embedding model or
-the chunk size - old vectors are not compatible, and `upsert` will not remove
-them.
+They are committed on purpose: the reference set quotes exact spans of those
+exact files, so a different copy - or a different extraction - would invalidate
+it. NIST publications are public domain.
+
+The index is not committed. Rebuild it from zero (`rm -rf data/chroma`) after
+changing the embedding model or the chunk size: old vectors are not compatible,
+and `upsert` will not remove them.
 
 ## Commands
 
@@ -144,8 +147,9 @@ check the ceiling before comparing chunk sizes. See
 src/llm_eval_harness/   pipeline and harness
 eval/ground_truth.yaml  reference set
 tests/                  harness tests
-docs/                   problem log, Russian README
-scripts/                smoke check, threshold calibration
+docs/                   problem log, Russian versions
+scripts/                smoke check, threshold calibration, stability check
 practice/               interview drills, outside the main test run
-data/                   corpus and index, not in git
+data/corpus/            the five source PDFs
+data/chroma/            the index, rebuilt by ingest, not in git
 ```
