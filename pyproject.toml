@@ -39,4 +39,6 @@ src = ["src", "practice", "tests"]
 # not decide whether the project is green. Run it on purpose:
 #     uv run pytest practice
 testpaths = ["tests"]
-pythonpath = ["src"]
+# scripts/ is importable because label_refusals.py edits the frozen answers
+# file in place, and that is worth a test rather than a careful hand.
+pythonpath = ["src", "scripts"]
