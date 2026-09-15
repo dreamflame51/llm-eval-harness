@@ -1,0 +1,91 @@
+# The V-model levels and the gaps between them, as data.
+#
+# The prose lives in docs/v-model.md; this file holds the parts that two
+# readers need - that document's table and the panel on the readout page - so
+# the two cannot drift apart. scripts/traceability.py regenerates the table
+# inside the document from here.
+#
+# state is one of: present, partial, missing.
+
+levels:
+  - level: User needs
+    side: specification
+    specified: nowhere
+    verified: nowhere
+    state: missing
+    note: >-
+      Nothing states what the product is for, so the matrix below traces up to
+      nothing. Defensible for an evaluation harness, whose product is the
+      measurement - but the box is empty and should be seen to be.
+
+  - level: System requirements
+    side: specification
+    specified: eval/traceability.yaml
+    verified: pytest, the metric commands
+    state: partial
+    note: >-
+      Ten claims, all of the form "the harness can tell X" rather than "the
+      product does Y for its user".
+
+  - level: Architecture
+    side: design
+    specified: pipeline.py, store.py, chunking and retrieval decisions
+    verified: scripts/compare_retrievers.py, scripts/sweep.py
+    state: present
+    note: >-
+      Every configuration choice here was made by measurement against the
+      fixture rather than by taste, and the sweep is committed as code.
+
+  - level: Module design
+    side: design
+    specified: module docstrings
+    verified: 202 unit tests
+    state: present
+    note: >-
+      The docstrings carry the reasoning, which is the half that does not
+      survive in code.
+
+  - level: Code
+    side: implementation
+    specified: "-"
+    verified: ruff and pytest in CI
+    state: present
+    note: Lint and the suite run on every push.
+
+gaps:
+  - id: GAP-1
+    title: No acceptance criterion anywhere
+    detail: >-
+      Every number is reported and read; none can fail. Half of them are
+      deterministic reads already pinned by equality, which needs no
+      threshold. The other half are recomputed by a generator that drifts
+      between processes, and that drift has never been measured - so a
+      threshold set today would fire on noise and be learned to be ignored.
+    blocks: A stated bar for any live metric
+    next: Measure the spread across processes, then set the bar outside it
+
+  - id: GAP-2
+    title: Verification without validation
+    detail: >-
+      Everything asks "does the system do what we specified?". Nothing asks
+      whether the specified thing is worth having - whether a person with a
+      question about SP 800-37r2 is better off with this than with ctrl-F.
+    blocks: Any claim that the system is useful rather than correct
+    next: One small user-facing task set, scored by a human, run once
+
+  - id: GAP-3
+    title: The system-test level is frozen
+    detail: >-
+      Generation metrics score answers recorded once. That was right for
+      labelling, and it means a regression introduced in pipeline.py today
+      moves no reported number until somebody re-records by hand.
+    blocks: Catching a generation-side regression from a code change
+    next: Schedule the live path and score it with the judge, not the phrase list
+
+  - id: GAP-4
+    title: The requirements are the harness's, not the product's
+    detail: >-
+      The top-left box of the V is empty, so the traceability matrix has
+      nothing above itself to trace to.
+    blocks: Traceability in the direction that matters to a user
+    next: Write one page of user-level needs

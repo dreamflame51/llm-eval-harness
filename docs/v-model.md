@@ -10,13 +10,15 @@ Russian version: not written yet.
 
 ## The two arms, as this project actually stands
 
+<!-- levels:start - generated from eval/v_model.yaml by scripts/traceability.py -->
 | level | specified where | verified by | state |
 |---|---|---|---|
 | User needs | nowhere | nowhere | **missing** |
-| System requirements | [`eval/traceability.yaml`](../eval/traceability.yaml), 10 claims | `pytest`, the metric commands | present, but they are requirements of the *harness* |
-| Architecture | `pipeline.py`, `store.py`, chunking and retrieval decisions in docstrings | `scripts/compare_retrievers.py`, `scripts/sweep.py` | present, measured |
+| System requirements | eval/traceability.yaml | pytest, the metric commands | **partial** |
+| Architecture | pipeline.py, store.py, chunking and retrieval decisions | scripts/compare_retrievers.py, scripts/sweep.py | present |
 | Module design | module docstrings | 202 unit tests | present |
-| Code | - | `ruff`, `pytest` in CI | present |
+| Code | - | ruff and pytest in CI | present |
+<!-- levels:end -->
 
 Read upward and the shape of the problem shows: the harness is verified
 thoroughly at the bottom and validated nowhere at the top.

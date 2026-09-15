@@ -18,6 +18,10 @@ import yaml
 
 MATRIX = pathlib.Path("eval/traceability.yaml")
 OUT = pathlib.Path("docs/traceability.md")
+V_MODEL = pathlib.Path("eval/v_model.yaml")
+V_DOC = pathlib.Path("docs/v-model.md")
+V_START = "<!-- levels:start"
+V_END = "<!-- levels:end -->"
 
 HEADER = """\
 # Traceability
@@ -73,12 +77,46 @@ def render(entries):
     return "\n".join(lines) + "\n"
 
 
+def render_levels(levels):
+    """The V-model table, for the block inside docs/v-model.md."""
+    lines = ["| level | specified where | verified by | state |", "|---|---|---|---|"]
+    for level in levels:
+        state = level["state"]
+        shown = f"**{state}**" if state != "present" else state
+        lines.append(
+            f"| {level['level']} | {level['specified']} | {level['verified']} | {shown} |"
+        )
+    return "\n".join(lines)
+
+
+def update_v_model(levels):
+    """
+    Replace the generated table in docs/v-model.md, leaving the prose alone.
+
+    The document argues; this table is data. Keeping the data in
+    eval/v_model.yaml means the panel on the readout page and the table here
+    cannot disagree, which is the failure mode of every second architecture
+    document.
+    """
+    body = V_DOC.read_text(encoding="utf-8")
+    start = body.index(V_START)
+    start = body.index("\n", start) + 1
+    end = body.index(V_END)
+    V_DOC.write_text(body[:start] + render_levels(levels) + "\n" + body[end:], encoding="utf-8")
+
+
 def main():
     entries = yaml.safe_load(MATRIX.read_text(encoding="utf-8"))
     OUT.write_text(render(entries), encoding="utf-8")
     gates = sum(1 for entry in entries if entry["measured"] == "gate")
     print(f"wrote {OUT}: {len(entries)} requirements, {gates} gates, "
           f"{len(entries) - gates} measurements")
+
+    v_model = yaml.safe_load(V_MODEL.read_text(encoding="utf-8"))
+    update_v_model(v_model["levels"])
+    missing = sum(1 for level in v_model["levels"] if level["state"] != "present")
+    print(f"wrote {V_DOC}: {len(v_model['levels'])} levels, {missing} not fully present, "
+          f"{len(v_model['gaps'])} gaps")
 
 
 if __name__ == "__main__":

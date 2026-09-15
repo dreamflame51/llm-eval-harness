@@ -251,7 +251,11 @@ def build(run_tests=False):
                 "id": entry["id"],
                 "requirement": " ".join(entry["requirement"].split()),
                 "measured": entry["measured"],
-                "tests": len(entry["tests"]),
+                # The names, not a count: a matrix that says "3 tests" without
+                # saying which three is a claim, and the whole point of the
+                # thing is that the claim is checkable.
+                "tests": entry["tests"],
+                "checks": entry["checks"],
                 "evidence": entry["evidence"],
                 "lesson": entry.get("lesson", "").rsplit("#", 1)[-1],
             }
@@ -259,6 +263,7 @@ def build(run_tests=False):
                 pathlib.Path("eval/traceability.yaml").read_text(encoding="utf-8")
             )
         ],
+        "v_model": yaml.safe_load(pathlib.Path("eval/v_model.yaml").read_text(encoding="utf-8")),
         "tests": test_inventory(),
         "test_run": test_run() if run_tests else None,
         "ci": ci_status(sha) if (sha := head_commit()) else None,
