@@ -12,20 +12,30 @@ Problem log: [docs/lessons.md](docs/lessons.md)
 ## How it works
 
 ```
-PDF ──load_pdf──> text ──chunk_text──> chunks ──> Chroma ──search──> top k ──> LLM ──> answer
+                          ┌─ Chroma  (embeddings) ─┐
+PDF ─load_pdf─> text ─chunk_text─> chunks ─┤                        ├─ RRF ─> top k ─> LLM ─> answer
+                          └─ BM25    (words)      ─┘
 ```
 
 | module | does |
 |---|---|
 | `loader.py` | PDF to text (pypdf) |
 | `chunker.py` | text to chunks, window 800 / overlap 160 |
-| `store.py` | Chroma index, `all-MiniLM-L6-v2` embeddings |
+| `store.py` | Chroma index, `all-MiniLM-L6-v2` embeddings, hybrid search |
+| `lexical.py` | BM25 over the same chunks, and the rank fusion |
 | `ingest.py` | builds the index from `data/corpus/*.pdf` |
 | `pipeline.py` | question to answer, via Ollama |
 | `dataset.py` | loads `eval/ground_truth.yaml` |
 | `validate.py` | checks the fixture still matches the corpus |
 | `evaluator.py` | retrieval metrics |
-| `refusal.py` | refusal check |
+| `refusal.py` | refusal check, judged |
+| `judge.py` | the LLM judge: refusal and fabrication as two axes |
+
+Retrieval is dense and lexical fused by reciprocal rank, not embeddings alone.
+Embeddings alone served no part of the gold span in the top five for ten of the
+twenty-six answerable questions, and the misses collected on questions that name
+a document by its identifier - see
+[#23](docs/lessons.md#23) and `scripts/compare_retrievers.py`.
 
 ## Setup
 
@@ -58,6 +68,8 @@ and `upsert` will not remove them.
 | `uv run python -m llm_eval_harness.evaluator` | does retrieval find the supporting text? |
 | `uv run python -m llm_eval_harness.refusal` | did it decline **and** invent nothing? (from the cache, no model) |
 | `uv run python scripts/judge_report.py` | both judges, the hand labels, and where they disagree |
+| `uv run python scripts/compare_retrievers.py` | dense, BM25, or the two fused? (~1 min) |
+| `uv run python scripts/compare_evals.py` | RAGAS against DeepEval, from the committed scores |
 | `uv run python scripts/smoke.py` | quick eyeball on three known questions |
 | `uv run python scripts/calibrate.py` | recalibrate the distance threshold |
 | `uv run python scripts/stability.py` | is the refusal score reproducible? |
@@ -68,6 +80,8 @@ minutes on this hardware:
 
 | command | answers |
 |---|---|
+| `uv run python scripts/ragas_eval.py` | RAGAS over the frozen answers (~70 min) |
+| `uv run python scripts/deepeval_eval.py` | DeepEval over the same ones (hours) |
 | `uv run python scripts/judge_refusals.py --model qwen3:8b` | judge the frozen answers, fill the cache |
 | `uv run python scripts/calibrate_judge.py --model qwen3:8b` | can this judge return the verdicts it must? |
 | `uv run python scripts/label_refusals.py` | label the frozen answers by hand |

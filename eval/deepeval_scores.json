@@ -1,0 +1,98 @@
+{
+  "model": "qwen3:8b",
+  "records": 26,
+  "metrics": [
+    "faithfulness",
+    "answer_relevancy",
+    "context_precision",
+    "context_recall"
+  ],
+  "seconds_per_metric": {
+    "faithfulness": 114.9,
+    "answer_relevancy": 0.0,
+    "context_precision": 0.0,
+    "context_recall": 0.0
+  },
+  "per_record": [
+    {
+      "question": "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+    },
+    {
+      "question": "What is a common control according to SP 800-37 Revision 2?"
+    },
+    {
+      "question": "What is the difference between a common control and a hybrid control in the RMF?"
+    },
+    {
+      "question": "What is the purpose of the Prepare step in the RMF?"
+    },
+    {
+      "question": "What key artifacts are included in an authorization package under SP 800-37r2?"
+    },
+    {
+      "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?"
+    },
+    {
+      "question": "What are the four components of the overall risk management process in SP 800-30r1?"
+    },
+    {
+      "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?"
+    },
+    {
+      "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?"
+    },
+    {
+      "question": "What is the purpose of the risk framing component of the risk management process?"
+    },
+    {
+      "question": "What is the primary purpose of NIST SP 800-53A Revision 5?"
+    },
+    {
+      "question": "Name the three primary assessment methods defined in SP 800-53A."
+    },
+    {
+      "question": "What does the Examine assessment method involve?"
+    },
+    {
+      "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?"
+    },
+    {
+      "question": "How do the depth and coverage attributes of assessment methods affect the assessment?"
+    },
+    {
+      "question": "What is the purpose of NIST SP 800-171A Revision 3?"
+    },
+    {
+      "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?"
+    },
+    {
+      "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?"
+    },
+    {
+      "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?"
+    },
+    {
+      "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?"
+    },
+    {
+      "question": "What is the scope of NIST SP 800-78-5?"
+    },
+    {
+      "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?"
+    },
+    {
+      "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?"
+    },
+    {
+      "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?"
+    },
+    {
+      "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?"
+    },
+    {
+      "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
+    }
+  ]
+}
