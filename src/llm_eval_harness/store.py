@@ -1,6 +1,8 @@
 import chromadb
 from chromadb.utils import embedding_functions
 
+from llm_eval_harness.lexical import BM25, rrf
+
 # English-only: the corpus and the eval questions are English, and on the
 # ground-truth set this model beats paraphrase-multilingual-MiniLM-L12-v2 at
 # equal chunking (hit@5 0.308 vs 0.192). Stated explicitly rather than left to
@@ -41,3 +43,48 @@ def search(query, k=5, coll=None):
         {"text": doc, "source": meta["source"], "distance": distance}
         for doc, meta, distance in zip(docs, metas, dists)
     ]
+
+
+# How deep each retriever is read before the two rankings are fused. A chunk
+# the fusion should lift into the top k has to be visible to one of them
+# first; the fused list is still cut to k.
+DEPTH = 10
+
+_lexical = {}
+
+
+def lexical_index(coll=None):
+    """
+    BM25 over the same chunks the collection holds, built once per collection.
+
+    Built from the index rather than from the PDFs so that the two retrievers
+    cannot disagree about what the corpus is: whatever was embedded is what
+    gets word-matched.
+    """
+    target = coll or collection
+    if target.name not in _lexical:
+        stored = target.get(include=["documents", "metadatas"])
+        _lexical[target.name] = BM25(
+            [
+                {"text": text, "source": meta.get("source")}
+                for text, meta in zip(stored["documents"], stored["metadatas"])
+            ]
+        )
+    return _lexical[target.name]
+
+
+def hybrid_search(query, k=5, coll=None, depth=DEPTH):
+    """
+    Dense and BM25, fused by reciprocal rank.
+
+    Measured against the same fixture as the dense retriever alone
+    (scripts/compare_retrievers.py): covered@5 0.577 against 0.462, hit@5
+    0.538 against 0.423, four records better and two worse. The two it loses
+    are real and are printed by that script - this is a trade that pays on
+    this fixture, not a free improvement.
+    """
+    if k <= 0:
+        return []
+    dense = search(query, k=depth, coll=coll)
+    lexical = lexical_index(coll).search(query, k=depth)
+    return rrf([dense, lexical], k=k)
