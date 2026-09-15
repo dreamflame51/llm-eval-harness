@@ -15,11 +15,15 @@ quoted from scripts/compare_retrievers.py rather than recomputed, because
 recomputing it needs the Chroma index.
 """
 
+import argparse
 import json
 import pathlib
 import statistics
 import subprocess
 import sys
+import tempfile
+import urllib.request
+from xml.etree import ElementTree
 
 import yaml
 
@@ -48,9 +52,8 @@ def test_inventory():
     """
     {test file: count}, by collection rather than by running anything.
 
-    Collected, not executed: the point of the panel is what the suite pins,
-    and a count of tests is honest about that whether or not a runner is
-    available here. Whether they pass is CI's job and CI's badge.
+    The cheap half: what the suite pins, available in seconds and without a
+    working runner. --run-tests replaces it with outcomes.
     """
     try:
         done = subprocess.run(
@@ -73,6 +76,101 @@ def test_inventory():
     return dict(sorted(counts.items(), key=lambda item: -item[1]))
 
 
+def test_run():
+    """
+    Run the suite and read the JUnit XML back: outcome and duration per test.
+
+    Locally rather than from CI's artifact on purpose. Downloading a run's
+    artifact needs an authenticated call even for a public repository, and the
+    page would then be showing results from a commit that is not necessarily
+    the one in the working tree. Running it here ties the outcomes to the code
+    the page was built from; whether the *pushed* commit is green is a
+    separate question, answered by ci_status() from the public API.
+    """
+    report = pathlib.Path(tempfile.gettempdir()) / "harness-tests.xml"
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "pytest", "-q", f"--junitxml={report}"],
+            capture_output=True,
+            text=True,
+            timeout=1800,
+            check=False,
+        )
+        tree = ElementTree.parse(report)
+    except (OSError, subprocess.TimeoutExpired, ElementTree.ParseError):
+        return None
+
+    files, cases = {}, []
+    for case in tree.iter("testcase"):
+        # pytest's JUnit output carries `file` only sometimes; the attribute
+        # that is always there is a dotted classname, tests.eval.test_dataset.
+        # Deriving the path from it rather than trusting `file` is why this
+        # reads 184 tests instead of silently reading none.
+        path = case.get("file")
+        if path:
+            path = path.replace("\\", "/")
+        else:
+            dotted = case.get("classname", "")
+            path = dotted.replace(".", "/") + ".py" if dotted else ""
+        if not path.startswith("tests/"):
+            continue
+        outcome = "passed"
+        for child in case:
+            if child.tag in ("failure", "error"):
+                outcome = "failed"
+            elif child.tag == "skipped":
+                outcome = "skipped"
+        seconds = float(case.get("time") or 0.0)
+        bucket = files.setdefault(path, {"passed": 0, "failed": 0, "skipped": 0, "seconds": 0.0})
+        bucket[outcome] += 1
+        bucket["seconds"] += seconds
+        cases.append({"file": path, "name": case.get("name"), "outcome": outcome,
+                      "seconds": round(seconds, 3)})
+
+    for bucket in files.values():
+        bucket["seconds"] = round(bucket["seconds"], 2)
+    order = sorted(files.items(), key=lambda item: -(item[1]["passed"] + item[1]["failed"]))
+    return {"files": dict(order), "cases": cases}
+
+
+def ci_status(sha):
+    """
+    The latest CI conclusion for this commit, from the public API.
+
+    Unauthenticated and best-effort: no network, no token, a fork with Actions
+    off - all of them mean the page simply does not claim anything about CI,
+    which is better than claiming something stale.
+    """
+    url = (
+        "https://api.github.com/repos/dreamflame51/llm-eval-harness/actions/runs"
+        f"?head_sha={sha}&per_page=1"
+    )
+    try:
+        with urllib.request.urlopen(url, timeout=15) as response:
+            runs = json.loads(response.read())["workflow_runs"]
+    except Exception:  # noqa: BLE001 - absence of a status is a valid state
+        return None
+    if not runs:
+        return None
+    run = runs[0]
+    return {
+        "status": run["status"],
+        "conclusion": run["conclusion"],
+        "url": run["html_url"],
+        "number": run["run_number"],
+    }
+
+
+def head_commit():
+    try:
+        done = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=30, check=False
+        )
+        return done.stdout.strip() or None
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
 def scores(path):
     """per_record from either shape: keyed by question, or a list of rows."""
     if not path.exists():
@@ -88,7 +186,7 @@ def mean(rows, metric):
     return statistics.mean(values) if values else None
 
 
-def build():
+def build(run_tests=False):
     records = refusal_answers()
     verdicts = {}
     for model in ("qwen3:8b", "gemma4:latest"):
@@ -147,6 +245,9 @@ def build():
             "note": "dense-retrieval run, both libraries, the same answers",
         },
         "tests": test_inventory(),
+        "test_run": test_run() if run_tests else None,
+        "ci": ci_status(sha) if (sha := head_commit()) else None,
+        "commit": (sha or "")[:7],
         "declines": {
             "dense": sum(1 for r in answers_before if looks_like_refusal(r["answer"])),
             "hybrid": sum(1 for r in answers_now if looks_like_refusal(r["answer"])),
@@ -156,11 +257,20 @@ def build():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--run-tests",
+        action="store_true",
+        help="run the suite and record each test's outcome and duration, "
+        "instead of only collecting their names",
+    )
+    args = parser.parse_args()
+
     page = PAGE.read_text(encoding="utf-8")
     start = page.index(OPEN) + len(OPEN)
     end = page.index(CLOSE, start)
 
-    data = build()
+    data = build(run_tests=args.run_tests)
     # Separators without spaces and no indentation: this block is data, and a
     # pretty-printed version of it would dominate every diff of the page.
     page = page[:start] + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + page[end:]
@@ -169,7 +279,9 @@ def main():
     print(f"{PAGE}: {len(data['refusal']['records'])} refusal records, "
           f"{len(data['libraries']['pairs'])} library pairs, "
           f"declines {data['declines']['dense']} -> {data['declines']['hybrid']}, "
-          f"{sum(data['tests'].values())} tests collected")
+          f"{sum(data['tests'].values())} tests collected"
+          + (f", {len(data['test_run']['cases'])} run" if data.get("test_run") else "")
+          + (f", CI {data['ci']['conclusion']}" if data.get("ci") else ""))
 
 
 if __name__ == "__main__":
