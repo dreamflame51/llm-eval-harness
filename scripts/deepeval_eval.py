@@ -36,10 +36,21 @@ Scores go to eval/deepeval_scores.json and are committed.
 import argparse
 import json
 import math
+import os
 import pathlib
 import time
 
 import yaml
+
+# DeepEval reports usage to its own servers unless told not to. Nothing in this
+# repository is anyone else's to send.
+os.environ.setdefault("DEEPEVAL_TELEMETRY_OPT_OUT", "YES")
+
+# Its per-attempt timeout defaults to 88.5 s, and a metric here takes 40-95 s
+# on this hardware - close enough that the default turns a slow machine into a
+# failed metric. Set in the file rather than in the shell so a run reproduces
+# without remembering an environment variable.
+os.environ.setdefault("DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE", "900")
 
 ANSWERS = pathlib.Path("eval/answerable_answers.yaml")
 OUT = pathlib.Path("eval/deepeval_scores.json")
@@ -47,9 +58,80 @@ OUT = pathlib.Path("eval/deepeval_scores.json")
 METRIC_NAMES = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 
 
+def no_think_model(name, temperature=0):
+    """
+    DeepEval's OllamaModel, with qwen3's thinking mode switched off.
+
+    `think` is a top-level parameter of ollama's chat call, not one of the
+    sampling `options`, so DeepEval's `generation_kwargs` - which lands in
+    options - cannot reach it. Left on, qwen3 spends its whole token budget
+    reasoning and DeepEval's per-attempt timeout (88.5 s by default) kills the
+    call before an answer exists. RAGAS hit the same wall from the other side,
+    where the reasoning broke the output parser instead.
+
+    Only the two generate methods are overridden, and only to add one keyword;
+    the return contract - (parsed schema or text, cost) - is DeepEval's.
+    """
+    from deepeval.models import OllamaModel
+
+    class NoThinkOllama(OllamaModel):
+        def generate(self, prompt, schema=None):
+            response = self.load_model().chat(
+                model=self.name,
+                messages=[{"role": "user", "content": prompt}],
+                format=schema.model_json_schema() if schema else None,
+                think=False,
+                options={"temperature": self.temperature, **self.generation_kwargs},
+            )
+            return self._parse(response, schema), 0
+
+        async def a_generate(self, prompt, schema=None):
+            response = await self.load_model(async_mode=True).chat(
+                model=self.name,
+                messages=[{"role": "user", "content": prompt}],
+                format=schema.model_json_schema() if schema else None,
+                think=False,
+                options={"temperature": self.temperature, **self.generation_kwargs},
+            )
+            return self._parse(response, schema), 0
+
+        @staticmethod
+        def _parse(response, schema):
+            content = response.message.content
+            return schema.model_validate_json(content) if schema else content
+
+    return NoThinkOllama(model=name, temperature=temperature)
+
+
 def load_rows(limit=None):
     rows = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
     return rows[:limit] if limit else rows
+
+
+def load_scores():
+    """What is already measured, keyed by question, so a re-run skips it."""
+    if not OUT.exists():
+        return {}
+    stored = json.loads(OUT.read_text(encoding="utf-8")).get("per_record", [])
+    return {row["question"]: row for row in stored}
+
+
+def save(per_record, model, metrics, timings):
+    OUT.write_text(
+        json.dumps(
+            {
+                "model": model,
+                "records": len(per_record),
+                "metrics": list(metrics),
+                "seconds_per_metric": {k: round(v, 1) for k, v in timings.items()},
+                "per_record": per_record,
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def build_cases(rows):
@@ -77,6 +159,9 @@ def parse_args():
         dest="metrics",
         help="run one metric only; repeatable. Use it to price them separately",
     )
+    parser.add_argument(
+        "--refresh", action="store_true", help="remeasure records already in the file"
+    )
     return parser.parse_args()
 
 
@@ -88,9 +173,7 @@ def main():
         ContextualRecallMetric,
         FaithfulnessMetric,
     )
-    from deepeval.models import OllamaModel
-
-    model = OllamaModel(model=args.model, temperature=0)
+    model = no_think_model(args.model)
     # One at a time, and no progress spinner per metric: the run is measured in
     # minutes per record and the timing below is the point of the exercise.
     common = {"model": model, "async_mode": False, "include_reason": True}
@@ -108,30 +191,42 @@ def main():
     print(f"{len(rows)} records x {len(wanted)} metrics, judged by {args.model}")
     print(f"metrics: {', '.join(wanted)}\n")
 
-    per_record = [{"question": row["question"]} for row in rows]
-    timings = {}
+    # Resumable, and written after every single measurement. The first version
+    # of this file saved once at the end; the run took four hours on this
+    # hardware, which made an interruption cost all of it. The RAGAS script had
+    # it right and this one did not - see docs/lessons.md #21.
+    done = {} if args.refresh else load_scores()
+    per_record = [
+        {**done.get(row["question"], {}), "question": row["question"]} for row in rows
+    ]
+    timings = {name: 0.0 for name in wanted}
     started = time.perf_counter()
 
     for name in wanted:
-        metric_started = time.perf_counter()
         # A fresh metric object per record: DeepEval metrics carry the last
         # score and reason as state, and reusing one across records makes the
         # failure mode a silently stale number rather than an error.
         for i, case in enumerate(cases):
+            if name in per_record[i] and not args.refresh:
+                print(f"  {name:<18} {i + 1}/{len(cases)}  cached", flush=True)
+                continue
+            measured = time.perf_counter()
             metric = available[name]()
             try:
                 metric.measure(case)
                 score, reason = metric.score, metric.reason
             except Exception as exc:  # noqa: BLE001 - a failed metric is data
                 score, reason = None, f"{type(exc).__name__}: {exc}"
+            timings[name] += time.perf_counter() - measured
             per_record[i][name] = _clean(score)
             per_record[i][f"{name}_reason"] = reason
             print(
                 f"  {name:<18} {i + 1}/{len(cases)}  "
-                f"{'-' if per_record[i][name] is None else f'{per_record[i][name]:.2f}'}",
+                f"{'-' if per_record[i][name] is None else f'{per_record[i][name]:.2f}'}"
+                f"  {time.perf_counter() - measured:.0f}s",
                 flush=True,
             )
-        timings[name] = round(time.perf_counter() - metric_started, 1)
+            save(per_record, args.model, wanted, timings)
 
     elapsed = time.perf_counter() - started
     print(f"\n{elapsed:.0f}s for {len(rows)} records, {elapsed / len(rows):.0f}s per record")
@@ -144,19 +239,8 @@ def main():
             + (f"   ({missing} failed)" if missing else "")
         )
 
-    payload = {
-        "model": args.model,
-        "records": len(rows),
-        "metrics": wanted,
-        "seconds": round(elapsed, 1),
-        "seconds_per_metric": timings,
-        "per_record": per_record,
-    }
-    if not args.limit:
-        OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(f"\nwrote {OUT}")
-    else:
-        print(f"\n--limit run, {OUT} not written")
+    save(per_record, args.model, wanted, timings)
+    print(f"\nwrote {OUT}")
 
 
 def _clean(value):
