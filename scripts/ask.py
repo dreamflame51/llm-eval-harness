@@ -22,7 +22,14 @@ below it should be read with that in mind.
 """
 
 import argparse
+import os
 import textwrap
+
+# The embedding model is in the local cache after ingest, so there is nothing
+# to fetch - but huggingface_hub checks the Hub anyway and warns that the
+# request is unauthenticated, which is the first thing a user of this command
+# sees. Offline by default; unset it if the cache ever needs filling.
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 from llm_eval_harness import pipeline
 

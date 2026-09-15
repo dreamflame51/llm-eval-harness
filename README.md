@@ -106,6 +106,19 @@ reason to paint a pipeline red.
 
 ## Commands
 
+Use the thing itself:
+
+| command | does |
+|---|---|
+| `uv run python scripts/ask.py "your question"` | answers from the corpus, with the passages it used |
+| `uv run python scripts/serve.py` | the same in a browser, on 127.0.0.1 |
+
+The passages are shown because the system's worst failure is a fluent invented
+figure: seeing the text an answer came from turns checking into a glance, and it is
+what distinguishes a correct refusal from a retrieval miss. Both run entirely on this
+machine - a published page cannot reach a local model, which is why this one is served
+rather than linked.
+
 | command | answers |
 |---|---|
 | `uv run python -m llm_eval_harness.validate` | is the reference set still valid? |
