@@ -1,0 +1,621 @@
+<title>NIST RAG Harness Readout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --plane: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --rule: rgba(11, 11, 11, 0.10);
+    --s1: #2a78d6;
+    --s2: #eb6834;
+    --s3: #1baf7a;
+    --good: #0ca30c;
+    --critical: #d03b3b;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --plane: #0d0d0d;
+      --surface: #1a1a19;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --rule: rgba(255, 255, 255, 0.10);
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --rule: rgba(255, 255, 255, 0.10);
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+  }
+
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 40px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  h1 {
+    font-size: clamp(26px, 4vw, 34px);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 6px 0 10px;
+    text-wrap: balance;
+  }
+  h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  p { margin: 0; max-width: 68ch; color: var(--ink-2); }
+  .lede { font-size: 16px; }
+  a { color: inherit; }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .tile {
+    background: var(--surface);
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .tile .k {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tile .v {
+    font-size: 27px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .tile .was { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .tile .n { font-size: 12.5px; color: var(--ink-2); }
+
+  section {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 20px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .head { display: flex; flex-direction: column; gap: 5px; }
+  .chart { width: 100%; overflow-x: auto; }
+  svg { display: block; max-width: 100%; height: auto; }
+  svg text { font-family: var(--sans); fill: var(--ink-2); }
+  svg text.tick { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  svg text.val { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
+  svg text.cat { font-size: 12.5px; fill: var(--ink); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+  .swatch { width: 11px; height: 11px; border-radius: 2px; flex: none; }
+
+  details { border-top: 1px solid var(--rule); padding-top: 10px; }
+  summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 3px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 13px; }
+  th, td { text-align: left; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--grid); }
+  th { font-weight: 500; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .grid-table { width: 100%; overflow-x: auto; }
+  .agree { border-collapse: collapse; font-size: 13px; min-width: 620px; }
+  .agree th { padding: 4px 8px; }
+  .agree td { padding: 4px 8px; border-bottom: 1px solid var(--grid); }
+  .agree td.q { color: var(--ink); max-width: 340px; }
+  .mark { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+  .mark.yes { color: var(--good); }
+  .mark.no { color: var(--ink-2); }
+  .mark.bad { color: var(--critical); }
+  .row-off td { background: color-mix(in srgb, var(--s2) 9%, transparent); }
+
+  .note {
+    font-size: 13px;
+    color: var(--ink-2);
+    border-left: 2px solid var(--s2);
+    padding-left: 12px;
+    max-width: 68ch;
+  }
+  footer { color: var(--muted); font-size: 12.5px; }
+  footer code { font-family: var(--mono); font-size: 12px; }
+
+  .tip {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+    padding: 7px 10px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    max-width: 300px;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .tip.on { opacity: 1; }
+  .tip b { font-family: var(--mono); font-weight: 500; }
+  @media (prefers-reduced-motion: reduce) {
+    .tip { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">llm-eval-harness &middot; 5 NIST publications &middot; 38-record reference set</p>
+    <h1>What the harness measured, and what it found</h1>
+    <p class="lede">
+      A retrieval-augmented system answering questions about SP 800-37r2, SP 800-53Ar5,
+      SP 800-171Ar3, SP 800-78-5 and SP 800-30r1. Every number below is read back from a
+      committed file &mdash; the judge's verdicts, the hand labels, and both library runs
+      &mdash; so the page needs no model to say what it says.
+    </p>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <section>
+    <div class="head">
+      <h2>One retriever could not find what the questions asked for</h2>
+      <p>
+        Ten of the 26 answerable questions were served no part of their gold span in the top
+        five. The misses collected on questions naming a document by its identifier, where an
+        embedding blurs <span style="font-family:var(--mono)">SP&nbsp;800-78-5</span> into every
+        neighbouring number. BM25 alone is worse overall; fused by reciprocal rank, better.
+      </p>
+    </div>
+    <div class="legend" id="retrieverLegend"></div>
+    <div class="chart" id="retrieverChart"></div>
+    <p class="note">
+      Four records improved, two got worse &mdash; one of the two had been fully covered and now
+      is not. An average over 26 records hides that, which is why the per-record view is printed
+      by <span style="font-family:var(--mono)">compare_retrievers.py</span> and not summarised away.
+    </p>
+    <details>
+      <summary>Table</summary>
+      <div id="retrieverTable"></div>
+    </details>
+  </section>
+
+  <section>
+    <div class="head">
+      <h2>The judge against the hand labels, record by record</h2>
+      <p>
+        Twelve questions the corpus cannot answer. Declining is the only correct response, and
+        an answer counts only when it declined <em>and</em> invented nothing. The labels are the
+        ground truth; the two judges and the phrase-list tripwire are scored against them.
+      </p>
+    </div>
+    <div class="grid-table" id="agreeGrid"></div>
+    <p class="note">
+      The phrase list called the refusal axis correctly 12 out of 12 &mdash; better than either
+      judge. It cannot express the second axis at all: an answer that declines and then invents a
+      figure is an unconditional pass for it. That cell is empty on this fixture, so the
+      replacement is kept for what it can see, not for beating what it replaced.
+    </p>
+  </section>
+
+  <section>
+    <div class="head">
+      <h2>Fusing BM25 in moved the generation-side metrics too</h2>
+      <p>
+        RAGAS over the same 26 questions, before and after the retriever changed. Three metrics
+        up, one down &mdash; <span style="font-family:var(--mono)">context_recall</span> carries
+        the same two records the fusion lost.
+      </p>
+    </div>
+    <div class="legend" id="slopeLegend"></div>
+    <div class="chart" id="slopeChart"></div>
+    <details>
+      <summary>Table</summary>
+      <div id="slopeTable"></div>
+    </details>
+  </section>
+
+  <section>
+    <div class="head">
+      <h2>Two libraries, one set of answers, and almost no agreement per record</h2>
+      <p>
+        RAGAS and DeepEval scoring identical answers against identical chunks with the same local
+        model. Averaged, the two faithfulness scores sit within 0.1 of each other. Per record they
+        correlate at <span style="font-family:var(--mono)">0.11</span>: the disagreements cancel.
+      </p>
+    </div>
+    <div class="chart" id="scatterChart"></div>
+    <p class="note">
+      Points off the diagonal are where the libraries disagree. Three of the furthest are records
+      where the generator declined: DeepEval scores &ldquo;Answer is missing&rdquo; a perfect 1.00
+      &mdash; nothing in it contradicts the chunks &mdash; while RAGAS gives the identical four
+      words 0.00, 0.50 or 1.00 depending on whether its claim extractor found anything to check.
+    </p>
+  </section>
+
+  <footer>
+    Reproduce any figure here: <code>python -m llm_eval_harness.refusal</code>,
+    <code>scripts/judge_report.py</code>, <code>scripts/compare_retrievers.py</code>,
+    <code>scripts/compare_evals.py</code>. Judged by qwen3:8b; answers generated by gemma4 and
+    frozen, because the generator drifts between processes.
+  </footer>
+</div>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script id="harness-data" type="application/json">{"refusal":{"records":[{"q":"What is the maximum time permitted between authorization reviews under SP 800-37r2?","class":"in_corpus_gap","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":false,"gemma_fab":false},{"q":"What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?","class":"in_corpus_gap","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"What is the maximum allowable password length specified in SP 800-63B?","class":"out_of_corpus","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"What is the recommended minimum key size for AES in FIPS 197?","class":"out_of_corpus","label_refused":false,"label_fabricated":true,"phrase":false,"qwen":false,"qwen_fab":false,"gemma":false,"gemma_fab":false},{"q":"What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?","class":"in_corpus_gap","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?","class":"in_corpus_gap","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?","class":"in_corpus_gap","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"What is the minimum PIN length required for a PIV Card according to SP 800-78-5?","class":"in_corpus_gap","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"What are the four security levels defined in FIPS 140-3 for cryptographic modules?","class":"out_of_corpus","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":true,"gemma_fab":false},{"q":"Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?","class":"out_of_corpus","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":false,"gemma_fab":false},{"q":"Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?","class":"out_of_corpus","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":false,"qwen_fab":true,"gemma":false,"gemma_fab":false},{"q":"What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?","class":"out_of_corpus","label_refused":true,"label_fabricated":false,"phrase":true,"qwen":true,"qwen_fab":false,"gemma":false,"gemma_fab":false}]},"retrievers":[{"name":"dense","hit":0.423,"covered":0.462,"coverage":0.544,"mrr":0.277},{"name":"BM25","hit":0.423,"covered":0.423,"coverage":0.481,"mrr":0.235},{"name":"hybrid (RRF)","hit":0.538,"covered":0.577,"coverage":0.606,"mrr":0.362}],"ragas":{"metrics":["faithfulness","answer_relevancy","context_precision","context_recall"],"dense":{"faithfulness":0.7884615384615384,"answer_relevancy":0.6047461538461538,"context_precision":0.7472846153846153,"context_recall":0.8589730769230769},"hybrid":{"faithfulness":0.8540346153846153,"answer_relevancy":0.6317923076923077,"context_precision":0.7984576923076923,"context_recall":0.7756423076923077}},"libraries":{"pairs":[{"q":"What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?","faithfulness":[0.0,0.0],"answer_relevancy":[0.6899,1.0],"context_precision":[0.7,1.0],"context_recall":[1.0,1.0]},{"q":"What is a common control according to SP 800-37 Revision 2?","faithfulness":[1.0,1.0],"answer_relevancy":[0.6088,1.0],"context_precision":[1.0,1.0],"context_recall":[1.0,1.0]},{"q":"What is the difference between a common control and a hybrid control in the RMF?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8199,1.0],"context_precision":[1.0,1.0],"context_recall":[1.0,1.0]},{"q":"What is the purpose of the Prepare step in the RMF?","faithfulness":[1.0,1.0],"answer_relevancy":[0.9806,0.75],"context_precision":[1.0,1.0],"context_recall":[1.0,1.0]},{"q":"What key artifacts are included in an authorization package under SP 800-37r2?","faithfulness":[1.0,1.0],"answer_relevancy":[0.6504,1.0],"context_precision":[0.95,1.0],"context_recall":[1.0,1.0]},{"q":"According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8531,1.0],"context_precision":[0.8056,1.0],"context_recall":[1.0,1.0]},{"q":"What are the four components of the overall risk management process in SP 800-30r1?","faithfulness":[1.0,1.0],"answer_relevancy":[0.0,1.0],"context_precision":[0.0,0.5],"context_recall":[1.0,1.0]},{"q":"At which three organizational tiers can risk assessments be applied according to SP 800-30r1?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8321,1.0],"context_precision":[0.95,0.9167],"context_recall":[1.0,1.0]},{"q":"What risk factors are considered when conducting a risk assessment per SP 800-30?","faithfulness":[1.0,0.0],"answer_relevancy":[0.6668,1.0],"context_precision":[0.75,0.3333],"context_recall":[1.0,1.0]},{"q":"What is the purpose of the risk framing component of the risk management process?","faithfulness":[1.0,1.0],"answer_relevancy":[0.9029,0.25],"context_precision":[1.0,1.0],"context_recall":[1.0,1.0]},{"q":"What is the primary purpose of NIST SP 800-53A Revision 5?","faithfulness":[1.0,1.0],"answer_relevancy":[0.0,1.0],"context_precision":[0.2,0.2],"context_recall":[1.0,0.5]},{"q":"Name the three primary assessment methods defined in SP 800-53A.","faithfulness":[0.0,1.0],"answer_relevancy":[0.0,0.0],"context_precision":[0.0,0.45],"context_recall":[1.0,0.3333]},{"q":"What does the Examine assessment method involve?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8521,1.0],"context_precision":[0.9167,1.0],"context_recall":[1.0,1.0]},{"q":"What is the difference between the Examine and Test assessment methods in SP 800-53A?","faithfulness":[1.0,1.0],"answer_relevancy":[0.7858,1.0],"context_precision":[1.0,1.0],"context_recall":[1.0,1.0]},{"q":"How do the depth and coverage attributes of assessment methods affect the assessment?","faithfulness":[1.0,0.9091],"answer_relevancy":[0.8275,1.0],"context_precision":[1.0,1.0],"context_recall":[1.0,1.0]},{"q":"What is the purpose of NIST SP 800-171A Revision 3?","faithfulness":[1.0,0.0],"answer_relevancy":[0.7286,1.0],"context_precision":[0.4167,0.3333],"context_recall":[1.0,0.0]},{"q":"What does CUI stand for and why is its protection important according to SP 800-171Ar3?","faithfulness":[0.5,1.0],"answer_relevancy":[0.0,0.0],"context_precision":[0.5,0.0],"context_recall":[0.0,0.0]},{"q":"What flexibility does SP 800-171Ar3 give to assessors regarding rigor?","faithfulness":[0.0,1.0],"answer_relevancy":[0.0,1.0],"context_precision":[1.0,1.0],"context_recall":[0.3333,0.75]},{"q":"How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?","faithfulness":[1.0,1.0],"answer_relevancy":[0.4072,1.0],"context_precision":[0.6792,0.6389],"context_recall":[1.0,1.0]},{"q":"How many security requirement families are defined in SP 800-171Ar3, and name them?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8526,1.0],"context_precision":[1.0,1.0],"context_recall":[1.0,0.7059]},{"q":"What is the scope of NIST SP 800-78-5?","faithfulness":[0.0,1.0],"answer_relevancy":[0.0,1.0],"context_precision":[0.0,0.0],"context_recall":[0.0,0.0]},{"q":"Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?","faithfulness":[1.0,1.0],"answer_relevancy":[0.6145,1.0],"context_precision":[0.8056,1.0],"context_recall":[1.0,1.0]},{"q":"What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8906,1.0],"context_precision":[1.0,1.0],"context_recall":[1.0,0.5]},{"q":"What algorithm and key-size options are permitted for the PIV Authentication key through 2030?","faithfulness":[1.0,1.0],"answer_relevancy":[0.9709,1.0],"context_precision":[0.7556,1.0],"context_recall":[1.0,1.0]},{"q":"What elliptic curves are recommended for PIV keys in SP 800-78-5?","faithfulness":[0.0,1.0],"answer_relevancy":[0.9193,1.0],"context_precision":[1.0,0.8875],"context_recall":[1.0,1.0]},{"q":"How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?","faithfulness":[1.0,1.0],"answer_relevancy":[0.8698,1.0],"context_precision":[1.0,0.8056],"context_recall":[0.0,1.0]}],"note":"dense-retrieval run, both libraries, the same answers"},"declines":{"dense":6,"hybrid":4,"total":26}}</script>
+<script>
+  (function () {
+    const DATA = JSON.parse(document.getElementById("harness-data").textContent);
+    const tip = document.getElementById("tip");
+    const fmt = (v) => (v === null || v === undefined ? "–" : v.toFixed(3));
+
+    function hover(el, html) {
+      el.addEventListener("pointerenter", (e) => {
+        tip.innerHTML = html;
+        tip.classList.add("on");
+        move(e);
+      });
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerleave", () => tip.classList.remove("on"));
+      function move(e) {
+        const pad = 14;
+        let x = e.clientX + pad;
+        let y = e.clientY + pad;
+        const box = tip.getBoundingClientRect();
+        if (x + box.width > window.innerWidth - 8) x = e.clientX - box.width - pad;
+        if (y + box.height > window.innerHeight - 8) y = e.clientY - box.height - pad;
+        tip.style.left = x + "px";
+        tip.style.top = y + "px";
+      }
+    }
+
+    const svgEl = (name, attrs) => {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+      for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+      return node;
+    };
+
+    /* ---------- stat tiles ---------- */
+    const declines = DATA.declines;
+    const labelled = DATA.refusal.records;
+    const clean = labelled.filter((r) => r.label_refused && !r.label_fabricated).length;
+    const qwenAgrees = labelled.filter(
+      (r) => (r.qwen && !r.qwen_fab) === (r.label_refused && !r.label_fabricated)
+    ).length;
+    const hybrid = DATA.retrievers.find((r) => r.name.startsWith("hybrid"));
+    const dense = DATA.retrievers.find((r) => r.name === "dense");
+
+    const tiles = [
+      {
+        k: "declined an answerable question",
+        v: declines.hybrid + " / " + declines.total,
+        was: "was " + declines.dense,
+        n: "Every one had zero coverage of its gold span. The refusals were correct; the retriever was not.",
+      },
+      {
+        k: "covered@5, gold span served",
+        v: hybrid.covered.toFixed(3),
+        was: "was " + dense.covered.toFixed(3),
+        n: "Dense embeddings fused with BM25 by reciprocal rank. Four records better, two worse.",
+      },
+      {
+        k: "judge agrees with the hand labels",
+        v: qwenAgrees + " / " + labelled.length,
+        was: "phrase list " + clean + " / " + labelled.length,
+        n: "On the headline decision: declined and invented nothing. The tripwire it replaced was not beaten.",
+      },
+    ];
+    document.getElementById("tiles").innerHTML = tiles
+      .map(
+        (t) =>
+          `<div class="tile"><span class="k">${t.k}</span>` +
+          `<span class="v">${t.v}<span class="was">${t.was}</span></span>` +
+          `<span class="n">${t.n}</span></div>`
+      )
+      .join("");
+
+    /* ---------- retriever comparison: grouped bars, one 0-1 scale ---------- */
+    (function () {
+      const metrics = [
+        ["hit", "hit@5"],
+        ["covered", "covered@5"],
+        ["coverage", "coverage@5"],
+        ["mrr", "MRR"],
+      ];
+      const series = DATA.retrievers;
+      const colors = ["var(--s1)", "var(--s2)", "var(--s3)"];
+      document.getElementById("retrieverLegend").innerHTML = series
+        .map(
+          (s, i) =>
+            `<span><i class="swatch" style="background:${colors[i]}"></i>${s.name}</span>`
+        )
+        .join("");
+
+      const W = 860, H = 260, L = 54, R = 16, T = 12, B = 44;
+      const iw = W - L - R, ih = H - T - B;
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
+      svg.appendChild(svgEl("title", {})).textContent =
+        "hit@5, covered@5, coverage@5 and MRR for dense, BM25 and their fusion";
+
+      const y = (v) => T + ih - v * ih;
+      for (let t = 0; t <= 1.0001; t += 0.25) {
+        svg.appendChild(svgEl("line", { x1: L, x2: L + iw, y1: y(t), y2: y(t), stroke: "var(--grid)", "stroke-width": 1 }));
+        const lab = svgEl("text", { x: L - 10, y: y(t) + 4, "text-anchor": "end" });
+        lab.setAttribute("class", "tick");
+        lab.textContent = t.toFixed(2);
+        svg.appendChild(lab);
+      }
+      svg.appendChild(svgEl("line", { x1: L, x2: L + iw, y1: y(0), y2: y(0), stroke: "var(--axis)", "stroke-width": 1 }));
+
+      const groupW = iw / metrics.length;
+      const barW = 26, gap = 2;
+      metrics.forEach(([key, label], gi) => {
+        const cx = L + groupW * gi + groupW / 2;
+        const total = series.length * barW + (series.length - 1) * gap;
+        series.forEach((s, si) => {
+          const x = cx - total / 2 + si * (barW + gap);
+          const v = s[key];
+          const h = Math.max(2, v * ih);
+          const rect = svgEl("rect", {
+            x, y: y(v), width: barW, height: h, rx: 4, ry: 4, fill: colors[si],
+          });
+          svg.appendChild(rect);
+          hover(rect, `<b>${s.name}</b><br>${label} <b>${v.toFixed(3)}</b>`);
+          const vt = svgEl("text", { x: x + barW / 2, y: y(v) - 6, "text-anchor": "middle" });
+          vt.setAttribute("class", "val");
+          vt.textContent = v.toFixed(2);
+          svg.appendChild(vt);
+        });
+        const ct = svgEl("text", { x: cx, y: H - 16, "text-anchor": "middle" });
+        ct.setAttribute("class", "cat");
+        ct.textContent = label;
+        svg.appendChild(ct);
+      });
+      document.getElementById("retrieverChart").appendChild(svg);
+
+      document.getElementById("retrieverTable").innerHTML =
+        `<table><thead><tr><th>retriever</th>` +
+        metrics.map(([, l]) => `<th class="num">${l}</th>`).join("") +
+        `</tr></thead><tbody>` +
+        series
+          .map(
+            (s) =>
+              `<tr><td>${s.name}</td>` +
+              metrics.map(([k]) => `<td class="num">${s[k].toFixed(3)}</td>`).join("") +
+              `</tr>`
+          )
+          .join("") +
+        `</tbody></table>`;
+    })();
+
+    /* ---------- refusal agreement grid ---------- */
+    (function () {
+      const rows = DATA.refusal.records;
+      const mark = (v, good) =>
+        v === null || v === undefined
+          ? `<span class="mark no">–</span>`
+          : v
+          ? `<span class="mark ${good ? "yes" : "bad"}">✓ yes</span>`
+          : `<span class="mark no">✗ no</span>`;
+
+      const body = rows
+        .map((r) => {
+          const truth = r.label_refused && !r.label_fabricated;
+          const qwen = r.qwen && !r.qwen_fab;
+          const gemma = r.gemma && !r.gemma_fab;
+          const off = qwen !== truth || gemma !== truth || r.phrase !== r.label_refused;
+          return (
+            `<tr class="${off ? "row-off" : ""}">` +
+            `<td class="q">${r.q}</td>` +
+            `<td style="color:var(--muted);font-family:var(--mono);font-size:11.5px">${r.class}</td>` +
+            `<td>${mark(r.label_refused, true)}</td>` +
+            `<td>${mark(r.label_fabricated, false)}</td>` +
+            `<td>${mark(r.phrase, true)}</td>` +
+            `<td>${mark(qwen, true)}</td>` +
+            `<td>${mark(gemma, true)}</td>` +
+            `</tr>`
+          );
+        })
+        .join("");
+
+      document.getElementById("agreeGrid").innerHTML =
+        `<table class="agree"><thead><tr>` +
+        `<th>question</th><th>class</th><th>label: refused</th><th>label: fabricated</th>` +
+        `<th>phrase list</th><th>qwen3</th><th>gemma4</th>` +
+        `</tr></thead><tbody>${body}</tbody></table>`;
+    })();
+
+    /* ---------- dense -> hybrid, per metric ---------- */
+    (function () {
+      const metrics = DATA.ragas.metrics;
+      const W = 860, H = 210, L = 150, R = 60, T = 16, B = 34;
+      const iw = W - L - R, ih = H - T - B;
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
+      svg.appendChild(svgEl("title", {})).textContent =
+        "RAGAS metric means before and after fusing BM25 into retrieval";
+      const x = (v) => L + v * iw;
+      const rowH = ih / metrics.length;
+
+      for (let t = 0; t <= 1.0001; t += 0.25) {
+        svg.appendChild(svgEl("line", { x1: x(t), x2: x(t), y1: T, y2: T + ih, stroke: "var(--grid)", "stroke-width": 1 }));
+        const lab = svgEl("text", { x: x(t), y: H - 12, "text-anchor": "middle" });
+        lab.setAttribute("class", "tick");
+        lab.textContent = t.toFixed(2);
+        svg.appendChild(lab);
+      }
+
+      document.getElementById("slopeLegend").innerHTML =
+        `<span><i class="swatch" style="background:var(--s1)"></i>dense only</span>` +
+        `<span><i class="swatch" style="background:var(--s2)"></i>hybrid (BM25 fused)</span>`;
+
+      metrics.forEach((m, i) => {
+        const cy = T + rowH * i + rowH / 2;
+        const a = DATA.ragas.dense[m], b = DATA.ragas.hybrid[m];
+        const name = svgEl("text", { x: L - 14, y: cy + 4, "text-anchor": "end" });
+        name.setAttribute("class", "cat");
+        name.textContent = m;
+        svg.appendChild(name);
+
+        svg.appendChild(svgEl("line", {
+          x1: x(Math.min(a, b)), x2: x(Math.max(a, b)), y1: cy, y2: cy,
+          stroke: "var(--axis)", "stroke-width": 2,
+        }));
+        [[a, "var(--s1)", "dense"], [b, "var(--s2)", "hybrid"]].forEach(([v, c, label]) => {
+          const dot = svgEl("circle", { cx: x(v), cy, r: 6, fill: c, stroke: "var(--surface)", "stroke-width": 2 });
+          svg.appendChild(dot);
+          hover(dot, `<b>${m}</b><br>${label} <b>${v.toFixed(3)}</b>`);
+        });
+        const delta = b - a;
+        const d = svgEl("text", { x: W - R + 8, y: cy + 4, "text-anchor": "start" });
+        d.setAttribute("class", "val");
+        d.setAttribute("fill", delta >= 0 ? "var(--good)" : "var(--critical)");
+        d.textContent = (delta >= 0 ? "+" : "") + delta.toFixed(3);
+        svg.appendChild(d);
+      });
+      document.getElementById("slopeChart").appendChild(svg);
+
+      document.getElementById("slopeTable").innerHTML =
+        `<table><thead><tr><th>metric</th><th class="num">dense</th><th class="num">hybrid</th><th class="num">delta</th></tr></thead><tbody>` +
+        metrics
+          .map((m) => {
+            const a = DATA.ragas.dense[m], b = DATA.ragas.hybrid[m];
+            return `<tr><td>${m}</td><td class="num">${a.toFixed(3)}</td><td class="num">${b.toFixed(3)}</td><td class="num">${(b - a >= 0 ? "+" : "") + (b - a).toFixed(3)}</td></tr>`;
+          })
+          .join("") +
+        `</tbody></table>`;
+    })();
+
+    /* ---------- RAGAS vs DeepEval, faithfulness per record ---------- */
+    (function () {
+      const pairs = DATA.libraries.pairs
+        .map((p) => ({ q: p.q, a: p.faithfulness[0], b: p.faithfulness[1] }))
+        .filter((p) => p.a !== null && p.b !== null);
+      const W = 460, H = 420, L = 56, R = 18, T = 16, B = 52;
+      const iw = W - L - R, ih = H - T - B;
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
+      svg.appendChild(svgEl("title", {})).textContent =
+        "Faithfulness per record: RAGAS on the horizontal axis, DeepEval on the vertical";
+      const x = (v) => L + v * iw;
+      const y = (v) => T + ih - v * ih;
+
+      for (let t = 0; t <= 1.0001; t += 0.25) {
+        svg.appendChild(svgEl("line", { x1: L, x2: L + iw, y1: y(t), y2: y(t), stroke: "var(--grid)", "stroke-width": 1 }));
+        svg.appendChild(svgEl("line", { x1: x(t), x2: x(t), y1: T, y2: T + ih, stroke: "var(--grid)", "stroke-width": 1 }));
+        const yl = svgEl("text", { x: L - 10, y: y(t) + 4, "text-anchor": "end" });
+        yl.setAttribute("class", "tick");
+        yl.textContent = t.toFixed(2);
+        svg.appendChild(yl);
+        const xl = svgEl("text", { x: x(t), y: T + ih + 18, "text-anchor": "middle" });
+        xl.setAttribute("class", "tick");
+        xl.textContent = t.toFixed(2);
+        svg.appendChild(xl);
+      }
+      svg.appendChild(svgEl("line", {
+        x1: x(0), y1: y(0), x2: x(1), y2: y(1),
+        stroke: "var(--axis)", "stroke-width": 2, "stroke-dasharray": "4 4",
+      }));
+      const agreeLabel = svgEl("text", { x: x(0.62), y: y(0.68), "text-anchor": "start" });
+      agreeLabel.setAttribute("class", "val");
+      agreeLabel.textContent = "libraries agree";
+      svg.appendChild(agreeLabel);
+
+      const counts = new Map();
+      pairs.forEach((p) => {
+        const key = p.a.toFixed(2) + "," + p.b.toFixed(2);
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+      const drawn = new Set();
+      pairs.forEach((p) => {
+        const key = p.a.toFixed(2) + "," + p.b.toFixed(2);
+        if (drawn.has(key)) return;
+        drawn.add(key);
+        const n = counts.get(key);
+        const dot = svgEl("circle", {
+          cx: x(p.a), cy: y(p.b), r: 5 + Math.min(n - 1, 4) * 2.2,
+          fill: "var(--s1)", "fill-opacity": 0.8,
+          stroke: "var(--surface)", "stroke-width": 2,
+        });
+        svg.appendChild(dot);
+        const same = pairs.filter((q) => q.a.toFixed(2) + "," + q.b.toFixed(2) === key);
+        hover(
+          dot,
+          `RAGAS <b>${p.a.toFixed(2)}</b> &middot; DeepEval <b>${p.b.toFixed(2)}</b>` +
+            (n > 1 ? `<br>${n} records` : `<br>${same[0].q}`)
+        );
+      });
+
+      const xt = svgEl("text", { x: L + iw / 2, y: H - 16, "text-anchor": "middle" });
+      xt.setAttribute("class", "cat");
+      xt.textContent = "RAGAS faithfulness";
+      svg.appendChild(xt);
+      const yt = svgEl("text", { x: 16, y: T + ih / 2, "text-anchor": "middle", transform: `rotate(-90 16 ${T + ih / 2})` });
+      yt.setAttribute("class", "cat");
+      yt.textContent = "DeepEval faithfulness";
+      svg.appendChild(yt);
+
+      document.getElementById("scatterChart").appendChild(svg);
+    })();
+  })();
+</script>

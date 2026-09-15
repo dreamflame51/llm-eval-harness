@@ -8,7 +8,7 @@
     "context_recall"
   ],
   "seconds_per_metric": {
-    "faithfulness": 778.6,
+    "faithfulness": 2350.4,
     "answer_relevancy": 0.0,
     "context_precision": 0.0,
     "context_recall": 0.0
@@ -60,52 +60,84 @@
       "faithfulness_reason": "The score is 0.00 because the actual output incorrectly specifies the four risk factors as 'Threats, Vulnerabilities, Likelihood of occurrence,' while the context only mentions 'Impact of loss' as one of four factors without listing the other three, leading to a clear contradiction."
     },
     {
-      "question": "What is the purpose of the risk framing component of the risk management process?"
+      "question": "What is the purpose of the risk framing component of the risk management process?",
+      "faithfulness": 0.0,
+      "faithfulness_reason": "The score is 0.00 because the actual output incorrectly states that the purpose of the risk framing component is to produce a risk management strategy, whereas the retrieval context clarifies that the risk framing step provides essential inputs to the risk assessment step, including the risk management strategy, but does not produce it."
     },
     {
-      "question": "What is the primary purpose of NIST SP 800-53A Revision 5?"
+      "question": "What is the primary purpose of NIST SP 800-53A Revision 5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "Name the three primary assessment methods defined in SP 800-53A."
+      "question": "Name the three primary assessment methods defined in SP 800-53A.",
+      "faithfulness": 0.0,
+      "faithfulness_reason": "The score is 0.00 because the actual output contradicts the retrieval context by claiming the names of the three assessment methods are mentioned directly in the context, while the context clearly states that a complete description is provided in Appendix C, implying the methods are not named there."
     },
     {
-      "question": "What does the Examine assessment method involve?"
+      "question": "What does the Examine assessment method involve?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?"
+      "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "How do the depth and coverage attributes of assessment methods affect the assessment?"
+      "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What is the purpose of NIST SP 800-171A Revision 3?"
+      "question": "What is the purpose of NIST SP 800-171A Revision 3?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?"
+      "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?",
+      "faithfulness": 0.3333,
+      "faithfulness_reason": "The score is 0.33 because the actual output incorrectly defines CUI and describes defining information types as an important step in security planning, which are not mentioned in the retrieval context."
     },
     {
-      "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?"
+      "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?"
+      "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?",
+      "faithfulness": 0.0,
+      "faithfulness_reason": "The score is 0.00 because the actual output incorrectly references SP 800-171Ar3 and Appendix E of SP 800-53A, which are not mentioned in the retrieval context."
     },
     {
-      "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?"
+      "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?",
+      "faithfulness": 0.0,
+      "faithfulness_reason": "The score is 0.00 because the actual output incorrectly references SP 800-171Ar3, which is not mentioned in the retrieval context, and it also includes additional security requirement families not listed in the retrieval context."
     },
     {
-      "question": "What is the scope of NIST SP 800-78-5?"
+      "question": "What is the scope of NIST SP 800-78-5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?"
+      "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?"
+      "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?"
+      "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?"
+      "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
       "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
