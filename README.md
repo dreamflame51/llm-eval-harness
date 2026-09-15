@@ -7,7 +7,9 @@ The point is the measurement. Retrieval that "looks relevant" is easy; the
 harness scores whether the retrieved text really supports the answer, and
 whether the model declines when the corpus has no answer at all.
 
-Problem log: [docs/lessons.md](docs/lessons.md)
+Problem log: [docs/lessons.md](docs/lessons.md) &middot;
+What is claimed and what checks it: [docs/traceability.md](docs/traceability.md) &middot;
+Where the levels are missing: [docs/v-model.md](docs/v-model.md)
 
 ## How it works
 
