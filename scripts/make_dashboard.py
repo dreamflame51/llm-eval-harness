@@ -264,6 +264,11 @@ def build(run_tests=False):
             )
         ],
         "v_model": yaml.safe_load(pathlib.Path("eval/v_model.yaml").read_text(encoding="utf-8")),
+        "drift": (
+            json.loads(pathlib.Path("eval/drift.json").read_text(encoding="utf-8"))
+            if pathlib.Path("eval/drift.json").exists()
+            else None
+        ),
         "tests": test_inventory(),
         "test_run": test_run() if run_tests else None,
         "ci": ci_status(sha) if (sha := head_commit()) else None,

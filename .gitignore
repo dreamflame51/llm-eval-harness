@@ -18,3 +18,6 @@ wheels/
 # eval/ground_truth.yaml quotes exact spans of those exact files, so without
 # them the reference set cannot be checked and no metric can be reproduced.
 data/chroma/
+
+# Personal interview-prep notes. Kept on disk, out of a public repository.
+docs/rehearsal.md

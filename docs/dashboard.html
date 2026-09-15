@@ -412,6 +412,22 @@
     </p>
   </section>
 
+  <section id="driftSection" hidden>
+    <div class="head">
+      <p class="eyebrow">Drift &middot; how much the number moves when nothing changes</p>
+      <h2>The width of the noise, before any threshold is set</h2>
+      <p>
+        The same metric, the same code, the same fixture &mdash; scored several times, each in a
+        fresh process. Inside one process greedy decoding holds and the answers are identical;
+        across processes the model is reloaded, the GPU/CPU layer split is re-decided, and
+        decoding diverges from the first flipped argmax. Any acceptance bar has to clear this,
+        or it fires on a model reload rather than on a regression.
+      </p>
+    </div>
+    <div class="chart" id="driftChart"></div>
+    <div id="driftFacts"></div>
+  </section>
+
   <section>
     <div class="head">
       <p class="eyebrow">V-model &middot; which levels of the V this project has</p>
@@ -857,6 +873,79 @@
           );
         })
         .join("");
+    })();
+
+    /* ---------- drift across processes ---------- */
+    (function () {
+      const drift = DATA.drift;
+      const section = document.getElementById("driftSection");
+      if (!drift || !section) return;
+      section.hidden = false;
+
+      const rates = drift.rates;
+      const W = 860, H = 170, L = 54, R = 70, T = 18, B = 34;
+      const iw = W - L - R, ih = H - T - B;
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" });
+      svg.appendChild(svgEl("title", {})).textContent =
+        "The refusal rate scored " + rates.length + " times, each in a fresh process";
+
+      const lo = Math.max(0, Math.min(...rates) - 0.15);
+      const hi = Math.min(1, Math.max(...rates) + 0.15);
+      const span = hi - lo || 1;
+      const x = (v) => L + ((v - lo) / span) * iw;
+
+      for (let i = 0; i <= 4; i++) {
+        const v = lo + (span * i) / 4;
+        svg.appendChild(svgEl("line", { x1: x(v), x2: x(v), y1: T, y2: T + ih, stroke: "var(--grid)", "stroke-width": 1 }));
+        const lab = svgEl("text", { x: x(v), y: H - 12, "text-anchor": "middle" });
+        lab.setAttribute("class", "tick");
+        lab.textContent = v.toFixed(2);
+        svg.appendChild(lab);
+      }
+
+      // The band the runs occupy. A threshold inside it measures the machine.
+      const cy = T + ih / 2;
+      if (drift.spread > 0) {
+        svg.appendChild(svgEl("rect", {
+          x: x(Math.min(...rates)), y: cy - 26,
+          width: Math.max(2, x(Math.max(...rates)) - x(Math.min(...rates))), height: 52,
+          fill: "var(--s2)", "fill-opacity": 0.12,
+        }));
+      }
+      svg.appendChild(svgEl("line", {
+        x1: x(Math.min(...rates)), x2: x(Math.max(...rates)), y1: cy, y2: cy,
+        stroke: "var(--axis)", "stroke-width": 2,
+      }));
+      rates.forEach((rate, i) => {
+        const dot = svgEl("circle", {
+          cx: x(rate), cy, r: 7, fill: "var(--s1)",
+          stroke: "var(--surface)", "stroke-width": 2,
+        });
+        svg.appendChild(dot);
+        hover(dot, `run ${i + 1}<br>refusal rate <b>${rate.toFixed(3)}</b>`);
+      });
+      const label = svgEl("text", { x: x((Math.min(...rates) + Math.max(...rates)) / 2), y: cy - 34, "text-anchor": "middle" });
+      label.setAttribute("class", "val");
+      label.textContent = drift.spread > 0 ? `spread ${drift.spread.toFixed(3)}` : "no movement";
+      svg.appendChild(label);
+      document.getElementById("driftChart").appendChild(svg);
+
+      const facts = [
+        [`${drift.runs} runs`, drift.mode === "across_processes" ? "each in a fresh process" : "all in one process"],
+        [`spread ${drift.spread.toFixed(3)}`, "what a threshold must clear"],
+        [`${drift.questions_that_flipped} of ${drift.records}`, "questions changed verdict between runs"],
+        [`${drift.questions_reworded} of ${drift.records}`, "were worded differently at least once"],
+      ];
+      document.getElementById("driftFacts").innerHTML =
+        `<div class="req-cols" style="margin-top:14px">` +
+        facts
+          .map(
+            ([value, what]) =>
+              `<div><span class="req-label">${what}</span>` +
+              `<div style="font-size:19px;font-weight:600;margin-top:2px">${value}</div></div>`
+          )
+          .join("") +
+        `</div>`;
     })();
 
     /* ---------- the V, and what is missing from it ---------- */
