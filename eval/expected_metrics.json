@@ -1,0 +1,28 @@
+{
+  "note": "Expected values for tests/eval/test_regression.py. Update with scripts/freeze_metrics.py only when a change to these numbers is intended, and say why in the commit message.",
+  "judge": "qwen3:8b",
+  "prompt_version": "1",
+  "refusal": {
+    "n": 12,
+    "clean": 10,
+    "undecided": 0,
+    "phrase_rate": 0.9167,
+    "by_class": {
+      "in_corpus_gap": {
+        "n": 6,
+        "clean": 6
+      },
+      "out_of_corpus": {
+        "n": 6,
+        "clean": 4
+      }
+    }
+  },
+  "ragas": {
+    "faithfulness": 0.854,
+    "answer_relevancy": 0.6318,
+    "context_precision": 0.7985,
+    "context_recall": 0.7756
+  },
+  "deepeval": null
+}

@@ -10,7 +10,7 @@
   "seconds_per_metric": {
     "faithfulness": 2484.1,
     "answer_relevancy": 910.7,
-    "context_precision": 1072.0,
+    "context_precision": 1382.9,
     "context_recall": 0.0
   },
   "per_record": [
@@ -181,35 +181,45 @@
       "faithfulness": 0.0,
       "faithfulness_reason": "The score is 0.00 because the actual output incorrectly references SP 800-171Ar3 and Appendix E of SP 800-53A, which are not mentioned in the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the relationship between SP 800-171Ar3 and SP 800-53A assessment procedures, with no irrelevant statements present."
+      "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the relationship between SP 800-171Ar3 and SP 800-53A assessment procedures, with no irrelevant statements present.",
+      "context_precision": 0.8667,
+      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed lower than the relevant ones. The fourth node is irrelevant and ranked lower than the relevant nodes, while the fifth node is relevant and ranked higher. The score is not higher because one irrelevant node is ranked higher than a relevant node, which slightly reduces the precision."
     },
     {
       "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?",
       "faithfulness": 0.0,
       "faithfulness_reason": "The score is 0.00 because the actual output incorrectly references SP 800-171Ar3, which is not mentioned in the retrieval context, and it also includes additional security requirement families not listed in the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the number of security requirement families defined in SP 800-171Ar3 and their names. There are no irrelevant statements in the output."
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the number of security requirement families defined in SP 800-171Ar3 and their names. There are no irrelevant statements in the output.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node correctly answers the input, and all irrelevant nodes are ranked below it."
     },
     {
       "question": "What is the scope of NIST SP 800-78-5?",
       "faithfulness": 1.0,
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the scope of NIST SP 800-78-5 without any irrelevant information."
+      "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the scope of NIST SP 800-78-5 without any irrelevant information.",
+      "context_precision": 0.0,
+      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, as none mention NIST SP 800-78-5 or its scope. The 'no' verdicts are ranked first, but since there are no relevant nodes, the score remains at 0.00."
     },
     {
       "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
       "faithfulness": 1.0,
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the FIPS standard that defines the requirements for PIV life-cycle activities supported by SP 800-78-5. There are no irrelevant statements in the output."
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the FIPS standard that defines the requirements for PIV life-cycle activities supported by SP 800-78-5. There are no irrelevant statements in the output.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes, which are correctly placed lower in the retrieval contexts."
     },
     {
       "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
       "faithfulness": 1.0,
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the public exponent required for RSA keys in PIV according to SP 800-78-5. There are no irrelevant statements in the output."
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the public exponent required for RSA keys in PIV according to SP 800-78-5. There are no irrelevant statements in the output.",
+      "context_precision": 0.8875,
+      "context_precision_reason": "The score is 0.89 because the first two nodes and the fourth node correctly identify the public exponent of 65537 for RSA keys, while the third node, which is irrelevant, is ranked lower. However, the score is not higher because there are no additional relevant nodes to further improve precision."
     },
     {
       "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",

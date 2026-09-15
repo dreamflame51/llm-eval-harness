@@ -496,6 +496,36 @@ def test_verdicts_are_indexed_by_question_and_axis(tmp_path):
     assert conflicts == []
 
 
+def test_freshness_counts_what_the_current_prompt_covers(tmp_path):
+    chat_fn, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
+    judge_records([record("q1")], "m", chat_fn=chat_fn, cache_dir=tmp_path)
+    fresh = judge.cache_freshness("m", [record("q1")], cache_dir=tmp_path)
+    assert (fresh["current"], fresh["stale"], fresh["missing"]) == (2, 0, [])
+    assert fresh["expected"] == 2
+
+
+def test_an_axis_never_judged_is_missing_not_stale(tmp_path):
+    chat_fn, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
+    judge_records(
+        [record("q1")], "m", axes=("refused",), chat_fn=chat_fn, cache_dir=tmp_path
+    )
+    fresh = judge.cache_freshness("m", [record("q1")], cache_dir=tmp_path)
+    assert fresh["current"] == 1
+    assert fresh["missing"] == [("q1", "fabricated")]
+
+
+def test_editing_the_prompt_makes_every_verdict_stale(tmp_path, monkeypatch):
+    # The trap the cache key sets: a changed prompt misses the cache, so the
+    # report keeps printing the old entries' numbers until someone re-runs the
+    # judge. Nothing else in the harness says that out loud.
+    chat_fn, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
+    judge_records([record("q1")], "m", chat_fn=chat_fn, cache_dir=tmp_path)
+    monkeypatch.setattr(judge, "PROMPT_VERSION", PROMPT_VERSION + "-edited")
+    fresh = judge.cache_freshness("m", [record("q1")], cache_dir=tmp_path)
+    assert (fresh["current"], fresh["stale"]) == (0, 2)
+    assert fresh["missing"] == []
+
+
 def test_a_question_judged_twice_in_different_modes_is_a_conflict(tmp_path):
     # Two experiments, not two samples. The later one is used and the earlier
     # one is surfaced rather than averaged in.

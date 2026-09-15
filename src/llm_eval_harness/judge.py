@@ -567,6 +567,53 @@ def judge_record(
     return key, entry, False
 
 
+def cache_freshness(model, records=None, axes=AXES, cache_dir=CACHE_DIR):
+    """
+    How much of this model's cache still describes the current prompt.
+
+    Returns {"model", "prompt_version", "expected", "current", "stale",
+    "missing"}: how many verdicts the fixture needs, how many exist at
+    PROMPT_VERSION, how many exist at some older version, and which
+    (question, axis) pairs have no verdict at all.
+
+    The cache key already makes a prompt edit miss rather than silently reuse
+    a verdict written for different instructions ([#18](docs/lessons.md#18)).
+    What it cannot do is say so out loud: after such an edit the report goes
+    on printing the old numbers from the old entries until somebody re-runs
+    the judge. This counts that gap, so a stale set of numbers is visible
+    rather than inferred.
+    """
+    if records is None:
+        records = refusal_answers()
+    entries = load_cache(model, cache_dir).values()
+
+    seen = {}
+    for entry in entries:
+        key = (entry["question"], entry["axis"])
+        seen.setdefault(key, set()).add(entry.get("prompt_version"))
+
+    current = stale = 0
+    missing = []
+    for record in records:
+        for axis in axes:
+            versions = seen.get((record["question"], axis))
+            if not versions:
+                missing.append((record["question"], axis))
+            elif PROMPT_VERSION in versions:
+                current += 1
+            else:
+                stale += 1
+
+    return {
+        "model": model,
+        "prompt_version": PROMPT_VERSION,
+        "expected": len(records) * len(axes),
+        "current": current,
+        "stale": stale,
+        "missing": missing,
+    }
+
+
 def verdicts_by_question(model, cache_dir=CACHE_DIR):
     """
     {question: {axis: entry}} from a model's cache, newest entry winning.
