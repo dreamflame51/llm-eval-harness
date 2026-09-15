@@ -712,6 +712,18 @@ would have saved this: **record what the system said, not only what the metric
 made of it.** A number that moves is an invitation to investigate, and the
 investigation needs the text.
 
+**Measured properly, a year of assumption later.** `stability.py` now spawns a
+fresh interpreter per run, which is the condition this entry says matters, and
+five runs over the twelve refusal records gave **spread 0.000** - no question
+changed verdict in sixty question-runs. Two answers of the twelve came back
+worded differently at least once, so the text still moves; the verdicts did
+not follow it this time. That does not overturn this entry: the run above
+happened on a different retriever, and a spread of zero over five runs bounds
+the drift loosely rather than proving it gone. What it does settle is the
+shape of any future threshold - the thing to watch is a **verdict flipping**,
+not the metric wobbling, because the metric here can only move in steps of one
+record, 0.083.
+
 ---
 
 <a id="18"></a>

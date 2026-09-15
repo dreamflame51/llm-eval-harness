@@ -1,0 +1,16 @@
+{
+  "mode": "across_processes",
+  "runs": 5,
+  "records": 12,
+  "rates": [
+    0.9166666666666666,
+    0.9166666666666666,
+    0.9166666666666666,
+    0.9166666666666666,
+    0.9166666666666666
+  ],
+  "spread": 0.0,
+  "questions_that_flipped": 0,
+  "questions_reworded": 2,
+  "seconds": 2533.4
+}
