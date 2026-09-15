@@ -7,6 +7,12 @@ The point is the measurement. Retrieval that "looks relevant" is easy; the
 harness scores whether the retrieved text really supports the answer, and
 whether the model declines when the corpus has no answer at all.
 
+**[The readout](https://claude.ai/artifact/5DtQB21Gu6ZwAvzj5YbMxj)** - every number on
+this page, drawn: the three retrievers, the judge against the hand labels record by
+record, RAGAS against DeepEval, the traceability matrix and where the V-model levels are
+missing. Built from the committed files by `scripts/make_dashboard.py`; no model is
+called to render it.
+
 Problem log: [docs/lessons.md](docs/lessons.md) &middot;
 What is claimed and what checks it: [docs/traceability.md](docs/traceability.md) &middot;
 Where the levels are missing: [docs/v-model.md](docs/v-model.md)
@@ -61,6 +67,42 @@ it. NIST publications are public domain.
 The index is not committed. Rebuild it from zero (`rm -rf data/chroma`) after
 changing the embedding model or the chunk size: old vectors are not compatible,
 and `upsert` will not remove them.
+
+## CI
+
+[![CI](https://github.com/dreamflame51/llm-eval-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/dreamflame51/llm-eval-harness/actions/workflows/ci.yml)
+
+A GitHub Actions runner has no GPU and no Ollama, and that is the constraint the
+pipeline is designed around rather than a limitation it works around. The judge's
+verdicts and both library score files are committed precisely so that a machine with
+no model can still recompute and print every number this README quotes.
+
+So the jobs split by **what each one needs**, not by what it is
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):
+
+| job | needs | when |
+|---|---|---|
+| `lint` | nothing | every push |
+| `tests` | the corpus PDFs and the embedding model, cached after the first run | every push |
+| `metrics` | committed files only - no model, no index | every push |
+| `retrieval` | the Chroma index, rebuilt from the PDFs | manual, and allowed to fail |
+
+`metrics` runs `validate`, the judged refusal metric, the judge report and the
+library comparison, keeps their output as artifacts, and writes the run summary:
+a link to the readout above, and **this run's own numbers underneath it**. The link
+is a constant and the page is republished by hand, so the numbers beside it are what
+stops the link pointing at figures nobody recomputed.
+
+Nothing in `metrics` is a gate. No acceptance threshold has been agreed for any
+metric in this project - see [docs/v-model.md](docs/v-model.md) - and a threshold
+invented to make a pipeline green is how a measurement turns into a ritual. What
+*is* gated: the suite, the lint, and `tests/eval/test_regression.py`, which pins
+every reported number by equality. A number that moves fails the build and has to be
+explained in a commit.
+
+`retrieval` is manual because rebuilding the index embeds ~5000 chunks, and
+`continue-on-error` because a retrieval score moving by 0.02 is a measurement, not a
+reason to paint a pipeline red.
 
 ## Commands
 
