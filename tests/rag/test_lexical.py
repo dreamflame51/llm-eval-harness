@@ -101,3 +101,11 @@ def test_the_original_chunk_fields_survive_the_fusion():
     fused = rrf([chunks("a")], k=1)
     assert fused[0]["source"] == "test"
     assert fused[0]["ranks"] == [1]
+
+
+def test_a_dense_only_chunk_keeps_its_distance():
+    # store.hybrid_search promises one shape to its callers. A chunk both
+    # retrievers found must not lose the distance the dense one measured.
+    dense = [{"text": "a", "source": "s", "distance": 0.3}]
+    lexical = [{"text": "a", "source": "s", "score": 4.0}]
+    assert rrf([dense, lexical], k=1)[0]["distance"] == 0.3

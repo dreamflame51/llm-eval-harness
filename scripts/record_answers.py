@@ -133,13 +133,56 @@ def build(records, refusal=True):
         row["retrieved"] = [
             {
                 "source": c["source"],
-                "distance": round(c["distance"], 4),
+                # None when only BM25 ranked this chunk: it has no distance in
+                # the embedding space, and rounding a missing number is how
+                # this script crashed the first time the retriever changed.
+                "distance": None if c.get("distance") is None else round(c["distance"], 4),
                 "text": c["text"],
             }
             for c in result["contexts"]
         ]
         rows.append(row)
     return rows
+
+
+def carry_labels(rows, old_path):
+    """
+    Move hand labels onto the new recording, but only where nothing moved.
+
+    A label is a judgement about one answer against the chunks that answer was
+    written from. Carrying it to different text would not be preserving work,
+    it would be attaching a verdict to something nobody read. So a label
+    travels only when the new answer and all of its chunks are identical to
+    the ones it was written about, character for character.
+
+    Returns (kept, stale) as lists of questions. In practice `stale` is most
+    of them - the generator drifts between processes even with identical
+    retrieval (docs/lessons.md #17) - and that is the point: the number says
+    how much re-labelling a change really costs, instead of leaving it to be
+    guessed at.
+    """
+    if not old_path.exists():
+        return [], [row["question"] for row in rows]
+
+    previous = {}
+    for row in yaml.safe_load(old_path.read_text(encoding="utf-8")) or []:
+        previous[row["question"]] = row
+
+    kept, stale = [], []
+    for row in rows:
+        old = previous.get(row["question"])
+        same = (
+            old is not None
+            and old.get("answer", "").strip() == row["answer"]
+            and [c["text"] for c in old.get("retrieved", [])]
+            == [c["text"] for c in row["retrieved"]]
+        )
+        if same and any(old["labels"].get(key) is not None for key in ("refused", "fabricated")):
+            row["labels"] = old["labels"]
+            kept.append(row["question"])
+        else:
+            stale.append(row["question"])
+    return kept, stale
 
 
 def main():
@@ -156,7 +199,15 @@ def main():
         help="which population to record: the refusal questions, or the 26 "
         "answerable ones that RAGAS and DeepEval score",
     )
+    parser.add_argument(
+        "--keep-labels",
+        action="store_true",
+        help="carry hand labels onto records whose answer and chunks came out "
+        "byte-identical, and report which ones need labelling again",
+    )
     args = parser.parse_args()
+    if args.keep_labels and args.set != "refusal":
+        raise SystemExit("--keep-labels applies to the refusal set; it is the only labelled one")
 
     refusal = args.set == "refusal"
     out = OUT if refusal else ANSWERABLE_OUT
@@ -171,6 +222,10 @@ def main():
     records = refusal_records() if refusal else answerable_records()
     print(f"recording {len(records)} answers - one model call each\n")
     rows = build(records, refusal=refusal)
+
+    kept, stale = [], []
+    if args.keep_labels:
+        kept, stale = carry_labels(rows, out)
 
     header = (HEADER if refusal else ANSWERABLE_HEADER).format(
         recorded=datetime.datetime.now(tz=datetime.UTC).date().isoformat(),
@@ -187,8 +242,17 @@ def main():
     out.write_text(header + "\n" + body, encoding="utf-8")
 
     print(f"\nwrote {out} - {len(rows)} records")
+    if args.keep_labels:
+        print(f"labels carried over: {len(kept)}; need labelling again: {len(stale)}")
+        for question in stale:
+            print(f"  - {question[:70]}")
+        print(
+            "\nA label describes one answer against the chunks it was written from.\n"
+            "Where either changed, the old verdict is about text that no longer\n"
+            "exists, and the judge verdicts cached for those records miss too."
+        )
     if refusal:
-        print("Fill in labels.refused and labels.fabricated by hand, then stop.")
+        print("\nuv run python scripts/label_refusals.py")
     else:
         print("Now: uv run python scripts/ragas_eval.py")
 

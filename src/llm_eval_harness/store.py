@@ -87,4 +87,9 @@ def hybrid_search(query, k=5, coll=None, depth=DEPTH):
         return []
     dense = search(query, k=depth, coll=coll)
     lexical = lexical_index(coll).search(query, k=depth)
-    return rrf([dense, lexical], k=k)
+    fused = rrf([dense, lexical], k=k)
+    # One shape out, whichever retriever found the chunk. A chunk only BM25
+    # ranked has no distance - it was never scored in the embedding space -
+    # and callers that record or print a distance should get None rather than
+    # a KeyError or, worse, a number that means something else.
+    return [{"distance": None, **chunk} for chunk in fused]
