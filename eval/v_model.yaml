@@ -5,94 +5,88 @@
 # the two cannot drift apart. scripts/traceability.py regenerates the table
 # inside the document from here.
 #
-# state is one of: present, partial, missing.
+# state on a level is one of: present, partial, missing.
+# state on a gap is absent while it is open, and "closed" once something
+# closes it - kept rather than deleted, because what the project used to be
+# missing is the more useful half of the record.
 
 levels:
-  - level: User needs
-    side: specification
-    specified: eval/needs.yaml
-    verified: the requirements serving each, and the tests under those
-    state: partial
-    note: >-
-      Four needs, written last and linked to the requirements that serve them,
-      checked in both directions. Still partial: nothing validates that a need
-      is actually met - that a reader is better off with this system than with
-      ctrl-F - which is GAP-2 below.
-
-  - level: System requirements
-    side: specification
-    specified: eval/traceability.yaml
-    verified: pytest, the metric commands
-    state: partial
-    note: >-
-      Ten claims, all of the form "the harness can tell X" rather than "the
-      product does Y for its user".
-
-  - level: Architecture
-    side: design
-    specified: pipeline.py, store.py, chunking and retrieval decisions
-    verified: scripts/compare_retrievers.py, scripts/sweep.py
-    state: present
-    note: >-
-      Every configuration choice here was made by measurement against the
-      fixture rather than by taste, and the sweep is committed as code.
-
-  - level: Module design
-    side: design
-    specified: module docstrings
-    verified: 202 unit tests
-    state: present
-    note: >-
-      The docstrings carry the reasoning, which is the half that does not
-      survive in code.
-
-  - level: Code
-    side: implementation
-    specified: "-"
-    verified: ruff and pytest in CI
-    state: present
-    note: Lint and the suite run on every push.
-
+- level: User needs
+  side: specification
+  specified: eval/needs.yaml
+  verified: the requirements serving each, and the tests under those
+  state: partial
+  note: 'Four needs, written last and linked to the requirements that serve them, checked
+    in both directions. Still partial: nothing validates that a need is actually met -
+    that a reader is better off with this system than with ctrl-F - which is GAP-2 below.'
+- level: System requirements
+  side: specification
+  specified: eval/traceability.yaml
+  verified: pytest, the metric commands, scripts/live_check.py
+  state: partial
+  note: Ten claims, all of the form "the harness can tell X" rather than "the product
+    does Y for its user".
+- level: Architecture
+  side: design
+  specified: pipeline.py, store.py, chunking and retrieval decisions
+  verified: scripts/compare_retrievers.py, scripts/sweep.py
+  state: present
+  note: Every configuration choice here was made by measurement against the fixture rather
+    than by taste, and the sweep is committed as code.
+- level: Module design
+  side: design
+  specified: module docstrings
+  verified: 202 unit tests
+  state: present
+  note: The docstrings carry the reasoning, which is the half that does not survive in
+    code.
+- level: Code
+  side: implementation
+  specified: '-'
+  verified: ruff and pytest in CI
+  state: present
+  note: Lint and the suite run on every push.
 gaps:
-  - id: GAP-1
-    title: No acceptance criterion anywhere
-    detail: >-
-      Every number is reported and read; none can fail. Half of them are
-      deterministic reads already pinned by equality, which needs no
-      threshold. The other half are recomputed by a generator that drifts
-      between processes, and that drift has never been measured - so a
-      threshold set today would fire on noise and be learned to be ignored.
-    blocks: A stated bar for any live metric
-    next: Measure the spread across processes, then set the bar outside it
-
-  - id: GAP-2
-    title: Verification without validation
-    detail: >-
-      Everything asks "does the system do what we specified?". Nothing asks
-      whether the specified thing is worth having - whether a person with a
-      question about SP 800-37r2 is better off with this than with ctrl-F.
-    blocks: Any claim that the system is useful rather than correct
-    next: One small user-facing task set, scored by a human, run once
-
-  - id: GAP-3
-    title: The system-test level is frozen
-    detail: >-
-      Generation metrics score answers recorded once. That was right for
-      labelling, and it means a regression introduced in pipeline.py today
-      moves no reported number until somebody re-records by hand.
-    blocks: Catching a generation-side regression from a code change
-    next: Schedule the live path and score it with the judge, not the phrase list
-
-  - id: GAP-4
-    title: The requirements were the harness's, not the product's
-    state: closed
-    detail: >-
-      The top-left box of the V was empty, so the traceability matrix had
-      nothing above itself to trace to. Closed by eval/needs.yaml: four needs
-      written as what a person wants from the system, each naming the
-      requirements that serve it, with the link checked in both directions -
-      a need nothing serves, and a requirement serving no need, both fail the
-      suite. What remains is GAP-2: the needs are stated and traced, not
-      validated.
-    blocks: nothing now
-    next: "-"
+- id: GAP-1
+  title: No acceptance criterion on a metric's value
+  state: closed
+  detail: 'Every number was reported and read; none could fail. The drift has now been
+    measured - five runs, each in a fresh process, spread 0.000 - and the measurement
+    changed the shape of the answer rather than supplying a number to compare against:
+    this metric moves in steps of one record, 0.083 on twelve, so a bar on the average
+    is either "one record" or nothing. What is gated instead is a verdict flipping, per
+    question, and the measured noise is pinned beside the values so the gate can be read
+    against what it was set from.'
+  blocks: nothing now
+  next: Re-measure the drift after a change to decoding or the hardware
+- id: GAP-2
+  title: Verification without validation
+  detail: Everything asks whether the system does what we specified. Nothing asked whether
+    the specified thing is worth having. scripts/usefulness.py and eval/usefulness_tasks.yaml
+    are the instrument - eight real tasks, four outcomes, optional timing against doing
+    it by hand - but the session has not been run, and a person has to run it. The instrument
+    is not the measurement.
+  blocks: Any claim that the system is useful rather than correct
+  next: 'Run the session: uv run python scripts/usefulness.py'
+- id: GAP-3
+  title: The system-test level is frozen
+  detail: 'Generation metrics score answers recorded once, so a regression introduced
+    in pipeline.py moved no reported number until somebody re-recorded by hand. Closed
+    by scripts/live_check.py: it runs the real pipeline, judges the fresh answers with
+    the same judge the reported metric uses, and fails when a verdict differs from the
+    pinned one. It cannot run in CI - the runner has no Ollama - so it is a local gate,
+    about twenty minutes for twelve records.'
+  blocks: nothing now, though nothing schedules it either
+  next: Run it before a release and after touching pipeline.py or the retriever
+  state: closed
+- id: GAP-4
+  title: The requirements were the harness's, not the product's
+  state: closed
+  detail: 'The top-left box of the V was empty, so the traceability matrix had nothing
+    above itself to trace to. Closed by eval/needs.yaml: four needs written as what a
+    person wants from the system, each naming the requirements that serve it, with the
+    link checked in both directions - a need nothing serves, and a requirement serving
+    no need, both fail the suite. What remains is GAP-2: the needs are stated and traced,
+    not validated.'
+  blocks: nothing now
+  next: '-'

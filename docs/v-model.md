@@ -14,7 +14,7 @@ Russian version: not written yet.
 | level | specified where | verified by | state |
 |---|---|---|---|
 | User needs | eval/needs.yaml | the requirements serving each, and the tests under those | **partial** |
-| System requirements | eval/traceability.yaml | pytest, the metric commands | **partial** |
+| System requirements | eval/traceability.yaml | pytest, the metric commands, scripts/live_check.py | **partial** |
 | Architecture | pipeline.py, store.py, chunking and retrieval decisions | scripts/compare_retrievers.py, scripts/sweep.py | present |
 | Module design | module docstrings | 202 unit tests | present |
 | Code | - | ruff and pytest in CI | present |
