@@ -1,0 +1,133 @@
+# CI for llm-eval-harness.
+#
+# The design constraint is the one the whole project is built around: the
+# expensive half of this harness needs a local LLM, and a runner has none.
+# That is not something to work around here - it is why the judge verdicts
+# (eval/judge_cache/) and both library score files are committed. Every number
+# printed below is read back from a file a human produced on a machine with
+# the models, and recomputing any of it is a separate, manual job.
+#
+# So the jobs split by what they need, not by what they are:
+#
+#   lint        nothing
+#   tests       the corpus PDFs (in the repository) and the embedding model,
+#               which the store tests download once and then cache
+#   metrics     committed files only - no model, no index, seconds to run
+#   retrieval   the Chroma index, which is derived and not in the repository.
+#               Run by hand, because rebuilding it embeds 5054 chunks.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      retrieval:
+        description: "Also rebuild the index and score retrieval (minutes)"
+        type: boolean
+        default: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - run: uv sync --frozen
+      - run: uv run ruff check src tests scripts
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      # The embedding model is pinned by name in store.py and never changes
+      # between runs, so the key is a constant: a cache miss costs 90 MB and
+      # a minute, and there is nothing to invalidate it on.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: huggingface-all-MiniLM-L6-v2
+      - run: uv sync --frozen
+      - run: uv run pytest -q --junitxml=report.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: report.xml
+
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - run: uv sync --frozen
+
+      # Reads the corpus PDFs, not a model: does every gold quote still appear
+      # in the extracted text, and does any of them straddle a chunk boundary?
+      # A failure here means the reference set no longer describes the corpus,
+      # which would make every other number meaningless.
+      - name: fixture still describes the corpus
+        run: uv run python -m llm_eval_harness.validate | tee validate.txt
+
+      # The judged refusal metric, the two judges against the hand labels, and
+      # RAGAS against DeepEval. All three read committed files and call
+      # nothing. They are here to be read and kept, not to pass or fail:
+      # no threshold has been agreed for any of these numbers yet, and
+      # inventing one in a CI file is where a metric turns into a ritual.
+      - name: metrics from the committed caches
+        run: |
+          uv run python -m llm_eval_harness.refusal | tee refusal.txt
+          uv run python scripts/judge_report.py | tee judge_report.txt
+          uv run python scripts/compare_evals.py | tee compare_evals.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrics
+          path: |
+            validate.txt
+            refusal.txt
+            judge_report.txt
+            compare_evals.txt
+
+  retrieval:
+    # Only when asked for, and allowed to be red: this is a measurement, not a
+    # gate. A failing pipeline because a retrieval score moved by 0.02 teaches
+    # everyone to stop reading the pipeline.
+    if: github.event_name == 'workflow_dispatch' && inputs.retrieval
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: huggingface-all-MiniLM-L6-v2
+      - run: uv sync --frozen
+      - run: uv run python -m llm_eval_harness.ingest
+      - run: |
+          uv run python -m llm_eval_harness.evaluator | tee evaluator.txt
+          uv run python scripts/compare_retrievers.py | tee retrievers.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retrieval
+          path: |
+            evaluator.txt
+            retrievers.txt

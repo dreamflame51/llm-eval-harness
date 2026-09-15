@@ -8,7 +8,7 @@
     "context_recall"
   ],
   "seconds_per_metric": {
-    "faithfulness": 114.9,
+    "faithfulness": 778.6,
     "answer_relevancy": 0.0,
     "context_precision": 0.0,
     "context_recall": 0.0
@@ -20,28 +20,44 @@
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What is a common control according to SP 800-37 Revision 2?"
+      "question": "What is a common control according to SP 800-37 Revision 2?",
+      "faithfulness": 0.6667,
+      "faithfulness_reason": "The score is 0.67 because the actual output contradicts the retrieval context by suggesting that common controls are reassessed at the system level by each system that inherits them, whereas the retrieval context clearly states that common controls are assessed separately and are not reassessed at the system level."
     },
     {
-      "question": "What is the difference between a common control and a hybrid control in the RMF?"
+      "question": "What is the difference between a common control and a hybrid control in the RMF?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What is the purpose of the Prepare step in the RMF?"
+      "question": "What is the purpose of the Prepare step in the RMF?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What key artifacts are included in an authorization package under SP 800-37r2?"
+      "question": "What key artifacts are included in an authorization package under SP 800-37r2?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?"
+      "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What are the four components of the overall risk management process in SP 800-30r1?"
+      "question": "What are the four components of the overall risk management process in SP 800-30r1?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?"
+      "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?"
+      "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
+      "faithfulness": 0.0,
+      "faithfulness_reason": "The score is 0.00 because the actual output incorrectly specifies the four risk factors as 'Threats, Vulnerabilities, Likelihood of occurrence,' while the context only mentions 'Impact of loss' as one of four factors without listing the other three, leading to a clear contradiction."
     },
     {
       "question": "What is the purpose of the risk framing component of the risk management process?"
