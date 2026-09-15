@@ -100,13 +100,18 @@ def no_think_model(name, temperature=0, num_predict=None):
             content = response.message.content
             return schema.model_validate_json(content) if schema else content
 
-    # Unbounded generation is what made this run cost 4.6 hours against RAGAS's
-    # 69 minutes, and almost all of the difference sat in one metric:
-    # context_precision took 462 s per record here against 52 s there. It asks
-    # for a written justification per retrieved chunk, and on CPU-bound
-    # inference the bill is the number of tokens generated, not the difficulty
-    # of the question. RAGAS was capped at 2048 tokens from the start; this was
-    # not capped at all.
+    # num_predict caps generated tokens. It is off by default, and the reason
+    # is worth keeping: the first full run took 4.6 hours against RAGAS's 69
+    # minutes, with context_precision costing 462 s a record against 52 s
+    # there, and the obvious explanation was that this metric writes a
+    # justification per chunk with no cap while RAGAS was capped at 2048.
+    #
+    # Measured, the explanation was wrong. Capped at 512 the same three records
+    # cost 56 s each; uncapped, immediately afterwards, 55 s each, with
+    # identical scores to four decimals. The 462 s was the machine, not the
+    # metric - the same shape as docs/lessons.md #21. The flag stays for
+    # bounding a worst case; it is not a fix for something that was never the
+    # cause.
     return NoThinkOllama(
         model=name,
         temperature=temperature,
