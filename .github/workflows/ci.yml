@@ -18,6 +18,12 @@
 
 name: CI
 
+env:
+  # The published readout. It is rebuilt by hand with
+  # scripts/make_dashboard.py and republished, so the link is a constant here
+  # and every run's own numbers go in the summary below it.
+  READOUT_URL: https://claude.ai/artifact/5DtQB21Gu6ZwAvzj5YbMxj
+
 on:
   push:
     branches: ["**"]
@@ -101,6 +107,29 @@ jobs:
             refusal.txt
             judge_report.txt
             compare_evals.txt
+
+      # The run summary is where someone looks after a green check, so the
+      # numbers go there rather than only into a log nobody opens. The readout
+      # page is linked, not rebuilt: publishing it is a manual step, and a
+      # link that quietly points at stale figures would be worse than no link,
+      # so the summary carries this run's numbers underneath it.
+      - name: run summary
+        if: always()
+        run: |
+          {
+            echo "## Harness readout"
+            echo
+            echo "[Open the readout page](${{ env.READOUT_URL }}) - retrieval, the judge against the hand labels, and RAGAS against DeepEval."
+            echo
+            echo "### Refusal, judged"
+            echo '```'
+            cat refusal.txt
+            echo '```'
+            echo "### Judges and the hand labels"
+            echo '```'
+            tail -n 20 judge_report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   retrieval:
     # Only when asked for, and allowed to be red: this is a measurement, not a

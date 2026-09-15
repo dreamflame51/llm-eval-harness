@@ -8,8 +8,8 @@
     "context_recall"
   ],
   "seconds_per_metric": {
-    "faithfulness": 2350.4,
-    "answer_relevancy": 0.0,
+    "faithfulness": 2484.1,
+    "answer_relevancy": 262.4,
     "context_precision": 0.0,
     "context_recall": 0.0
   },
@@ -17,42 +17,58 @@
     {
       "question": "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the seven steps of the NIST Risk Management Framework (RMF) as described in SP 800-37 Revision 2. There are no irrelevant statements in the output."
     },
     {
       "question": "What is a common control according to SP 800-37 Revision 2?",
       "faithfulness": 0.6667,
-      "faithfulness_reason": "The score is 0.67 because the actual output contradicts the retrieval context by suggesting that common controls are reassessed at the system level by each system that inherits them, whereas the retrieval context clearly states that common controls are assessed separately and are not reassessed at the system level."
+      "faithfulness_reason": "The score is 0.67 because the actual output contradicts the retrieval context by suggesting that common controls are reassessed at the system level by each system that inherits them, whereas the retrieval context clearly states that common controls are assessed separately and are not reassessed at the system level.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about a common control according to SP 800-37 Revision 2. There are no irrelevant statements in the output."
     },
     {
       "question": "What is the difference between a common control and a hybrid control in the RMF?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the question about the difference between a common control and a hybrid control in the RMF, with no irrelevant statements present."
     },
     {
       "question": "What is the purpose of the Prepare step in the RMF?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the purpose of the Prepare step in the RMF without any irrelevant information."
     },
     {
       "question": "What key artifacts are included in an authorization package under SP 800-37r2?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the question about the key artifacts included in an authorization package under SP 800-37r2. There are no irrelevant statements in the output."
     },
     {
       "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the four steps of the risk assessment process as outlined in SP 800-30 Revision 1. There are no irrelevant statements in the output."
     },
     {
       "question": "What are the four components of the overall risk management process in SP 800-30r1?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the four components of the overall risk management process in SP 800-30r1. There are no irrelevant statements in the output."
     },
     {
       "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
       "faithfulness": 1.0,
-      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+      "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the three organizational tiers where risk assessments can be applied according to SP 800-30r1. There are no irrelevant statements in the output."
     },
     {
       "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
@@ -140,7 +156,9 @@
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
     },
     {
-      "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
+      "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?",
+      "faithfulness": 0.6667,
+      "faithfulness_reason": "The score is 0.67 because the actual output incorrectly states that the context directs the reader to SP 800-53A for information on assessments and the reuse of assessment results, whereas the context only mentions that SP 800-53A provides guidance on assessment processes and tailoring, without mentioning the reuse of assessment results."
     }
   ]
 }

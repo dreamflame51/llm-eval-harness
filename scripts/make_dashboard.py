@@ -18,6 +18,8 @@ recomputing it needs the Chroma index.
 import json
 import pathlib
 import statistics
+import subprocess
+import sys
 
 import yaml
 
@@ -40,6 +42,35 @@ RETRIEVERS = [
     {"name": "BM25", "hit": 0.423, "covered": 0.423, "coverage": 0.481, "mrr": 0.235},
     {"name": "hybrid (RRF)", "hit": 0.538, "covered": 0.577, "coverage": 0.606, "mrr": 0.362},
 ]
+
+
+def test_inventory():
+    """
+    {test file: count}, by collection rather than by running anything.
+
+    Collected, not executed: the point of the panel is what the suite pins,
+    and a count of tests is honest about that whether or not a runner is
+    available here. Whether they pass is CI's job and CI's badge.
+    """
+    try:
+        done = subprocess.run(
+            [sys.executable, "-m", "pytest", "--collect-only", "-q"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+
+    counts = {}
+    for line in done.stdout.splitlines():
+        if "::" not in line:
+            continue
+        path = line.split("::", 1)[0].strip().replace("\\", "/")
+        if path.startswith("tests/"):
+            counts[path] = counts.get(path, 0) + 1
+    return dict(sorted(counts.items(), key=lambda item: -item[1]))
 
 
 def scores(path):
@@ -115,6 +146,7 @@ def build():
             ],
             "note": "dense-retrieval run, both libraries, the same answers",
         },
+        "tests": test_inventory(),
         "declines": {
             "dense": sum(1 for r in answers_before if looks_like_refusal(r["answer"])),
             "hybrid": sum(1 for r in answers_now if looks_like_refusal(r["answer"])),
@@ -136,7 +168,8 @@ def main():
 
     print(f"{PAGE}: {len(data['refusal']['records'])} refusal records, "
           f"{len(data['libraries']['pairs'])} library pairs, "
-          f"declines {data['declines']['dense']} -> {data['declines']['hybrid']}")
+          f"declines {data['declines']['dense']} -> {data['declines']['hybrid']}, "
+          f"{sum(data['tests'].values())} tests collected")
 
 
 if __name__ == "__main__":
