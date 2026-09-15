@@ -185,10 +185,16 @@
   .req-cols {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 4px 26px;
+    gap: 10px 26px;
     margin-top: 10px;
   }
+  /* A grid item will not shrink below its min-content width by default, and
+     a test name is one unbreakable token - so the column grew past its track
+     and the text landed on top of the next column. Both halves are needed:
+     min-width lets the track win, overflow-wrap lets the token break. */
+  .req-cols > div { min-width: 0; }
   .req-label {
+    display: block;
     font-family: var(--mono);
     font-size: 10.5px;
     letter-spacing: 0.08em;
@@ -196,8 +202,18 @@
     color: var(--muted);
   }
   .req-cols ul { margin: 4px 0 0; padding-left: 0; list-style: none; }
-  .req-cols li { margin-bottom: 3px; line-height: 1.4; }
-  .req-file { color: var(--muted); font-size: 11px; margin-left: 8px; }
+  .req-cols li {
+    margin-bottom: 4px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .req-cols li span { overflow-wrap: anywhere; }
+  .req-file {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-left: 0;
+  }
 
   .note {
     font-size: 13px;
