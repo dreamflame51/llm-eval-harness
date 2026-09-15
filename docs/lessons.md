@@ -59,7 +59,8 @@ anything.**
 | Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21) |
 | Checks that check nothing | [10](#10), [20](#20) |
 | What the system actually gets wrong | [11](#11) |
-| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20) |
+| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22) |
+| A gap between two metrics that nobody owned | [23](#23) |
 
 ---
 
@@ -890,3 +891,139 @@ exact call addressable - and because the cache is written after every call
 rather than at the end of the run, which is the same property that made the
 run itself resumable. Cheap repeatability is what turns an anomaly into a
 question rather than a note in a document.
+
+**It happened again, and the second time came with an explanation.** DeepEval's
+full run cost 4.6 hours against RAGAS's 69 minutes, and `context_precision`
+carried 3.3 of them: 462 s per record against 52 s for the same metric in
+RAGAS. There was a mechanism ready to explain it - DeepEval asks for a written
+justification per retrieved chunk, RAGAS had been capped at 2048 generated
+tokens and DeepEval had no cap at all - and the explanation was told to
+someone before it was checked. Capped at 512 tokens: 56 s per record. Uncapped,
+run immediately afterwards on the same three records: 55 s, with scores
+identical to four decimals. The mechanism was plausible, arithmetically
+sensible, and not what happened. **A cost that has a good explanation still
+needs the measurement**, and the measurement here was fifteen minutes.
+
+---
+
+<a id="22"></a>
+
+## 22. The averages agreed and the records did not
+
+**Symptom.** RAGAS and DeepEval were run over the same 26 frozen answers, with
+the same local model, to see whether two implementations of the same four
+metrics say the same thing. On the headline numbers they nearly do:
+
+```
+                  RAGAS  DeepEval   corr per record
+faithfulness      0.788     0.881   0.11
+answer_relevancy  0.605     0.885   0.33
+context_precision 0.747     0.772   0.80
+context_recall    0.859     0.800   0.48
+```
+
+Two faithfulness scores within 0.1 of each other, computed from the same
+answers and the same chunks - and a per-record correlation of 0.11. Six of the
+26 records differ by more than 0.5, in both directions. The averages are close
+because the disagreements cancel, not because the two agree.
+
+**Diagnosis.** Three separate causes, and only one of them is a bug.
+
+*A definition, not an error.* Three of the six worst disagreements are records
+where the generator declined - "Answer is missing". DeepEval scores that
+faithfulness 1.00 on every single one: nothing in the answer contradicts the
+chunks. RAGAS scores the identical four words 0.00, 0.50 or 1.00 depending on
+whether its claim extractor found anything to check. Neither library documents
+this as a choice, and a system that declined every question would score a
+perfect 1.00 in one of them.
+
+*A judge inside a library is still a judge.* One DeepEval verdict reads: the
+answer "incorrectly references the publication [NIST.SP.800-171Ar3] and its
+purpose of 'Assessing CUI Security Requirements,' which are not mentioned in
+the retrieval context". That string is in chunk 4, verbatim. The verdict is
+simply wrong, and it was checkable in one grep only because DeepEval stores a
+reason next to the score - the same property the evidence quote gives
+judge.py ([#20](#20)).
+
+*Different questions under one name.* RAGAS's answer_relevancy generates
+questions from the answer and compares them to the real one in embedding
+space; DeepEval's scores statements for relevance directly. On a declined
+answer, RAGAS says 0.00 - a refusal does not address the question - and
+DeepEval says 1.00 on four of the six. Both are defensible readings of
+"relevant". They are not the same metric.
+
+**Lesson.** Two implementations agreeing on an average is not evidence that
+they measure the same thing; **correlate them per record, and the aggregate
+becomes a claim you can test rather than a coincidence you can lean on.** The
+per-record view is also where all three of the findings above came from - none
+of them is visible in a table of means.
+
+The corollary for using one library: a metric name is not a specification. Any
+number from `faithfulness` is a number about a definition that is a paragraph
+long somewhere in the source, and on the case that matters most here - an
+answer that declines - the two definitions point in opposite directions.
+
+---
+
+<a id="23"></a>
+
+## 23. Six false refusals that were not refusals, and not false
+
+**Symptom.** The RAGAS run was supposed to measure the generator. It did, and
+what it showed had nothing to do with either library: on 6 of the 26
+**answerable** questions, the system answered "Answer is missing". It was
+declining to answer questions the corpus does answer.
+
+The harness had never reported this, and could not have. `refusal.py` scores
+only the 12 unanswerable records - declining there is the correct behaviour.
+`evaluator.py` scores only retrieval and never looks at the generated text. A
+refusal on an answerable question falls exactly between the two, and each
+metric was individually complete.
+
+**Diagnosis.** The obvious reading was an over-cautious generator, and the
+obvious fix was the system prompt. Both were wrong. Every one of the six had
+**zero coverage** of its gold span in the retrieved five: the model had been
+handed nothing to answer from, and declining was the right thing to do. The
+actual defect was next to it - four further records also had zero coverage and
+were answered anyway, from chunks that did not support the answer.
+
+Ten of 26 with nothing to work from, then. Not evenly spread: they cluster on
+questions that name a document by its identifier - "the scope of NIST SP
+800-78-5", "what flexibility does SP 800-171Ar3 give". Both of those gold spans
+sit whole inside a single indexed chunk, and dense retrieval ranks that chunk
+below position fifty. An embedding smears "SP 800-78-5" across every
+neighbouring document number; an exact string is the one thing word matching
+does better.
+
+**Fix.** BM25 alongside the embeddings, the two rankings fused by reciprocal
+rank (`lexical.py`). Measured on the same fixture, with the metrics that were
+already there:
+
+```
+retriever      hit@5  covered@5  coverage@5    MRR
+dense          0.423      0.462       0.544  0.277
+bm25           0.423      0.423       0.481  0.235
+hybrid (rrf)   0.538      0.577       0.606  0.362
+```
+
+Four records better, two worse - one of the two was fully covered and now is
+not. Re-recording the answers and re-scoring: declines on answerable questions
+6 -> 4, RAGAS faithfulness 0.788 -> 0.854, context_precision 0.747 -> 0.798,
+and context_recall 0.859 -> 0.776, which is the same two lost records showing
+up on the generation side. A trade that pays on this fixture, not a free win.
+
+**Lesson.** Two things, and the second is the bigger one.
+
+**A symptom on the generation side can be a defect on the retrieval side**, and
+the only way to tell is to check what the generator was given before judging
+what it said. The prompt fix would have made the model answer those six
+questions from chunks that do not contain the answer - it would have turned
+six correct refusals into six fabrications, and every generation metric would
+have gone up.
+
+**Complete metrics can leave a hole between them.** Nothing was missing from
+the refusal check or from the retrieval metrics; what was missing was the
+question "did it answer the ones it could?", which belonged to neither. Both
+metrics were written by the same person on the same fixture, and it still took
+an outside library to notice. When adding a metric, ask what it hands off to
+the next one, and whether anything lives in the gap.
