@@ -6,7 +6,7 @@ verifies it on the way up, and its usefulness here is the pairing: any level
 whose right-hand side is empty is a claim nobody checks, and any check whose
 left-hand side is empty is work nobody asked for.
 
-Russian version: not written yet.
+Russian version: [v-model.ru.md](v-model.ru.md).
 
 ## The two arms, as this project actually stands
 

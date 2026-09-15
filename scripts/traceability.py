@@ -21,6 +21,7 @@ NEEDS = pathlib.Path("eval/needs.yaml")
 OUT = pathlib.Path("docs/traceability.md")
 V_MODEL = pathlib.Path("eval/v_model.yaml")
 V_DOC = pathlib.Path("docs/v-model.md")
+V_DOC_RU = pathlib.Path("docs/v-model.ru.md")
 V_START = "<!-- levels:start"
 V_END = "<!-- levels:end -->"
 
@@ -97,12 +98,27 @@ def render(entries, needs):
     return "\n".join(lines) + "\n"
 
 
-def render_levels(levels):
-    """The V-model table, for the block inside docs/v-model.md."""
-    lines = ["| level | specified where | verified by | state |", "|---|---|---|---|"]
+# The header row and the words for each state, per language. Only these
+# differ between the two documents - the rows themselves are the same data.
+V_HEADINGS = {
+    V_DOC: (
+        ["| level | specified where | verified by | state |", "|---|---|---|---|"],
+        {"present": "present", "partial": "partial", "missing": "missing"},
+    ),
+    V_DOC_RU: (
+        ["| уровень | где задан | чем проверяется | состояние |", "|---|---|---|---|"],
+        {"present": "есть", "partial": "частично", "missing": "нет"},
+    ),
+}
+
+
+def render_levels(levels, doc):
+    """The V-model table, for the block inside one of the v-model documents."""
+    header, words = V_HEADINGS[doc]
+    lines = list(header)
     for level in levels:
-        state = level["state"]
-        shown = f"**{state}**" if state != "present" else state
+        state = words[level["state"]]
+        shown = state if level["state"] == "present" else f"**{state}**"
         lines.append(
             f"| {level['level']} | {level['specified']} | {level['verified']} | {shown} |"
         )
@@ -111,18 +127,23 @@ def render_levels(levels):
 
 def update_v_model(levels):
     """
-    Replace the generated table in docs/v-model.md, leaving the prose alone.
+    Replace the generated table in both v-model documents, prose untouched.
 
-    The document argues; this table is data. Keeping the data in
-    eval/v_model.yaml means the panel on the readout page and the table here
-    cannot disagree, which is the failure mode of every second architecture
-    document.
+    The documents argue; this table is data. Keeping the data in
+    eval/v_model.yaml means the panel on the readout page and the tables here
+    cannot disagree - and neither can the two languages, which is the failure
+    mode of every second translated document.
     """
-    body = V_DOC.read_text(encoding="utf-8")
-    start = body.index(V_START)
-    start = body.index("\n", start) + 1
-    end = body.index(V_END)
-    V_DOC.write_text(body[:start] + render_levels(levels) + "\n" + body[end:], encoding="utf-8")
+    for doc in (V_DOC, V_DOC_RU):
+        if not doc.exists():
+            continue
+        body = doc.read_text(encoding="utf-8")
+        start = body.index(V_START)
+        start = body.index("\n", start) + 1
+        end = body.index(V_END)
+        doc.write_text(
+            body[:start] + render_levels(levels, doc) + "\n" + body[end:], encoding="utf-8"
+        )
 
 
 def main():

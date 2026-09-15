@@ -12,10 +12,22 @@ import pytest
 from llm_eval_harness.dataset import load_ground_truth
 from llm_eval_harness.validate import CORPUS_DIR, check_contexts, load_corpus
 
-pytestmark = pytest.mark.skipif(
-    not list(pathlib.Path(CORPUS_DIR).glob("*.pdf")),
-    reason=f"no PDFs in {CORPUS_DIR}",
-)
+# Marked slow, not excluded. It re-extracts five PDFs and takes about 100
+# seconds - two thirds of the whole suite - which is long enough that people
+# start running "the fast ones" locally and stop running this at all. So:
+# `uv run pytest` still runs everything, `-m "not slow"` skips it for the
+# fifteen-second loop while editing, and CI has no reason to skip it.
+#
+# This is the check that guards the ruler itself: every gold quote still
+# appearing in the extracted text is what makes every retrieval number mean
+# anything (docs/lessons.md #1).
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skipif(
+        not list(pathlib.Path(CORPUS_DIR).glob("*.pdf")),
+        reason=f"no PDFs in {CORPUS_DIR}",
+    ),
+]
 
 # Gold contexts that are present in the extracted text but longer than the
 # chunk overlap and unlucky with the boundary, so no single chunk holds them

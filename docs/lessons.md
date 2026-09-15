@@ -61,6 +61,7 @@ anything.**
 | What the system actually gets wrong | [11](#11) |
 | Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22) |
 | A gap between two metrics that nobody owned | [23](#23) |
+| Measuring something nobody could use | [24](#24) |
 
 ---
 
@@ -1039,3 +1040,58 @@ question "did it answer the ones it could?", which belonged to neither. Both
 metrics were written by the same person on the same fixture, and it still took
 an outside library to notice. When adding a metric, ask what it hands off to
 the next one, and whether anything lives in the gap.
+
+---
+
+<a id="24"></a>
+
+## 24. Nobody could use the thing we had spent a week measuring
+
+**Symptom.** A day of work that reads well in a list: an LLM judge validated
+against hand labels, two evaluation libraries compared per record, a
+traceability matrix that fails the build when it rots, the project mapped onto
+the V-model with four gaps named, user needs written down so the matrix had
+something to trace up to. Then one question, from the person the work was for:
+
+> у нас нет реальной страницы где юзер может сделать запрос в РАГ систему
+> которую мы построили, собственно ради чего потом у нас все проверки
+
+There was no way to ask the system a question. `pipeline.answer()` existed as
+a function three other scripts imported. There was no command, no page, no
+entry point of any kind. Every number in this document describes something a
+person could not use.
+
+**Diagnosis.** Not an oversight in the ordinary sense - nothing was forgotten,
+because nothing had ever named it. The first user need in `eval/needs.yaml`
+reads "an answer with the passage it came from", and it was written *the same
+day*, by the same process that then failed to notice that no such thing
+existed. Writing down what a system is for does not check whether it is.
+
+The deeper reason is more uncomfortable: every level of the V was worked from
+the inside out. The harness verified the pipeline, the traceability matrix
+verified the harness, the tests verified the matrix. Each layer had a layer
+below it to check, and the stack was never stood on the ground. A check whose
+subject is another check will never ask whether the bottom one is reachable by
+a human being.
+
+**Fix.** `scripts/ask.py` - a question in, an answer out, and under it the
+passages the answer was drawn from with their distances. `scripts/serve.py`
+and `docs/ask.html` - the same thing with a text box, served on loopback,
+because a published page cannot reach a local model. Forty minutes of work,
+after a week of measuring.
+
+The passages are not a nicety. This system's worst failure is a fluent
+invented figure, and the cheapest defence against it is not a better model but
+showing the reader the text the answer came from, so that checking costs a
+glance. It is also what lets a reader tell a correct refusal from a retrieval
+miss - the distinction that took [#23](#23) two days to find.
+
+**Lesson.** **Build the thing a person touches first, even badly.** It is the
+only artifact that cannot be verified by another artifact, and it is the one
+that makes every question above it concrete: what to measure, what a good
+answer looks like, whether a refusal is a feature or a failure.
+
+And the second half, which is about this project's method rather than its
+code: a stack of checks that each validate the layer below produces a very
+convincing feeling of rigour. The feeling is not evidence. The question that
+found this took four seconds to ask and nobody inside the work asked it.

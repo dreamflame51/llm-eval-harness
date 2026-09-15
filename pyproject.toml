@@ -46,3 +46,9 @@ testpaths = ["tests"]
 # scripts/ is importable because label_refusals.py edits the frozen answers
 # file in place, and that is worth a test rather than a careful hand.
 pythonpath = ["src", "scripts"]
+# Registered rather than left to a warning, and deliberately not excluded by
+# default: `uv run pytest` runs everything, `-m "not slow"` is for the edit
+# loop. A slow check that is skipped by default is a check that stops running.
+markers = [
+    "slow: re-parses the corpus PDFs; about 100s of the suite's 160",
+]
