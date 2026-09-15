@@ -16,7 +16,77 @@
         "n": 6,
         "clean": 4
       }
+    },
+    "per_question": {
+      "What is the maximum time permitted between authorization reviews under SP 800-37r2?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What is the maximum allowable password length specified in SP 800-63B?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What is the recommended minimum key size for AES in FIPS 197?": {
+        "refused": false,
+        "fabricated": false,
+        "phrase": false
+      },
+      "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What is the minimum PIN length required for a PIV Card according to SP 800-78-5?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What are the four security levels defined in FIPS 140-3 for cryptographic modules?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?": {
+        "refused": false,
+        "fabricated": true,
+        "phrase": true
+      },
+      "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      }
     }
+  },
+  "drift": {
+    "mode": "across_processes",
+    "runs": 5,
+    "records": 12,
+    "spread": 0.0,
+    "questions_that_flipped": 0,
+    "questions_reworded": 2
   },
   "ragas": {
     "faithfulness": 0.854,

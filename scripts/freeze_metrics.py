@@ -56,6 +56,29 @@ def library_means(path, records):
     return out
 
 
+def drift_snapshot():
+    """
+    What scripts/stability.py last measured, or None.
+
+    Only the fields a threshold would be argued from: how many runs, in what
+    mode, how far the metric moved, and whether any question changed verdict.
+    An in-process run is recorded as such rather than quietly counted - it
+    measures the one condition where the model does not move.
+    """
+    path = pathlib.Path("eval/drift.json")
+    if not path.exists():
+        return None
+    measured = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "mode": measured["mode"],
+        "runs": measured["runs"],
+        "records": measured["records"],
+        "spread": measured["spread"],
+        "questions_that_flipped": measured["questions_that_flipped"],
+        "questions_reworded": measured["questions_reworded"],
+    }
+
+
 def answerable_count():
     rows = yaml.safe_load(
         pathlib.Path("eval/answerable_answers.yaml").read_text(encoding="utf-8")
@@ -84,7 +107,24 @@ def snapshot():
                 name: {"n": bucket["n"], "clean": bucket["clean"]}
                 for name, bucket in sorted(judged["by_class"].items())
             },
+            # Per question, not only the total. The metric can only move in
+            # steps of one record - 0.083 on twelve - so a bar on the average
+            # is either "one record" or nothing. What is worth catching is a
+            # question that used to decline and stopped, whichever way the
+            # average went, and that is only visible here.
+            "per_question": {
+                row["question"]: {
+                    "refused": row["refused"],
+                    "fabricated": row["fabricated"],
+                    "phrase": row["phrase"],
+                }
+                for row in judged["results"]
+            },
         },
+        # The measured width of the noise, kept beside the pinned values so
+        # that a future threshold can be read against what it was based on
+        # rather than taken on faith. Produced by scripts/stability.py.
+        "drift": drift_snapshot(),
         "ragas": library_means(pathlib.Path("eval/ragas_scores.json"), records),
         "deepeval": library_means(pathlib.Path("eval/deepeval_scores.json"), records),
     }

@@ -89,6 +89,43 @@ def test_the_class_split_has_not_moved(expected, judged):
         assert judged["by_class"][name]["clean"] == bucket["clean"], name
 
 
+def test_no_single_question_changed_verdict(expected, judged):
+    # The gate that matters more than the average. This metric moves in steps
+    # of one record (0.083 on twelve), so a bar on the mean is either "one
+    # record" or nothing; a question that used to decline and stopped is the
+    # thing worth failing a build for, whichever way the mean went.
+    pinned = expected["refusal"].get("per_question")
+    if not pinned:
+        pytest.skip("per-question verdicts are not pinned yet")
+
+    moved = []
+    for row in judged["results"]:
+        was = pinned.get(row["question"])
+        if was is None:
+            moved.append((row["question"], "not pinned", ""))
+            continue
+        for axis in ("refused", "fabricated", "phrase"):
+            if was[axis] != row[axis]:
+                moved.append((row["question"][:60], axis, f"{was[axis]} -> {row[axis]}"))
+    assert not moved, f"verdicts moved: {moved}"
+
+
+def test_the_measured_drift_is_recorded_beside_the_pinned_values(expected):
+    # A threshold is only readable next to the noise it was set against. If
+    # eval/drift.json has been re-measured, this fails until the pin is
+    # updated - the same rule as every other number here.
+    pinned = expected.get("drift")
+    path = pathlib.Path("eval/drift.json")
+    if pinned is None and not path.exists():
+        pytest.skip("drift has not been measured yet")
+    assert pinned is not None, "eval/drift.json exists but no drift is pinned"
+    assert path.exists(), "a drift measurement is pinned but eval/drift.json is gone"
+
+    measured = json.loads(path.read_text(encoding="utf-8"))
+    for field in ("mode", "runs", "records", "spread", "questions_that_flipped"):
+        assert pinned[field] == measured[field], field
+
+
 @pytest.mark.parametrize("library", ["ragas", "deepeval"])
 def test_library_scores_have_not_moved(expected, library):
     pinned = expected.get(library)
