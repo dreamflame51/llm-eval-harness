@@ -45,16 +45,37 @@ ANSWERS = pathlib.Path("eval/answerable_answers.yaml")
 RAGAS = pathlib.Path("eval/ragas_scores.json")
 DEEPEVAL = pathlib.Path("eval/deepeval_scores.json")
 
+# The same three files as they were before BM25 was fused into retrieval. Kept
+# because a metric moving is only readable next to what it moved from, and
+# because re-running them costs an hour and a half of inference.
+BASELINE = pathlib.Path("eval/dense_baseline")
+
 METRICS = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 
 
 def load():
+    """
+    The answers and whatever scores exist.
+
+    A missing score file is an ordinary state, not an error: the two runs cost
+    an hour and several hours, they are run separately, and the half that
+    exists is still worth reading. Sections that need the other half say so
+    and are skipped.
+    """
     rows = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
-    ragas = json.loads(RAGAS.read_text(encoding="utf-8"))["per_record"]
-    deepeval = {
-        row["question"]: row
-        for row in json.loads(DEEPEVAL.read_text(encoding="utf-8"))["per_record"]
-    }
+    ragas = (
+        json.loads(RAGAS.read_text(encoding="utf-8"))["per_record"]
+        if RAGAS.exists()
+        else {}
+    )
+    deepeval = (
+        {
+            row["question"]: row
+            for row in json.loads(DEEPEVAL.read_text(encoding="utf-8"))["per_record"]
+        }
+        if DEEPEVAL.exists()
+        else {}
+    )
     return rows, ragas, deepeval
 
 
@@ -76,11 +97,64 @@ def correlation(pairs):
     return statistics.correlation(left, right)
 
 
+def baseline_means():
+    """{library: {metric: mean}} from the pre-hybrid run, or {} if absent."""
+    out = {}
+    for name, path in (
+        ("RAGAS", BASELINE / "ragas_scores.json"),
+        ("DeepEval", BASELINE / "deepeval_scores.json"),
+    ):
+        if not path.exists():
+            continue
+        stored = json.loads(path.read_text(encoding="utf-8"))["per_record"]
+        records = stored.values() if isinstance(stored, dict) else stored
+        rows = list(records)
+        out[name] = {
+            metric: statistics.mean(
+                [row[metric] for row in rows if row.get(metric) is not None]
+            )
+            for metric in METRICS
+            if any(row.get(metric) is not None for row in rows)
+        }
+    return out
+
+
+def print_against_baseline(ragas, deepeval):
+    before = baseline_means()
+    if not before:
+        return
+    now = {}
+    for library, scores in (("RAGAS", ragas), ("DeepEval", deepeval)):
+        now[library] = {
+            metric: statistics.mean(values)
+            for metric in METRICS
+            if (values := [r[metric] for r in scores.values() if r.get(metric) is not None])
+        }
+    print("\ndense retrieval -> hybrid (BM25 fused in), same questions")
+    for library in ("RAGAS", "DeepEval"):
+        if library not in before or not now.get(library):
+            continue
+        print(f"  {library}")
+        for metric in METRICS:
+            if metric not in before[library] or metric not in now[library]:
+                continue
+            was, is_now = before[library][metric], now[library][metric]
+            print(f"    {metric:<18}{was:>7.3f} -> {is_now:>6.3f}  {is_now - was:+.3f}")
+    print(
+        "  Retrieval changed, so the answers changed and these are different\n"
+        "  answers scored by the same metric - not the same answers rescored."
+    )
+
+
 def main():
     rows, ragas, deepeval = load()
     refusals = [row for row in rows if looks_like_refusal(row["answer"])]
 
     print(f"{len(rows)} answerable questions, one frozen answer each\n")
+
+    if not ragas or not deepeval:
+        missing = "RAGAS" if not ragas else "DeepEval"
+        print(f"no {missing} scores yet - the side-by-side needs both\n")
 
     header = f"{'metric':<18}{'RAGAS':>8}{'DeepEval':>10}{'corr':>7}{'far apart':>11}"
     print(header)
@@ -99,6 +173,8 @@ def main():
             f"{far:>11}"
         )
     print("\ncorr is per record. far apart counts records differing by more than 0.5.")
+
+    print_against_baseline(ragas, deepeval)
 
     # The finding neither library was run to produce, and the one the harness
     # could not have seen: refusal.py only scores the unanswerable records and

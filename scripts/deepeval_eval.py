@@ -58,7 +58,7 @@ OUT = pathlib.Path("eval/deepeval_scores.json")
 METRIC_NAMES = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 
 
-def no_think_model(name, temperature=0):
+def no_think_model(name, temperature=0, num_predict=None):
     """
     DeepEval's OllamaModel, with qwen3's thinking mode switched off.
 
@@ -100,7 +100,18 @@ def no_think_model(name, temperature=0):
             content = response.message.content
             return schema.model_validate_json(content) if schema else content
 
-    return NoThinkOllama(model=name, temperature=temperature)
+    # Unbounded generation is what made this run cost 4.6 hours against RAGAS's
+    # 69 minutes, and almost all of the difference sat in one metric:
+    # context_precision took 462 s per record here against 52 s there. It asks
+    # for a written justification per retrieved chunk, and on CPU-bound
+    # inference the bill is the number of tokens generated, not the difficulty
+    # of the question. RAGAS was capped at 2048 tokens from the start; this was
+    # not capped at all.
+    return NoThinkOllama(
+        model=name,
+        temperature=temperature,
+        generation_kwargs={"num_predict": num_predict} if num_predict else {},
+    )
 
 
 def load_rows(limit=None):
@@ -108,16 +119,16 @@ def load_rows(limit=None):
     return rows[:limit] if limit else rows
 
 
-def load_scores():
+def load_scores(out=OUT):
     """What is already measured, keyed by question, so a re-run skips it."""
-    if not OUT.exists():
+    if not out.exists():
         return {}
-    stored = json.loads(OUT.read_text(encoding="utf-8")).get("per_record", [])
+    stored = json.loads(out.read_text(encoding="utf-8")).get("per_record", [])
     return {row["question"]: row for row in stored}
 
 
-def save(per_record, model, metrics, timings):
-    OUT.write_text(
+def save(per_record, model, metrics, timings, out=OUT):
+    out.write_text(
         json.dumps(
             {
                 "model": model,
@@ -162,6 +173,18 @@ def parse_args():
     parser.add_argument(
         "--refresh", action="store_true", help="remeasure records already in the file"
     )
+    parser.add_argument(
+        "--num-predict",
+        type=int,
+        help="cap generated tokens per call. Unset means unbounded, which is "
+        "what made context_precision cost 462s a record",
+    )
+    parser.add_argument(
+        "--out",
+        type=pathlib.Path,
+        help="write somewhere other than eval/deepeval_scores.json - for "
+        "trying a setting without overwriting a finished run",
+    )
     return parser.parse_args()
 
 
@@ -173,7 +196,8 @@ def main():
         ContextualRecallMetric,
         FaithfulnessMetric,
     )
-    model = no_think_model(args.model)
+    out = args.out or OUT
+    model = no_think_model(args.model, num_predict=args.num_predict)
     # One at a time, and no progress spinner per metric: the run is measured in
     # minutes per record and the timing below is the point of the exercise.
     common = {"model": model, "async_mode": False, "include_reason": True}
@@ -195,7 +219,7 @@ def main():
     # of this file saved once at the end; the run took four hours on this
     # hardware, which made an interruption cost all of it. The RAGAS script had
     # it right and this one did not - see docs/lessons.md #21.
-    done = {} if args.refresh else load_scores()
+    done = {} if args.refresh else load_scores(out)
     per_record = [
         {**done.get(row["question"], {}), "question": row["question"]} for row in rows
     ]
@@ -226,7 +250,7 @@ def main():
                 f"  {time.perf_counter() - measured:.0f}s",
                 flush=True,
             )
-            save(per_record, args.model, wanted, timings)
+            save(per_record, args.model, wanted, timings, out)
 
     elapsed = time.perf_counter() - started
     print(f"\n{elapsed:.0f}s for {len(rows)} records, {elapsed / len(rows):.0f}s per record")
@@ -239,8 +263,8 @@ def main():
             + (f"   ({missing} failed)" if missing else "")
         )
 
-    save(per_record, args.model, wanted, timings)
-    print(f"\nwrote {OUT}")
+    save(per_record, args.model, wanted, timings, out)
+    print(f"\nwrote {out}")
 
 
 def _clean(value):

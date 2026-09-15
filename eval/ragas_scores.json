@@ -1,0 +1,168 @@
+{
+  "model": "qwen3:8b",
+  "records": 26,
+  "seconds_per_metric": {
+    "faithfulness": 1997.4,
+    "answer_relevancy": 353.0,
+    "context_precision": 1369.2,
+    "context_recall": 526.0
+  },
+  "per_record": {
+    "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?": {
+      "faithfulness": 0.1429,
+      "answer_relevancy": 0.6899,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is a common control according to SP 800-37 Revision 2?": {
+      "faithfulness": 0.6667,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.95,
+      "context_recall": 1.0
+    },
+    "What is the difference between a common control and a hybrid control in the RMF?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.6221,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is the purpose of the Prepare step in the RMF?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9806,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What key artifacts are included in an authorization package under SP 800-37r2?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.7255,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?": {
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.8424,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What are the four components of the overall risk management process in SP 800-30r1?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.7772,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8321,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What risk factors are considered when conducting a risk assessment per SP 800-30?": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.9363,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is the purpose of the risk framing component of the risk management process?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9029,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is the primary purpose of NIST SP 800-53A Revision 5?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    },
+    "Name the three primary assessment methods defined in SP 800-53A.": {
+      "faithfulness": 0.6667,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    },
+    "What does the Examine assessment method involve?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8232,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is the difference between the Examine and Test assessment methods in SP 800-53A?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8529,
+      "context_precision": 0.7556,
+      "context_recall": 1.0
+    },
+    "How do the depth and coverage attributes of assessment methods affect the assessment?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9914,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is the purpose of NIST SP 800-171A Revision 3?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.2,
+      "context_recall": 0.0
+    },
+    "What does CUI stand for and why is its protection important according to SP 800-171Ar3?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.5894,
+      "context_precision": 0.3667,
+      "context_recall": 0.5
+    },
+    "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 1.0,
+      "context_recall": 0.6667
+    },
+    "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.7095,
+      "context_precision": 0.8667,
+      "context_recall": 1.0
+    },
+    "How many security requirement families are defined in SP 800-171Ar3, and name them?": {
+      "faithfulness": 0.9286,
+      "answer_relevancy": 0.9459,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What is the scope of NIST SP 800-78-5?": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    },
+    "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.6145,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8392,
+      "context_precision": 0.8042,
+      "context_recall": 1.0
+    },
+    "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9709,
+      "context_precision": 0.8667,
+      "context_recall": 1.0
+    },
+    "What elliptic curves are recommended for PIV keys in SP 800-78-5?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9193,
+      "context_precision": 1.0,
+      "context_recall": 1.0
+    },
+    "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8614,
+      "context_precision": 0.95,
+      "context_recall": 0.0
+    }
+  }
+}
