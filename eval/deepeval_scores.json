@@ -10,8 +10,8 @@
   "seconds_per_metric": {
     "faithfulness": 2484.1,
     "answer_relevancy": 910.7,
-    "context_precision": 1382.9,
-    "context_recall": 0.0
+    "context_precision": 1573.5,
+    "context_recall": 922.3
   },
   "per_record": [
     {
@@ -21,7 +21,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the seven steps of the NIST Risk Management Framework (RMF) as described in SP 800-37 Revision 2. There are no irrelevant statements in the output.",
       "context_precision": 0.8667,
-      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the fourth node being irrelevant and ranked lower. The fifth node, while relevant, is placed lower than some irrelevant nodes, slightly reducing the score."
+      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the fourth node being irrelevant and ranked lower. The fifth node, while relevant, is placed lower than some irrelevant nodes, slightly reducing the score.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all seven sentences in the expected output are directly supported by the 1st node in the retrieval context, which outlines each step of the RMF process in detail."
     },
     {
       "question": "What is a common control according to SP 800-37 Revision 2?",
@@ -30,7 +32,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about a common control according to SP 800-37 Revision 2. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which directly define common controls according to SP 800-37 Revision 2, are ranked first and second. The 'no' verdicts are correctly ranked lower as they discuss related but not directly defining content."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which directly define common controls according to SP 800-37 Revision 2, are ranked first and second. The 'no' verdicts are correctly ranked lower as they discuss related but not directly defining content.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the 1st sentence in the expected output is fully supported by node 4 in retrieval context, which states that 'Common controls can also be identified at different levels of the organization... can be inherited by information systems.'"
     },
     {
       "question": "What is the difference between a common control and a hybrid control in the RMF?",
@@ -39,7 +43,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the question about the difference between a common control and a hybrid control in the RMF, with no irrelevant statements present.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant information is prioritized."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant information is prioritized.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the first sentence aligns perfectly with node 1 in retrieval context, and the second sentence matches node 4, providing complete support for the expected output."
     },
     {
       "question": "What is the purpose of the Prepare step in the RMF?",
@@ -48,7 +54,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the purpose of the Prepare step in the RMF without any irrelevant information.",
       "context_precision": 0.8667,
-      "context_precision_reason": "The score is 0.87 because the first, second, and fifth nodes (rank 1, 2, and 5) provide direct support for the input, while the third and fourth nodes (rank 3 and 4) are irrelevant and should be ranked lower. The score is not higher because the two relevant nodes are not perfectly ranked above all irrelevant nodes, but the majority of relevant information is positioned at the top."
+      "context_precision_reason": "The score is 0.87 because the first, second, and fifth nodes (rank 1, 2, and 5) provide direct support for the input, while the third and fourth nodes (rank 3 and 4) are irrelevant and should be ranked lower. The score is not higher because the two relevant nodes are not perfectly ranked above all irrelevant nodes, but the majority of relevant information is positioned at the top.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the first sentence of the expected output is fully supported by the 5th node in the retrieval context, matching the exact wording and intent."
     },
     {
       "question": "What key artifacts are included in an authorization package under SP 800-37r2?",
@@ -57,7 +65,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the question about the key artifacts included in an authorization package under SP 800-37r2. There are no irrelevant statements in the output.",
       "context_precision": 0.9167,
-      "context_precision_reason": "The score is 0.92 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed after two relevant ones. The fourth node is relevant and correctly ranked, while the fifth node is irrelevant and placed lower, which contributes to the high precision score. The score is not higher because one irrelevant node is ranked above a relevant one, slightly reducing the precision."
+      "context_precision_reason": "The score is 0.92 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed after two relevant ones. The fourth node is relevant and correctly ranked, while the fifth node is irrelevant and placed lower, which contributes to the high precision score. The score is not higher because one irrelevant node is ranked above a relevant one, slightly reducing the precision.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all sentences in the expected output are fully supported by the nodes in retrieval context, with each sentence directly referencing the authorization package, security and privacy plans, and related documentation."
     },
     {
       "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
@@ -66,7 +76,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the four steps of the risk assessment process as outlined in SP 800-30 Revision 1. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes that follow. The first node directly answers the input with the four steps, and the second node confirms the same information, ensuring high contextual precision."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes that follow. The first node directly answers the input with the four steps, and the second node confirms the same information, ensuring high contextual precision.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all four sentences in the expected output are perfectly aligned with the 2nd node in the retrieval context, which explicitly lists the same four steps."
     },
     {
       "question": "What are the four components of the overall risk management process in SP 800-30r1?",
@@ -75,7 +87,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the four components of the overall risk management process in SP 800-30r1. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first node correctly answers the input, and all irrelevant nodes are ranked below it."
+      "context_precision_reason": "The score is 1.00 because the first node correctly answers the input, and all irrelevant nodes are ranked below it.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all four sentences in the expected output are perfectly aligned with the 2nd node in the retrieval context, which explicitly lists the four risk management steps as framing, assessing, responding to, and monitoring risk."
     },
     {
       "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
@@ -84,7 +98,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the three organizational tiers where risk assessments can be applied according to SP 800-30r1. There are no irrelevant statements in the output.",
       "context_precision": 0.9167,
-      "context_precision_reason": "The score is 0.92 because the first three nodes correctly identify the three tiers, with the third node being slightly redundant but still relevant. The fourth node is also relevant and reinforces the information. The two 'no' verdicts are ranked lower, which is appropriate since they do not explicitly mention the three tiers, thus maintaining a high level of precision."
+      "context_precision_reason": "The score is 0.92 because the first three nodes correctly identify the three tiers, with the third node being slightly redundant but still relevant. The fourth node is also relevant and reinforces the information. The two 'no' verdicts are ranked lower, which is appropriate since they do not explicitly mention the three tiers, thus maintaining a high level of precision.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the expected output perfectly aligns with the 1st node in retrieval context, which explicitly mentions risk assessments conducted at all three tiers—organization level, mission/business process level, and information system level."
     },
     {
       "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
@@ -93,7 +109,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the question about risk factors considered in a risk assessment per SP 800-30, with no irrelevant statements present.",
       "context_precision": 0.8333,
-      "context_precision_reason": "The score is 0.83 because the first two nodes are relevant, with the first node directly answering the input and the second node being irrelevant. The third node is relevant but less specific, while the fourth and fifth nodes are irrelevant. The score is not higher because the second and fourth nodes, which are irrelevant, are ranked higher than some relevant nodes, reducing the precision."
+      "context_precision_reason": "The score is 0.83 because the first two nodes are relevant, with the first node directly answering the input and the second node being irrelevant. The third node is relevant but less specific, while the fourth and fifth nodes are irrelevant. The score is not higher because the second and fourth nodes, which are irrelevant, are ranked higher than some relevant nodes, reducing the precision.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the 2nd node in the retrieval context directly supports the expected output sentence by mentioning 'Impact of loss is one of four risk factors considered during risk assessment activities—the other three factors being threats, vulnerabilities, and likelihood of occurrence [SP 800-30].'"
     },
     {
       "question": "What is the purpose of the risk framing component of the risk management process?",
@@ -102,7 +120,9 @@
       "answer_relevancy": 0.5714,
       "answer_relevancy_reason": "The score is 0.57 because the actual output contains multiple irrelevant statements that focus on risk management strategy rather than the purpose of the risk framing component. These statements deviate from the specific question asked, which is about the purpose of the risk framing component, thereby reducing the relevancy score.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes that follow. The first node directly answers the input, and the second provides supporting context, ensuring that all relevant nodes are prioritized."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes that follow. The first node directly answers the input, and the second provides supporting context, ensuring that all relevant nodes are prioritized.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the 1st sentence in the expected output is perfectly aligned with the 1st node in the retrieval context, which explicitly states the purpose of the risk framing component as producing a risk management strategy that addresses assessing, responding to, and monitoring risk."
     },
     {
       "question": "What is the primary purpose of NIST SP 800-53A Revision 5?",
@@ -111,7 +131,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the primary purpose of NIST SP 800-53A Revision 5. There are no irrelevant statements in the output.",
       "context_precision": 0.0,
-      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, as they either discuss different NIST publications or do not address the primary purpose of NIST SP 800-53A. None of the 'no' verdicts are ranked higher than others, but since all are irrelevant, the score remains at 0.00."
+      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, as they either discuss different NIST publications or do not address the primary purpose of NIST SP 800-53A. None of the 'no' verdicts are ranked higher than others, but since all are irrelevant, the score remains at 0.00.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the entire expected output is directly supported by the 2nd node in the retrieval context, which matches the sentence exactly."
     },
     {
       "question": "Name the three primary assessment methods defined in SP 800-53A.",
@@ -120,7 +142,9 @@
       "answer_relevancy": 0.6667,
       "answer_relevancy_reason": "The score is 0.67 because the response did not directly address the question by naming the three primary assessment methods. However, it is at this score because it partially addressed the query and provided relevant information, albeit incomplete.",
       "context_precision": 0.0,
-      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant and ranked higher than any relevant nodes, which do not exist in this case. The reason for the 'no' verdicts are all about the absence of explicit mention of the three primary assessment methods, which are not provided in any of the nodes."
+      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant and ranked higher than any relevant nodes, which do not exist in this case. The reason for the 'no' verdicts are all about the absence of explicit mention of the three primary assessment methods, which are not provided in any of the nodes.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all three sentences in the expected output are directly supported by node(s) in retrieval context, specifically the 3rd node, which explicitly mentions 'Examine, Interview, and Test' as part of the depth attribute description."
     },
     {
       "question": "What does the Examine assessment method involve?",
@@ -129,7 +153,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the question about the Examine assessment method without any irrelevant statements.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant nodes are above irrelevant ones."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant nodes are above irrelevant ones.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the entire expected output is fully supported by the 3rd node in the retrieval context, which directly matches the sentence in the expected output."
     },
     {
       "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
@@ -138,7 +164,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the difference between the Examine and Test assessment methods in SP 800-53A. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant nodes are above irrelevant ones."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant nodes are above irrelevant ones.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the first and second sentences of the expected output are fully supported by the first and third nodes in retrieval context, respectively, with no unsupportive reasons present."
     },
     {
       "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
@@ -147,7 +175,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses how the depth and coverage attributes of assessment methods affect the assessment. There are no irrelevant statements to detract from the score.",
       "context_precision": 0.8667,
-      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed lower than the relevant ones. The fourth node is irrelevant and ranked lower than the relevant ones, while the fifth node is relevant and ranked higher. The score is not higher because one irrelevant node is ranked higher than a relevant one, which slightly reduces the precision."
+      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed lower than the relevant ones. The fourth node is irrelevant and ranked lower than the relevant ones, while the fifth node is relevant and ranked higher. The score is not higher because one irrelevant node is ranked higher than a relevant one, which slightly reduces the precision.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the expected output aligns perfectly with the 1st node in retrieval context, which explicitly defines depth and coverage as hierarchical attributes that define the level of effort for the assessment, matching the sentences in the expected output."
     },
     {
       "question": "What is the purpose of NIST SP 800-171A Revision 3?",
@@ -156,7 +186,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the purpose of NIST SP 800-171A Revision 3 without any irrelevant information.",
       "context_precision": 0.0,
-      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, and none of the 'no' verdicts are ranked lower than the 'yes' verdicts, as there are no 'yes' verdicts at all."
+      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, and none of the 'no' verdicts are ranked lower than the 'yes' verdicts, as there are no 'yes' verdicts at all.",
+      "context_recall": 0.0,
+      "context_recall_reason": "The score is 0.00 because the expected output sentence cannot be attributed to any parts of the retrieval context. The retrieval context does not mention anything about providing organizations with assessment procedures or methodology for NIST SP 800-171."
     },
     {
       "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?",
@@ -165,7 +197,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the question about what CUI stands for and explains its importance according to SP 800-171Ar3, with no irrelevant information included.",
       "context_precision": 0.7556,
-      "context_precision_reason": "The score is 0.76 because the first, third, and fifth nodes (rank 1, 3, 5) provide relevant information about CUI and its importance according to SP 800-171Ar3. However, the second and fourth nodes (rank 2, 4) are irrelevant and should be ranked lower, which slightly reduces the score."
+      "context_precision_reason": "The score is 0.76 because the first, third, and fifth nodes (rank 1, 3, 5) provide relevant information about CUI and its importance according to SP 800-171Ar3. However, the second and fourth nodes (rank 2, 4) are irrelevant and should be ranked lower, which slightly reduces the score.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the 1st sentence in the expected output is fully supported by the 6th node in the retrieval context, which directly defines Controlled Unclassified Information (CUI) and its importance in federal agencies."
     },
     {
       "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?",
@@ -174,7 +208,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the question about the flexibility SP 800-171Ar3 provides to assessors regarding rigor. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes that follow, ensuring all relevant information is prioritized correctly."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes that follow, ensuring all relevant information is prioritized correctly.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all three sentences in the expected output are fully supported by the 3rd node in the retrieval context, which explains the flexibility, customization, and varying rigor of assessments as per SP 800-53A."
     },
     {
       "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?",
@@ -183,7 +219,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the relationship between SP 800-171Ar3 and SP 800-53A assessment procedures, with no irrelevant statements present.",
       "context_precision": 0.8667,
-      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed lower than the relevant ones. The fourth node is irrelevant and ranked lower than the relevant nodes, while the fifth node is relevant and ranked higher. The score is not higher because one irrelevant node is ranked higher than a relevant node, which slightly reduces the precision."
+      "context_precision_reason": "The score is 0.87 because the first three nodes are relevant and ranked higher, with the third node being irrelevant but placed lower than the relevant ones. The fourth node is irrelevant and ranked lower than the relevant nodes, while the fifth node is relevant and ranked higher. The score is not higher because one irrelevant node is ranked higher than a relevant node, which slightly reduces the precision.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the sentence in the expected output is fully supported by the 2nd node in the retrieval context, which directly mentions 'assessment procedures in SP 800-53A [5]'."
     },
     {
       "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?",
@@ -192,7 +230,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the number of security requirement families defined in SP 800-171Ar3 and their names. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first node correctly answers the input, and all irrelevant nodes are ranked below it."
+      "context_precision_reason": "The score is 1.00 because the first node correctly answers the input, and all irrelevant nodes are ranked below it.",
+      "context_recall": 0.3333,
+      "context_recall_reason": "The score is 0.33 because the 1st node in the retrieval context fully supports the expected output by listing all 17 families, while the other nodes do not provide any relevant information to support the expected output."
     },
     {
       "question": "What is the scope of NIST SP 800-78-5?",
@@ -201,7 +241,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the response is fully relevant and directly addresses the scope of NIST SP 800-78-5 without any irrelevant information.",
       "context_precision": 0.0,
-      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, as none mention NIST SP 800-78-5 or its scope. The 'no' verdicts are ranked first, but since there are no relevant nodes, the score remains at 0.00."
+      "context_precision_reason": "The score is 0.00 because all nodes in retrieval contexts are irrelevant to the input, as none mention NIST SP 800-78-5 or its scope. The 'no' verdicts are ranked first, but since there are no relevant nodes, the score remains at 0.00.",
+      "context_recall": 0.0,
+      "context_recall_reason": "The score is 0.00 because the expected output sentence about cryptographic algorithms and PIV credentials does not align with any node in retrieval context, which focuses on risk assessment, security requirements, and NIST publications rather than cryptographic specifics."
     },
     {
       "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
@@ -210,7 +252,9 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the FIPS standard that defines the requirements for PIV life-cycle activities supported by SP 800-78-5. There are no irrelevant statements in the output.",
       "context_precision": 1.0,
-      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes, which are correctly placed lower in the retrieval contexts."
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked higher than the irrelevant nodes, which are correctly placed lower in the retrieval contexts.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the expected output sentence is directly supported by node 1 in retrieval context, which explicitly defines FIPS 201-3 and its requirements for PIV life cycle activities."
     },
     {
       "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
@@ -219,28 +263,42 @@
       "answer_relevancy": 1.0,
       "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about the public exponent required for RSA keys in PIV according to SP 800-78-5. There are no irrelevant statements in the output.",
       "context_precision": 0.8875,
-      "context_precision_reason": "The score is 0.89 because the first two nodes and the fourth node correctly identify the public exponent of 65537 for RSA keys, while the third node, which is irrelevant, is ranked lower. However, the score is not higher because there are no additional relevant nodes to further improve precision."
+      "context_precision_reason": "The score is 0.89 because the first two nodes and the fourth node correctly identify the public exponent of 65537 for RSA keys, while the third node, which is irrelevant, is ranked lower. However, the score is not higher because there are no additional relevant nodes to further improve precision.",
+      "context_recall": 0.5,
+      "context_recall_reason": "The score is 0.50 because the sentence '65537' in the expected output is partially supported by node 1 in retrieval context, which mentions 65537 in the context of RSA public exponents, but the exact sentence '65537' is not present in any node."
     },
     {
       "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
       "faithfulness": 1.0,
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about algorithm and key-size options permitted for the PIV Authentication key through 2030. There are no irrelevant statements in the output."
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about algorithm and key-size options permitted for the PIV Authentication key through 2030. There are no irrelevant statements in the output.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first two nodes, which are relevant, are ranked first and second, while the irrelevant nodes are ranked lower, ensuring all relevant information is prioritized.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the first sentence in the expected output is fully supported by the first node in retrieval context, which contains the exact same information."
     },
     {
       "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
       "faithfulness": 1.0,
       "faithfulness_reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about elliptic curves recommended for PIV keys in SP 800-78-5. There are no irrelevant statements in the output."
+      "answer_relevancy_reason": "The score is 1.00 because the answer is fully relevant and directly addresses the question about elliptic curves recommended for PIV keys in SP 800-78-5. There are no irrelevant statements in the output.",
+      "context_precision": 0.9167,
+      "context_precision_reason": "The score is 0.92 because the first four nodes are relevant and ranked higher, while the fifth node is irrelevant and ranked lower. The second node is relevant but should be ranked higher than the fourth node, which is also relevant, but the fourth node's reason is more specific and directly related to the question.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the expected output sentence directly matches the information provided in node(s) in retrieval context, specifically the recommendation of Curve P-256 or Curve P-384 from FIPS 186."
     },
     {
       "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?",
       "faithfulness": 0.6667,
       "faithfulness_reason": "The score is 0.67 because the actual output incorrectly states that the context directs the reader to SP 800-53A for information on assessments and the reuse of assessment results, whereas the context only mentions that SP 800-53A provides guidance on assessment processes and tailoring, without mentioning the reuse of assessment results.",
       "answer_relevancy": 1.0,
-      "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the relationship between the Assess step of the RMF (SP 800-37r2) and the assessment methods defined in SP 800-53A, with no irrelevant information included."
+      "answer_relevancy_reason": "The score is 1.00 because the response directly addresses the relationship between the Assess step of the RMF (SP 800-37r2) and the assessment methods defined in SP 800-53A, with no irrelevant information included.",
+      "context_precision": 0.8875,
+      "context_precision_reason": "The score is 0.89 because the first four nodes are relevant and ranked higher, while the third node, which is irrelevant, is ranked lower. The third node's reason does not directly address the relationship between the Assess step of RMF and the assessment methods in SP 800-53A, which should place it lower than the relevant nodes.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the first sentence of the expected output is fully supported by the 1st node in the retrieval context, which explains that SP 800-53A addresses the Assess step and provides guidance on the security and privacy control assessment processes. The second sentence is also directly supported by the 1st node, which explicitly states that SP 800-53A supplies the concrete assessment methods and procedures."
     }
   ]
 }

@@ -214,6 +214,7 @@ def build(run_tests=False):
     dense = scores(BASELINE / "ragas_scores.json")
     hybrid = scores(pathlib.Path("eval/ragas_scores.json"))
     deepeval = scores(BASELINE / "deepeval_scores.json")
+    deepeval_now = scores(pathlib.Path("eval/deepeval_scores.json"))
 
     answers_now = yaml.safe_load(
         pathlib.Path("eval/answerable_answers.yaml").read_text(encoding="utf-8")
@@ -230,19 +231,20 @@ def build(run_tests=False):
             "dense": {m: mean(dense, m) for m in METRICS},
             "hybrid": {m: mean(hybrid, m) for m in METRICS},
         },
+        "deepeval": {
+            "dense": {m: mean(deepeval, m) for m in METRICS},
+            "hybrid": {m: mean(deepeval_now, m) for m in METRICS},
+        },
         "libraries": {
+            # The current run of each, so the scatter describes the system as
+            # it stands. The before/after of both libraries is carried
+            # separately, above.
             "pairs": [
-                {
-                    "q": question,
-                    **{
-                        m: [row.get(m), deepeval[question].get(m)]
-                        for m in METRICS
-                    },
-                }
-                for question, row in dense.items()
-                if question in deepeval
+                {"q": question, **{m: [row.get(m), deepeval_now[question].get(m)] for m in METRICS}}
+                for question, row in hybrid.items()
+                if question in deepeval_now
             ],
-            "note": "dense-retrieval run, both libraries, the same answers",
+            "note": "hybrid-retrieval run, both libraries, the same answers",
         },
         "tests": test_inventory(),
         "test_run": test_run() if run_tests else None,
