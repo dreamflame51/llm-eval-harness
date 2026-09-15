@@ -1,5 +1,9 @@
 # What this harness claims to check, what checks it, and where the evidence is.
 #
+# What each requirement is *for* lives in eval/needs.yaml, which names the
+# requirements that serve each user need. The link is checked in both
+# directions by tests/eval/test_traceability.py.
+#
 # The point of writing it down is that the three columns drift apart otherwise:
 # a requirement that nothing verifies, a test whose requirement nobody
 # remembers, a number quoted from a file that no longer exists. Every `tests`

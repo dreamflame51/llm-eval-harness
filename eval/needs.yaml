@@ -1,0 +1,43 @@
+# What a person wants from the system, and which requirements serve it.
+#
+# Written last, and the order of writing is the admission: for most of this
+# project's life the top-left box of the V was empty and every requirement in
+# eval/traceability.yaml traced upward to nothing (docs/v-model.md, GAP-4).
+#
+# These are written as what someone wants from the *system*, not as what the
+# harness can tell. The difference is the whole point of the level: "the
+# harness can measure fabrication" is a capability, "I am told when the corpus
+# has no answer instead of being handed an invented figure" is a need.
+#
+# tests/eval/test_traceability.py checks the link in both directions: a need no
+# requirement serves is a need nobody is working on, and a requirement serving
+# no need is work nobody asked for.
+
+- id: UN-1
+  need: >-
+    Someone with a question about these five NIST publications gets an answer
+    drawn from them, with the passage it came from, instead of reading 700
+    pages of PDF to find out whether the answer is in there at all.
+  served_by: [REQ-02, REQ-03]
+
+- id: UN-2
+  need: >-
+    When the corpus does not answer the question, they are told so - rather
+    than handed a fluent, plausible, invented figure they have no way to
+    check. This is the failure that costs a reader their trust in everything
+    else the system said, and it is the reason the harness exists.
+  served_by: [REQ-04, REQ-05]
+
+- id: UN-3
+  need: >-
+    Anyone deciding whether to rely on the system can see what it was measured
+    on and how it did, without running a model and without taking anyone's
+    word for it.
+  served_by: [REQ-01, REQ-06, REQ-07, REQ-10]
+
+- id: UN-4
+  need: >-
+    A change to the system - a prompt, a chunk size, a retriever - shows up as
+    a change in the numbers in the same week, not the next quarter, and by
+    failing rather than by being noticed.
+  served_by: [REQ-08, REQ-09]

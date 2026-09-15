@@ -13,7 +13,7 @@ Russian version: not written yet.
 <!-- levels:start - generated from eval/v_model.yaml by scripts/traceability.py -->
 | level | specified where | verified by | state |
 |---|---|---|---|
-| User needs | nowhere | nowhere | **missing** |
+| User needs | eval/needs.yaml | the requirements serving each, and the tests under those | **partial** |
 | System requirements | eval/traceability.yaml | pytest, the metric commands | **partial** |
 | Architecture | pipeline.py, store.py, chunking and retrieval decisions | scripts/compare_retrievers.py, scripts/sweep.py | present |
 | Module design | module docstrings | 202 unit tests | present |
@@ -76,13 +76,22 @@ regression introduced today in `pipeline.py` - a broken prompt, a wrong `k` -
 would not show up in any reported number until somebody re-records the
 answers by hand.
 
-### 4. The requirements are the harness's, not the product's
+### 4. The requirements were the harness's, not the product's - closed
 
 The ten entries in the traceability matrix are all of the form "the harness
-must be able to tell X". None is of the form "the product must do Y for its
-user". That is defensible for an evaluation harness, whose product *is* the
-measurement - but it means the top-left box of the V is empty, and the
-traceability matrix traces to nothing above itself.
+must be able to tell X". None was of the form "the product must do Y for its
+user", which left the top-left box of the V empty and the matrix tracing to
+nothing above itself.
+
+[`eval/needs.yaml`](../eval/needs.yaml) closes it: four needs written as what a
+person wants from the system - an answer with the passage it came from, being
+told when the corpus has no answer, being able to check the numbers without
+running a model, a change showing up in the same week - each naming the
+requirements that serve it. The link is checked in both directions, so a need
+nothing serves and a requirement serving no need both fail the suite.
+
+What that does **not** do is validate anything. The needs are stated and
+traced; whether they are met is gap 2 above, and still open.
 
 ## What follows
 

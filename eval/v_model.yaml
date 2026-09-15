@@ -10,13 +10,14 @@
 levels:
   - level: User needs
     side: specification
-    specified: nowhere
-    verified: nowhere
-    state: missing
+    specified: eval/needs.yaml
+    verified: the requirements serving each, and the tests under those
+    state: partial
     note: >-
-      Nothing states what the product is for, so the matrix below traces up to
-      nothing. Defensible for an evaluation harness, whose product is the
-      measurement - but the box is empty and should be seen to be.
+      Four needs, written last and linked to the requirements that serve them,
+      checked in both directions. Still partial: nothing validates that a need
+      is actually met - that a reader is better off with this system than with
+      ctrl-F - which is GAP-2 below.
 
   - level: System requirements
     side: specification
@@ -83,9 +84,15 @@ gaps:
     next: Schedule the live path and score it with the judge, not the phrase list
 
   - id: GAP-4
-    title: The requirements are the harness's, not the product's
+    title: The requirements were the harness's, not the product's
+    state: closed
     detail: >-
-      The top-left box of the V is empty, so the traceability matrix has
-      nothing above itself to trace to.
-    blocks: Traceability in the direction that matters to a user
-    next: Write one page of user-level needs
+      The top-left box of the V was empty, so the traceability matrix had
+      nothing above itself to trace to. Closed by eval/needs.yaml: four needs
+      written as what a person wants from the system, each naming the
+      requirements that serve it, with the link checked in both directions -
+      a need nothing serves, and a requirement serving no need, both fail the
+      suite. What remains is GAP-2: the needs are stated and traced, not
+      validated.
+    blocks: nothing now
+    next: "-"

@@ -263,6 +263,7 @@ def build(run_tests=False):
                 pathlib.Path("eval/traceability.yaml").read_text(encoding="utf-8")
             )
         ],
+        "needs": yaml.safe_load(pathlib.Path("eval/needs.yaml").read_text(encoding="utf-8")),
         "v_model": yaml.safe_load(pathlib.Path("eval/v_model.yaml").read_text(encoding="utf-8")),
         "drift": (
             json.loads(pathlib.Path("eval/drift.json").read_text(encoding="utf-8"))

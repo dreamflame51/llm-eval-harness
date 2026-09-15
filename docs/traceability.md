@@ -18,6 +18,27 @@ complete.
   would be worse than none.
 
 
+## What this is for
+
+Written last. For most of this project's life this level did not exist and every requirement below traced upward to nothing; see [v-model.md](v-model.md), GAP-4. These say what a person wants from the system, not what the harness can tell.
+
+**UN-1** &mdash; Someone with a question about these five NIST publications gets an answer drawn from them, with the passage it came from, instead of reading 700 pages of PDF to find out whether the answer is in there at all.
+
+Served by REQ-02 (measurement), REQ-03 (measurement).
+
+**UN-2** &mdash; When the corpus does not answer the question, they are told so - rather than handed a fluent, plausible, invented figure they have no way to check. This is the failure that costs a reader their trust in everything else the system said, and it is the reason the harness exists.
+
+Served by REQ-04 (measurement), REQ-05 (measurement).
+
+**UN-3** &mdash; Anyone deciding whether to rely on the system can see what it was measured on and how it did, without running a model and without taking anyone's word for it.
+
+Served by REQ-01 (gate), REQ-06 (gate), REQ-07 (gate), REQ-10 (gate).
+
+**UN-4** &mdash; A change to the system - a prompt, a chunk size, a retriever - shows up as a change in the numbers in the same week, not the next quarter, and by failing rather than by being noticed.
+
+Served by REQ-08 (gate), REQ-09 (gate).
+
+
 10 requirements, 27 test references, 6 held as gates.
 
 | id | requirement | held as | lesson |

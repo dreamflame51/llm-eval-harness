@@ -21,6 +21,7 @@ import pytest
 import yaml
 
 MATRIX = pathlib.Path("eval/traceability.yaml")
+NEEDS = pathlib.Path("eval/needs.yaml")
 LESSONS = pathlib.Path("docs/lessons.md")
 FIELDS = ("id", "requirement", "measured", "tests", "checks", "evidence")
 
@@ -46,6 +47,29 @@ def collected():
     if not ids:
         pytest.skip("could not collect the test list")
     return ids
+
+
+@pytest.fixture(scope="module")
+def needs():
+    return yaml.safe_load(NEEDS.read_text(encoding="utf-8"))
+
+
+def test_every_need_is_served_by_requirements_that_exist(matrix, needs):
+    known = {entry["id"] for entry in matrix}
+    for need in needs:
+        assert need["need"].strip(), need["id"]
+        assert need["served_by"], f"{need['id']} is served by nothing"
+        unknown = [req for req in need["served_by"] if req not in known]
+        assert not unknown, f"{need['id']} names requirements that do not exist: {unknown}"
+
+
+def test_every_requirement_serves_a_need(matrix, needs):
+    # The direction that catches work nobody asked for. It is also the
+    # direction that was impossible until the needs were written down at all -
+    # see docs/v-model.md, GAP-4.
+    serving = {req for need in needs for req in need["served_by"]}
+    orphans = [entry["id"] for entry in matrix if entry["id"] not in serving]
+    assert not orphans, f"requirements that serve no stated need: {orphans}"
 
 
 def test_every_requirement_has_the_required_fields(matrix):

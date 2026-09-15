@@ -17,6 +17,7 @@ import pathlib
 import yaml
 
 MATRIX = pathlib.Path("eval/traceability.yaml")
+NEEDS = pathlib.Path("eval/needs.yaml")
 OUT = pathlib.Path("docs/traceability.md")
 V_MODEL = pathlib.Path("eval/v_model.yaml")
 V_DOC = pathlib.Path("docs/v-model.md")
@@ -45,8 +46,27 @@ complete.
 """
 
 
-def render(entries):
-    lines = [HEADER]
+def render_needs(needs, entries):
+    """The level above the requirements, and what serves each one."""
+    by_id = {entry["id"]: entry for entry in entries}
+    lines = ["\n## What this is for\n"]
+    lines.append(
+        "Written last. For most of this project's life this level did not exist and "
+        "every requirement below traced upward to nothing; see "
+        "[v-model.md](v-model.md), GAP-4. These say what a person wants from the "
+        "system, not what the harness can tell.\n"
+    )
+    for need in needs:
+        lines.append(f"**{need['id']}** &mdash; {' '.join(need['need'].split())}\n")
+        served = ", ".join(
+            f"{req} ({by_id[req]['measured']})" for req in need["served_by"] if req in by_id
+        )
+        lines.append(f"Served by {served}.\n")
+    return "\n".join(lines)
+
+
+def render(entries, needs):
+    lines = [HEADER, render_needs(needs, entries)]
     lines.append(f"\n{len(entries)} requirements, "
                  f"{sum(len(e['tests']) for e in entries)} test references, "
                  f"{sum(1 for e in entries if e['measured'] == 'gate')} held as gates.\n")
@@ -107,10 +127,11 @@ def update_v_model(levels):
 
 def main():
     entries = yaml.safe_load(MATRIX.read_text(encoding="utf-8"))
-    OUT.write_text(render(entries), encoding="utf-8")
+    needs = yaml.safe_load(NEEDS.read_text(encoding="utf-8"))
+    OUT.write_text(render(entries, needs), encoding="utf-8")
     gates = sum(1 for entry in entries if entry["measured"] == "gate")
-    print(f"wrote {OUT}: {len(entries)} requirements, {gates} gates, "
-          f"{len(entries) - gates} measurements")
+    print(f"wrote {OUT}: {len(needs)} user needs, {len(entries)} requirements, "
+          f"{gates} gates, {len(entries) - gates} measurements")
 
     v_model = yaml.safe_load(V_MODEL.read_text(encoding="utf-8"))
     update_v_model(v_model["levels"])
