@@ -16,7 +16,7 @@ English: [v-model.md](v-model.md).
 | User needs | eval/needs.yaml | the requirements serving each, and scripts/usefulness.py | **частично** |
 | System requirements | eval/traceability.yaml | pytest, the metric commands, scripts/live_check.py | **частично** |
 | Architecture | pipeline.py, store.py, chunking and retrieval decisions | scripts/compare_retrievers.py, scripts/sweep.py | есть |
-| Module design | module docstrings | 202 unit tests | есть |
+| Module design | module docstrings | the unit suite | есть |
 | Code | - | ruff and pytest in CI | есть |
 <!-- levels:end -->
 
@@ -75,6 +75,12 @@ SP 800-37r2 с этой системой, чем с ctrl-F по PDF.
 это локальный гейт, около двадцати минут на двенадцать записей. Он не схлопывает
 две разные причины расхождения: система просела **или** замороженный набор
 устарел, и чинится это по-разному.
+
+На первом же настоящем прогоне он упал — по второй причине. Замороженный набор
+отказов ни разу не перезаписывали после того, как в ретривал вплавили BM25,
+поэтому прибитые вердикты описывали плотную систему, а продукт уже сутки отвечал
+гибридной ([#25](lessons.ru.md#25)). Оба отчётных числа этой сменой не
+сдвинулись; три вопроса из двенадцати — сдвинулись.
 
 ### 4. Требования были стенда, а не продукта — закрыто
 

@@ -28,6 +28,7 @@ invalidate every cached verdict.
 
 import argparse
 import json
+import pathlib
 import shutil
 import textwrap
 
@@ -209,12 +210,19 @@ def parse_args():
     parser.add_argument(
         "--record", type=int, action="append", help="label only this record (1-based)"
     )
+    parser.add_argument(
+        "--file",
+        type=pathlib.Path,
+        default=REFUSAL_ANSWERS_PATH,
+        help="the recorded set to label. There is more than one once a set has "
+        "been recorded beside the old one under a changed retriever",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    records = refusal_answers()
+    records = refusal_answers(args.file)
     total = len(records)
 
     wanted = []
@@ -262,16 +270,16 @@ def main():
                 # the worst moment to stop.
                 note = ""
 
-            save(i, {"refused": refused, "fabricated": fabricated, "note": note})
+            save(i, {"refused": refused, "fabricated": fabricated, "note": note}, args.file)
             labelled += 1
             print(f"saved: refused={refused} fabricated={fabricated}")
     except (KeyboardInterrupt, EOFError):
         print("\nstopped.")
 
-    print(f"\n{labelled} record(s) written to {REFUSAL_ANSWERS_PATH}")
+    print(f"\n{labelled} record(s) written to {args.file}")
     unlabelled = sum(
         1
-        for record in refusal_answers()
+        for record in refusal_answers(args.file)
         if record["labels"]["refused"] is None
         or record["labels"]["fabricated"] is None
     )

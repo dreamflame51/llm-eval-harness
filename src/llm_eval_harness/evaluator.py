@@ -7,7 +7,10 @@ quality (faithfulness, refusal behaviour) is a separate, more expensive layer.
 
 A retrieved chunk counts as a hit when it contains one of the record's gold
 contexts verbatim, whitespace aside - the same test validate.check_contexts()
-uses, applied to the k chunks search() returned instead of the whole corpus.
+uses, applied to the k chunks retrieval returned instead of the whole corpus.
+Retrieval here means whatever pipeline.py answers with, so these numbers
+describe the product rather than a component of it; scripts/compare_retrievers.py
+is where one retriever is scored against another on purpose.
 
     hit@k  fraction of questions where a hit appeared anywhere in the top k.
            Blind to position: a system that always ranks the right chunk 5th
@@ -177,15 +180,24 @@ def evaluate_retrieval(records=None, k=K, search_fn=None):
     caller can see which questions missed rather than only the averages.
 
     search_fn is injectable so tests can score a fake retriever without an
-    index; it defaults to store.search, imported lazily because importing store
-    builds the embedding model and opens the Chroma client.
+    index; it defaults to the retriever the product actually answers with,
+    imported lazily because importing the pipeline builds the embedding model
+    and opens the Chroma client.
+
+    That default used to be store.search - the dense retriever alone - and it
+    stayed that way after BM25 was fused into pipeline.py, so the headline
+    retrieval numbers described a retriever nothing in the product used
+    (docs/lessons.md #25). Read from pipeline rather than named again here:
+    two places that each decide what "the retriever" means is how that
+    happened. scripts/compare_retrievers.py still passes each one explicitly,
+    which is the honest way to ask that question.
     """
     if records is None:
         records = answerable_records()
     if search_fn is None:
-        from llm_eval_harness.store import search
+        from llm_eval_harness.pipeline import RETRIEVE
 
-        search_fn = search
+        search_fn = RETRIEVE
 
     ranks, coverages = [], []
     for rec in records:

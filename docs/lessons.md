@@ -1095,3 +1095,71 @@ And the second half, which is about this project's method rather than its
 code: a stack of checks that each validate the layer below produces a very
 convincing feeling of rigour. The feeling is not evidence. The question that
 found this took four seconds to ask and nobody inside the work asked it.
+
+---
+
+<a id="25"></a>
+
+## 25. The headline number did not move. Three of the twelve questions did.
+
+**Symptom.** `scripts/live_check.py` - written the day before to catch exactly
+this and never yet run in anger - failed on its first real run. Five verdicts
+moved against the pin, on three questions: one that used to answer now
+declines, one that used to decline now answers, and one lost its `fabricated`
+flag.
+
+The suspicion was the drift this project has documented since [#17](#17): the
+generator is reproducible inside a process and not between them. So the check
+was run again, clean, nothing else on the machine. The second run was
+**identical** to the first - same three questions, same directions, the same
+answer text to the character. Whatever this was, it was not noise.
+
+**Diagnosis.** The frozen set had been left behind by a change to retrieval.
+
+Two independent confirmations, both cheap:
+
+- **Dates.** `eval/refusal_answers.yaml` was last written on 14.09. BM25 was
+  fused into retrieval on 15.09 (`9a1814b`); `273cc4b` then added
+  `--keep-labels`, the machinery for carrying hand labels across exactly this
+  kind of re-recording; and `6787a0b` re-recorded and re-scored the
+  *answerable* set on hybrid retrieval. Three consecutive commits about the
+  consequences of the change, and the labelled set was in none of them.
+- **Contents.** `hybrid_search` returns `distance: null` for a chunk only BM25
+  ranked. The answerable set carries 30 such chunks out of 130. The refusal set
+  carries 0 out of 60 - every chunk in it has an embedding distance, which is
+  what a purely dense retriever returns.
+
+So the reported refusal metric described the system as it was before the
+retriever changed, while the product had been answering with the new one for a
+day. The same mistake, in the same week, in two places: `evaluate_retrieval`
+still defaults to the dense `search` while `pipeline.answer` uses
+`hybrid_search`, so the `hit@5` in the README describes a retriever the product
+does not use either.
+
+**What made it invisible for a day** is worth its own line. Every frozen set
+carries a provenance block - date, generator, options, `k`, embedder, chunk
+size. It did not name the retriever. That block read identically before and
+after the change, so the file went on looking like a current description of the
+system.
+
+**Fix.** The provenance block now names the retriever. The dense-era set is
+kept as it is, labels and all, and the hybrid set is recorded beside it rather
+than over it: a hand label describes one answer against the chunks it was
+written from, so re-recording in place would have destroyed the twelve labels
+both judges were validated against in exchange for nothing.
+
+**Lesson.** **A frozen fixture is a photograph of a system, and it has to say
+which system.** Anything a recorded answer depends on - model, decoding,
+chunking, and the retriever most of all - belongs in the file, or the file
+cannot be told apart from a current one.
+
+And the finding that is worth more than the bug. Between the dense-era pin and
+today's hybrid system, **every headline number is unchanged**: the phrase list
+scores 11 of 12 either way, the judged metric 10 of 12 either way. Underneath,
+three of the twelve questions behave differently - the AES record gained a
+refusal, the SP 800-76 record lost one, and they cancelled. An average over
+twelve records cannot see a change that swaps two of them. The per-question
+gate was argued for on the grounds that this metric moves in steps of one
+record; here it earned its keep against a change the mean reports as zero -
+the same shape as [#22](#22), where two libraries agreed on the average and
+disagreed on almost every record.

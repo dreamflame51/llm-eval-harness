@@ -81,9 +81,14 @@ gaps:
     by scripts/live_check.py: it runs the real pipeline, judges the fresh answers with
     the same judge the reported metric uses, and fails when a verdict differs from the
     pinned one. It cannot run in CI - the runner has no Ollama - so it is a local gate,
-    about twenty minutes for twelve records.'
+    about twenty minutes for twelve records. On its first real run, 16.09, it failed
+    and was right to: the frozen refusal set had never been re-recorded after BM25 was
+    fused into retrieval, so every pinned verdict described the dense system while the
+    product answered with the hybrid one (docs/lessons.md #25). Both headline numbers
+    were unchanged by that; three of the twelve questions were not.'
   blocks: nothing now, though nothing schedules it either
-  next: Run it before a release and after touching pipeline.py or the retriever
+  next: Run it before a release and after touching pipeline.py or the retriever - the
+    change it has already caught once
   state: closed
 - id: GAP-4
   title: The requirements were the harness's, not the product's

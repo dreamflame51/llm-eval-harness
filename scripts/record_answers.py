@@ -60,8 +60,13 @@ HEADER = """\
 # Provenance of this snapshot:
 #   recorded:        {recorded}
 #   generator:       {model}, options {options}
-#   retrieval:       k={k}, {embedder}
+#   retrieval:       {retriever}, k={k}, {embedder}
 #   chunking:        {size}/{overlap}
+#
+# The retriever is named here because leaving it out cost a day: this block
+# read the same before and after BM25 was fused into retrieval, so a set
+# recorded under dense retrieval went on being scored as though it described
+# the running system (docs/lessons.md #25).
 #
 # Fill in by hand, one record at a time, two independent questions:
 #
@@ -95,7 +100,7 @@ ANSWERABLE_HEADER = """\
 # Provenance of this snapshot:
 #   recorded:        {recorded}
 #   generator:       {model}, options {options}
-#   retrieval:       k={k}, {embedder}
+#   retrieval:       {retriever}, k={k}, {embedder}
 #   chunking:        {size}/{overlap}
 #
 #   question         what was asked
@@ -205,12 +210,24 @@ def main():
         help="carry hand labels onto records whose answer and chunks came out "
         "byte-identical, and report which ones need labelling again",
     )
+    parser.add_argument(
+        "--out",
+        type=pathlib.Path,
+        help="write somewhere other than the canonical file - for recording a "
+        "second set beside a labelled one instead of over it",
+    )
+    parser.add_argument(
+        "--labels-from",
+        type=pathlib.Path,
+        help="with --keep-labels, the file to carry labels from. Defaults to "
+        "the file being written; point it at the old set when recording beside it",
+    )
     args = parser.parse_args()
     if args.keep_labels and args.set != "refusal":
         raise SystemExit("--keep-labels applies to the refusal set; it is the only labelled one")
 
     refusal = args.set == "refusal"
-    out = OUT if refusal else ANSWERABLE_OUT
+    out = args.out or (OUT if refusal else ANSWERABLE_OUT)
 
     if out.exists() and not args.force:
         raise SystemExit(
@@ -225,12 +242,13 @@ def main():
 
     kept, stale = [], []
     if args.keep_labels:
-        kept, stale = carry_labels(rows, out)
+        kept, stale = carry_labels(rows, args.labels_from or out)
 
     header = (HEADER if refusal else ANSWERABLE_HEADER).format(
         recorded=datetime.datetime.now(tz=datetime.UTC).date().isoformat(),
         model=pipeline.MODEL,
         options={"temperature": 0, "seed": 0},
+        retriever=pipeline.RETRIEVE.__name__,
         k=pipeline.K,
         embedder=store.EMBEDDER.__class__.__name__ + " all-MiniLM-L6-v2",
         size=chunker.SIZE,

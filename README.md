@@ -175,6 +175,17 @@ screen. They keep extraction artifacts verbatim (`T he`, `process43`,
 `Rivest-Shamir- Adleman`). Removing those would be wrong: the retriever indexes
 the mangled text, so a clean quote would score a correct retrieval as a miss.
 
+**Two recorded sets of refusal answers, and the reason is worth reading.** A
+recorded answer is a photograph of the system that produced it, so the twelve
+hand labels in `eval/refusal_answers.yaml` describe **dense** retrieval - what
+the product used until BM25 was fused in on 15.09. `eval/refusal_answers.hybrid.yaml`
+is the same twelve questions under the retriever the product uses now, recorded
+beside the old set rather than over it: a label describes one answer against
+the chunks it was written from, and none of the twelve survived the change
+(`--keep-labels` carried exactly 0). Until the hybrid set is labelled by hand,
+the reported refusal numbers are the dense ones and say so
+([#25](docs/lessons.md#25)).
+
 ## What the metrics mean
 
 **`validate`** - fixture integrity. Two different failures, kept apart:
@@ -191,10 +202,16 @@ retriever serve the evidence?" has more than one honest answer.
 
 | metric | reads as | now |
 |---|---|---|
-| `hit@5` | one chunk held a gold span whole | **0.423** |
-| `covered@5` | the five chunks *together* held it | **0.462** |
-| `coverage@5` | mean share of a gold span the five chunks held | **0.544** |
-| `MRR` | average of 1/rank; miss counts 0 | **0.277** |
+| `hit@5` | one chunk held a gold span whole | **0.538** |
+| `covered@5` | the five chunks *together* held it | **0.577** |
+| `coverage@5` | mean share of a gold span the five chunks held | **0.606** |
+| `MRR` | average of 1/rank; miss counts 0 | **0.362** |
+
+These score the retriever `pipeline.py` actually answers with - dense and BM25
+fused. Until 16.09 they scored dense retrieval alone, a day after the product
+had stopped using it ([#25](docs/lessons.md#25)); the dense column is still
+printed, by `scripts/compare_retrievers.py`, where comparing retrievers is the
+question being asked.
 
 `hit@k` ignores position, `MRR` does not - a system that always ranks the right
 chunk 5th looks perfect to one and poor to the other.
@@ -280,7 +297,10 @@ time, against the current setup as a control:
 
 `uv run python scripts/sweep.py` reproduces it. The `reach` column is the
 ceiling of each metric on this fixture - the best it could possibly return
-whatever the retriever does:
+whatever the retriever does. Every row here scores **dense** retrieval, which
+is what the question needs: the chunk size is being compared, so the retriever
+has to be held still. That is why the 800/160 row reads 0.423 and the table
+above, scoring the same configuration with BM25 fused in, reads 0.538:
 
 | size / overlap | chunks | reach hit / cov | hit@5 | cov@5 | coverage@5 | MRR |
 |---|---|---|---|---|---|---|

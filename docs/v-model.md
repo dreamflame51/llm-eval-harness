@@ -16,7 +16,7 @@ Russian version: [v-model.ru.md](v-model.ru.md).
 | User needs | eval/needs.yaml | the requirements serving each, and scripts/usefulness.py | **partial** |
 | System requirements | eval/traceability.yaml | pytest, the metric commands, scripts/live_check.py | **partial** |
 | Architecture | pipeline.py, store.py, chunking and retrieval decisions | scripts/compare_retrievers.py, scripts/sweep.py | present |
-| Module design | module docstrings | 202 unit tests | present |
+| Module design | module docstrings | the unit suite | present |
 | Code | - | ruff and pytest in CI | present |
 <!-- levels:end -->
 
@@ -85,6 +85,12 @@ differs from the pinned one. It cannot run in CI - the runner has no Ollama -
 so it is a local gate, about twenty minutes for twelve records. It deliberately
 does not collapse the two causes of a flip: the system regressed, **or** the
 frozen set is stale, and those are fixed differently.
+
+On its first real run it failed, and on the second cause. The frozen refusal
+set had never been re-recorded after BM25 was fused into retrieval, so the
+pinned verdicts described the dense system while the product had been answering
+with the hybrid one for a day ([#25](lessons.md#25)). Both headline numbers were
+identical across that change; three of the twelve questions were not.
 
 ### 4. The requirements were the harness's, not the product's - closed
 
