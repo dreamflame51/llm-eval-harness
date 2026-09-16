@@ -131,6 +131,8 @@ uv run python -m llm_eval_harness.ingest    # ~5000 чанков, несколь
 | `uv run python scripts/calibrate_judge.py --model qwen3:8b` | способен ли судья выдать вердикты, которые обязан? |
 | `uv run python scripts/label_refusals.py` | разметить зафиксированные ответы руками |
 | `uv run python scripts/record_answers.py` | перезаписать ответы (разметка при этом теряется) |
+| `uv run python scripts/live_check.py` | ведёт ли живой пайплайн себя так, как описывают прибитые числа? (~20 мин) |
+| `uv run python scripts/usefulness.py` | посидеть с системой на реальных задачах и записать, была ли от неё польза |
 
 ## Эталонный набор
 

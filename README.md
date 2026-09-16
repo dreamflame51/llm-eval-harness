@@ -143,6 +143,8 @@ minutes on this hardware:
 | `uv run python scripts/calibrate_judge.py --model qwen3:8b` | can this judge return the verdicts it must? |
 | `uv run python scripts/label_refusals.py` | label the frozen answers by hand |
 | `uv run python scripts/record_answers.py` | re-freeze the answers (discards the labels) |
+| `uv run python scripts/live_check.py` | does the live pipeline still behave the way the pinned numbers describe? (~20 min) |
+| `uv run python scripts/usefulness.py` | sit with the system on real tasks and record whether it was any use |
 | `uv run pytest` | the harness test suite |
 | `uv run pytest practice` | interview drill code, kept out of the main suite |
 

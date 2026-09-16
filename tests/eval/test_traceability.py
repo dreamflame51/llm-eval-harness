@@ -23,7 +23,10 @@ import yaml
 MATRIX = pathlib.Path("eval/traceability.yaml")
 NEEDS = pathlib.Path("eval/needs.yaml")
 LESSONS = pathlib.Path("docs/lessons.md")
+TASKS = pathlib.Path("eval/usefulness_tasks.yaml")
+SESSION = pathlib.Path("eval/usefulness.yaml")
 FIELDS = ("id", "requirement", "measured", "tests", "checks", "evidence")
+OUTCOMES = {"accepted", "checked", "declined", "wrong", "skipped"}
 
 
 @pytest.fixture(scope="module")
@@ -125,6 +128,23 @@ def test_the_checks_are_commands_someone_can_run(matrix):
     for entry in matrix:
         for command in entry["checks"]:
             assert command.startswith(("python ", "uv run ")), (entry["id"], command)
+
+
+def test_the_usefulness_session_judged_the_tasks_that_were_set():
+    # The validation level is the one measurement here a machine cannot make,
+    # so the only thing a machine can check is that the record describes the
+    # tasks actually set. An id that drifted, or a task edited after it was
+    # judged, would leave the readout showing outcomes for something else.
+    if not SESSION.exists():
+        pytest.skip("the usefulness session has not been run")
+    tasks = {
+        task["id"]: " ".join(task["task"].split())
+        for task in yaml.safe_load(TASKS.read_text(encoding="utf-8"))
+    }
+    for row in yaml.safe_load(SESSION.read_text(encoding="utf-8")):
+        assert row["id"] in tasks, f"{row['id']} was judged but is not a task"
+        assert row["task"] == tasks[row["id"]], f"{row['id']}: the task text has changed"
+        assert row["outcome"] in OUTCOMES, (row["id"], row["outcome"])
 
 
 def test_the_suite_is_actually_reached_by_the_matrix(matrix, collected):

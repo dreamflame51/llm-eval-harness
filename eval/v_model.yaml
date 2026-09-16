@@ -14,11 +14,12 @@ levels:
 - level: User needs
   side: specification
   specified: eval/needs.yaml
-  verified: the requirements serving each, and the tests under those
+  verified: the requirements serving each, and scripts/usefulness.py
   state: partial
   note: 'Four needs, written last and linked to the requirements that serve them, checked
-    in both directions. Still partial: nothing validates that a need is actually met -
-    that a reader is better off with this system than with ctrl-F - which is GAP-2 below.'
+    in both directions, and validated once on eight real tasks - six finished on the passage
+    shown, none answered wrongly. Still partial: one session, judged by the author, and
+    the timing half of it is unusable (GAP-2).'
 - level: System requirements
   side: specification
   specified: eval/traceability.yaml
@@ -36,7 +37,7 @@ levels:
 - level: Module design
   side: design
   specified: module docstrings
-  verified: 202 unit tests
+  verified: the unit suite
   state: present
   note: The docstrings carry the reasoning, which is the half that does not survive in
     code.
@@ -61,13 +62,18 @@ gaps:
   next: Re-measure the drift after a change to decoding or the hardware
 - id: GAP-2
   title: Verification without validation
-  detail: Everything asks whether the system does what we specified. Nothing asked whether
-    the specified thing is worth having. scripts/usefulness.py and eval/usefulness_tasks.yaml
-    are the instrument - eight real tasks, four outcomes, optional timing against doing
-    it by hand - but the session has not been run, and a person has to run it. The instrument
-    is not the measurement.
-  blocks: Any claim that the system is useful rather than correct
-  next: 'Run the session: uv run python scripts/usefulness.py'
+  state: closed
+  detail: 'Everything asks whether the system does what we specified. Nothing asked whether
+    the specified thing is worth having. Closed by sitting with the system on the eight
+    tasks in eval/usefulness_tasks.yaml and recording what happened: six accepted on the
+    passage shown, one correct decline, one answer that had to be checked elsewhere, none
+    wrong (eval/usefulness.yaml, 2026-09-16). What it does not close is the timing claim
+    - the clock ran on into the judging, so those seconds are an upper bound and not a
+    comparison with doing the task by hand.'
+  blocks: nothing now, though eight tasks judged by the system's own author can falsify
+    a claim of usefulness, not certify one
+  next: Re-time on fresh tasks with the fixed clock - not on these eight, which have been
+    seen
 - id: GAP-3
   title: The system-test level is frozen
   detail: 'Generation metrics score answers recorded once, so a regression introduced

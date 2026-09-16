@@ -31,6 +31,7 @@ it - and the report says so rather than leaving it to be assumed.
 import argparse
 import datetime
 import pathlib
+import statistics
 import time
 
 import yaml
@@ -65,7 +66,13 @@ def save(results):
         "# system finished them. The validation level - see docs/v-model.md, GAP-2.\n"
         "# Not a metric to optimise: eight tasks can falsify 'this is useful', not\n"
         "# certify it, and re-running the session on the same tasks after tuning the\n"
-        "# system against them would measure the tuning.\n\n"
+        "# system against them would measure the tuning.\n"
+        "#\n"
+        "# seconds = wall clock from asking to the answer being on screen. The eight\n"
+        "# rows judged 2026-09-16 predate that: their clock ran on until the outcome\n"
+        "# was typed, so they carry the reading and the judging too and are an upper\n"
+        "# bound, not a comparison. They are left as recorded rather than corrected,\n"
+        "# because re-running the session on tasks already seen measures the memory.\n\n"
     )
     OUT.write_text(
         header + yaml.safe_dump(rows, allow_unicode=True, sort_keys=False, width=88),
@@ -106,12 +113,10 @@ def report(tasks, results):
 
     timed = [r for r in judged if r.get("seconds") and r.get("by_hand_seconds")]
     if timed:
-        with_system = sorted(r["seconds"] for r in timed)
-        by_hand = sorted(r["by_hand_seconds"] for r in timed)
-        middle = len(timed) // 2
         print(
             f"median time on {len(timed)} timed tasks: "
-            f"{with_system[middle]:.0f}s with the system, {by_hand[middle]:.0f}s by hand"
+            f"{statistics.median(r['seconds'] for r in timed):.0f}s with the system, "
+            f"{statistics.median(r['by_hand_seconds'] for r in timed):.0f}s by hand"
         )
     print(
         f"\n{len(judged)} tasks is enough to falsify a claim of usefulness, not to certify "
@@ -158,8 +163,12 @@ def main():
         print("=" * 88)
         began = time.perf_counter()
         ask(task["task"])
-        outcome = ask_outcome()
+        # The clock stops when the answer is on screen. It used to run until
+        # the outcome was typed, which put the pause for reading and judging
+        # inside a number compared against doing the task by hand - and that
+        # pause is not time the system cost. See the note in save().
         seconds = round(time.perf_counter() - began)
+        outcome = ask_outcome()
 
         by_hand = input("seconds it would take by hand (Enter to skip): ").strip()
         note = input("note (Enter to skip): ").strip()

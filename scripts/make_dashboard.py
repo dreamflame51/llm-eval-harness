@@ -270,6 +270,14 @@ def build(run_tests=False):
             if pathlib.Path("eval/drift.json").exists()
             else None
         ),
+        # The one measurement here a machine cannot produce: a person sat with
+        # the system and said whether it finished the task. Absent until the
+        # session is run, and the page simply omits the panel then.
+        "usefulness": (
+            yaml.safe_load(pathlib.Path("eval/usefulness.yaml").read_text(encoding="utf-8"))
+            if pathlib.Path("eval/usefulness.yaml").exists()
+            else None
+        ),
         "tests": test_inventory(),
         "test_run": test_run() if run_tests else None,
         "ci": ci_status(sha) if (sha := head_commit()) else None,
