@@ -39,7 +39,7 @@ from llm_eval_harness.judge import (
     load_cache,
     matrix,
     quote_missing,
-    verdicts_by_question,
+    verdicts_for,
 )
 from llm_eval_harness.refusal import looks_like_refusal
 
@@ -59,7 +59,7 @@ def models(cache_dir=CACHE_DIR):
 def decisions(model, records, cache_dir=CACHE_DIR):
     """Rows for the report: the join, plus the raw entries the quote check reads."""
     rows, conflicts = decided_records(model, records, cache_dir)
-    found, _ = verdicts_by_question(model, cache_dir)
+    found, _ = verdicts_for(model, records, cache_dir)
     return rows, found, conflicts
 
 

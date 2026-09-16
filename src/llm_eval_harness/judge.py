@@ -450,9 +450,15 @@ def mode_string(think, structured):
     return f"{thinking}/{'schema' if structured else 'free'}"
 
 
-def cache_key(model, axis, record, mode):
+def cache_key(model, axis, record, mode, prompt_version=None):
     """
     Hash of everything a verdict depends on.
+
+    prompt_version defaults to the current one, read at call time rather than
+    bound as a default argument - binding it freezes the constant at import and
+    an edited prompt stops invalidating the cache, which is the one thing this
+    key exists to do. entries_for passes older versions explicitly to find
+    entries the current prompt would miss.
 
     The answer and the chunks are hashed verbatim, not normalised: they are
     frozen text, and if either moves the verdict has to be recomputed rather
@@ -464,7 +470,7 @@ def cache_key(model, axis, record, mode):
     about than two.
     """
     parts = [
-        PROMPT_VERSION,
+        prompt_version or PROMPT_VERSION,
         mode,
         model,
         axis,
@@ -474,6 +480,31 @@ def cache_key(model, axis, record, mode):
     ]
     digest = hashlib.sha256("\x00".join(parts).encode("utf-8"))
     return digest.hexdigest()[:16]
+
+
+def entries_for(model, record, axis, cache):
+    """
+    Every cached verdict that describes THIS record on this axis, newest first.
+
+    By cache key, never by question. A question is not a unique thing to judge:
+    the same question, re-recorded under a changed retriever, is a different
+    answer over different chunks and needs its own verdict. Indexing the cache
+    by question - which is what this module did until 16.09 - hands back
+    whichever verdict was written last, so the moment a second recording is
+    judged, the first one's reported numbers quietly become verdicts about text
+    it does not contain (docs/lessons.md #25).
+
+    The key covers the prompt version too, so old-prompt entries are found by
+    trying the versions the cache actually holds. That is what lets
+    cache_freshness say "stale" about this record rather than about a question.
+    """
+    shapes = {(entry["mode"], entry.get("prompt_version")) for entry in cache.values()}
+    found = [
+        cache[key]
+        for mode, version in shapes
+        if (key := cache_key(model, axis, record, mode, version)) in cache
+    ]
+    return sorted(found, key=lambda entry: entry["judged"], reverse=True)
 
 
 def _slug(model):
@@ -585,18 +616,18 @@ def cache_freshness(model, records=None, axes=AXES, cache_dir=CACHE_DIR):
     """
     if records is None:
         records = refusal_answers()
-    entries = load_cache(model, cache_dir).values()
-
-    seen = {}
-    for entry in entries:
-        key = (entry["question"], entry["axis"])
-        seen.setdefault(key, set()).add(entry.get("prompt_version"))
+    cache = load_cache(model, cache_dir)
 
     current = stale = 0
     missing = []
     for record in records:
         for axis in axes:
-            versions = seen.get((record["question"], axis))
+            # Per record, not per question: a verdict about a different
+            # recording of the same question is not a verdict about this one,
+            # and counting it as current is how a stale number stays hidden.
+            versions = {
+                entry.get("prompt_version") for entry in entries_for(model, record, axis, cache)
+            }
             if not versions:
                 missing.append((record["question"], axis))
             elif PROMPT_VERSION in versions:
@@ -614,23 +645,30 @@ def cache_freshness(model, records=None, axes=AXES, cache_dir=CACHE_DIR):
     }
 
 
-def verdicts_by_question(model, cache_dir=CACHE_DIR):
+def verdicts_for(model, records, cache_dir=CACHE_DIR):
     """
-    {question: {axis: entry}} from a model's cache, newest entry winning.
+    {question: {axis: entry}} for these records, and the conflicts.
 
-    Indexed by what is inside the entries rather than by recomputing the key,
-    so the report does not have to know which mode a run used. When the same
-    question and axis were judged twice in different modes the later verdict
-    wins and the earlier one is returned as a conflict for the caller to
-    mention: silently averaging two experiments would be the worst option.
+    Resolved per record by entries_for, so the entries returned describe the
+    text in `records` and nothing else. A record judged twice - two modes, or
+    two prompt versions - uses the later verdict and reports the earlier one as
+    a conflict for the caller to mention: two experiments are not two samples,
+    and silently averaging them would be the worst option.
     """
-    latest, conflicts = {}, []
-    for entry in sorted(load_cache(model, cache_dir).values(), key=lambda e: e["judged"]):
-        slot = latest.setdefault(entry["question"], {})
-        if entry["axis"] in slot:
-            conflicts.append((entry["question"], entry["axis"]))
-        slot[entry["axis"]] = entry
-    return latest, conflicts
+    cache = load_cache(model, cache_dir)
+    found, conflicts = {}, []
+    for record in records:
+        slot = {}
+        for axis in AXES:
+            entries = entries_for(model, record, axis, cache)
+            if not entries:
+                continue
+            if len(entries) > 1:
+                conflicts.append((record["question"], axis))
+            slot[axis] = entries[0]
+        if slot:
+            found[record["question"]] = slot
+    return found, conflicts
 
 
 def decided_records(model, records=None, cache_dir=CACHE_DIR):
@@ -645,7 +683,7 @@ def decided_records(model, records=None, cache_dir=CACHE_DIR):
     """
     if records is None:
         records = refusal_answers()
-    found, conflicts = verdicts_by_question(model, cache_dir)
+    found, conflicts = verdicts_for(model, records, cache_dir)
     rows = []
     for record in records:
         by_axis = found.get(record["question"], {})

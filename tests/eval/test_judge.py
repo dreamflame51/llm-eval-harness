@@ -19,6 +19,7 @@ from llm_eval_harness.judge import (
     agreement,
     build_messages,
     cache_key,
+    decided_records,
     decision,
     extract_json,
     judge_records,
@@ -30,7 +31,7 @@ from llm_eval_harness.judge import (
     strip_thinking,
     thinking_default,
     user_prompt,
-    verdicts_by_question,
+    verdicts_for,
     write_cache,
 )
 
@@ -487,13 +488,33 @@ def test_agreement_with_nothing_to_compare():
 
 def test_verdicts_are_indexed_by_question_and_axis(tmp_path):
     chat_fn, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
-    judge_records(
-        [record("q1"), record("q2")], "m", chat_fn=chat_fn, cache_dir=tmp_path
-    )
-    found, conflicts = verdicts_by_question("m", cache_dir=tmp_path)
+    records = [record("q1"), record("q2")]
+    judge_records(records, "m", chat_fn=chat_fn, cache_dir=tmp_path)
+    found, conflicts = verdicts_for("m", records, cache_dir=tmp_path)
     assert set(found) == {"q1", "q2"}
     assert set(found["q1"]) == {"refused", "fabricated"}
     assert conflicts == []
+
+
+def test_a_second_recording_of_a_question_gets_its_own_verdict(tmp_path):
+    # The failure this is here for, and it is not hypothetical: judging a set
+    # recorded under a new retriever put two verdicts per question into one
+    # cache, and a lookup by question handed the older recording the newer
+    # verdict - verdicts about text it does not contain (docs/lessons.md #25).
+    old = record("q1", answer="The answer is missing.")
+    new = record("q1", answer="The maximum is three years.")
+    declined, _ = replies(REFUSED_REPLY, CLEAN_REPLY)
+    answered, _ = replies(json.dumps(HEDGED), CLEAN_REPLY)
+    judge_records([old], "m", chat_fn=declined, cache_dir=tmp_path)
+    judge_records([new], "m", chat_fn=answered, cache_dir=tmp_path)
+
+    rows, conflicts = decided_records("m", [old], cache_dir=tmp_path)
+    assert [refused for _, refused, _ in rows] == [True], "the old answer declined"
+    assert conflicts == [], "two recordings are not two verdicts about one record"
+
+    rows, _ = decided_records("m", [new], cache_dir=tmp_path)
+    # HEDGED declines and then answers, which decision() reads as not a refusal.
+    assert [refused for _, refused, _ in rows] == [False], "the new answer did not"
 
 
 def test_freshness_counts_what_the_current_prompt_covers(tmp_path):
@@ -541,7 +562,7 @@ def test_a_question_judged_twice_in_different_modes_is_a_conflict(tmp_path):
         structured=False,
         cache_dir=tmp_path,
     )
-    _, conflicts = verdicts_by_question("m", cache_dir=tmp_path)
+    _, conflicts = verdicts_for("m", [record("q1")], cache_dir=tmp_path)
     assert conflicts == [("q1", "refused")]
 
 
