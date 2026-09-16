@@ -1163,3 +1163,165 @@ gate was argued for on the grounds that this metric moves in steps of one
 record; here it earned its keep against a change the mean reports as zero -
 the same shape as [#22](#22), where two libraries agreed on the average and
 disagreed on almost every record.
+
+---
+
+<a id="26"></a>
+
+## 26. The cache was indexed by the question, and the question is not the thing being judged
+
+**Symptom.** Ten minutes after the second set was judged, the per-question
+regression gate went red on two records - the AES one and the SP 800-76 one -
+with the pinned dense verdicts disagreeing with what the harness now reported
+about the dense answers. Nothing had touched those answers. They had been
+frozen since 14.09.
+
+**Diagnosis.** Mine, made an hour earlier. `verdicts_by_question` built
+`{question: {axis: entry}}` by walking the whole cache file, newest entry
+winning. That is correct while a cache describes one recording. Judge a second
+recording of the same twelve questions into the same file - which is exactly
+what [#25](#25) called for - and every question has two verdicts, the newer one
+wins, and the older recording is now reported using verdicts about text it does
+not contain.
+
+The irony is precise: the cache **key** has always been content-addressed. It
+covers the prompt version, the mode, the model, the axis, the question, the
+answer and the chunks, and the module docstring says so. The lookup threw all
+of that away and matched on the question alone, so the guarantee existed and
+was not used.
+
+**Fix.** `entries_for(model, record, axis, cache)` recomputes the key for the
+record in hand, across the modes and prompt versions the cache actually holds,
+and returns only entries that describe *this* record. `decided_records`,
+`verdicts_for` and `cache_freshness` all go through it. One test pins the case
+directly: two recordings of one question, two verdicts, each record gets its
+own.
+
+While making the key reachable, the first attempt put `prompt_version` in the
+signature as a default argument - which binds the constant at import, so an
+edited prompt stops invalidating the cache. The test written two days earlier
+for exactly that caught it on the next run.
+
+**Lesson.** **A content-addressed store with a lookup that ignores the content
+is not content-addressed.** The key is the interface; if reads do not go
+through it, the property it guarantees is decorative.
+
+And the part that is about the harness rather than the bug: this was caught
+within minutes by a test that exists because of [#25](#25), on a repository
+whose own author had just written the lesson about stale fixtures. Knowing the
+failure mode did not prevent me from reintroducing it - the gate did.
+
+---
+
+<a id="27"></a>
+
+## 27. The finding I nearly wrote down, and the control that took it away
+
+**Symptom.** Two labelled recordings of the same twelve questions, one under
+dense retrieval and one under hybrid, and the hand labels read 11/12 clean
+against 9/12. Fusing BM25 in had raised `hit@5` from 0.423 to 0.538. The
+sentence writes itself: *better retrieval, worse grounding - a trade nobody was
+measuring*. It is a good finding. It went into the README and into two file
+headers before anything checked it.
+
+**Diagnosis.** The two recordings differ in more than the retriever. One was
+made on 14.09 and the other on 16.09, and this generator does not produce the
+same text twice across processes ([#17](#17)). So the comparison carries the
+retriever, the day, and whatever the model does differently on a reload, and
+attributes all of it to the retriever.
+
+The obvious mechanism did not survive a look either. "BM25 matches the document
+identifier the question names, drags in a chunk about the absent standard, and
+the model answers from it" is plausible and checkable, and it is wrong here: of
+the three records whose hand verdict got worse, two retrieved no BM25-only
+chunk at all, and the third's lexical chunk is about ECDSA signing, which its
+answer does not mention. What hybrid retrieval changed was the *mix and order*
+of five chunks that dense retrieval mostly also found.
+
+**The control.** `scripts/record_answers.py --retriever dense` - a flag added
+for this - records the same twelve questions through the embedding retriever
+alone, on the same afternoon as the hybrid set. Judged by the same model, with
+the same phrase list, both sides of two comparisons:
+
+| comparison | answers that changed | verdicts that moved |
+|---|---|---|
+| same retriever, two days apart | 8 of 12 | **0 of 12** |
+| retriever swapped, same afternoon | 7 of 12 | **2 of 12** |
+
+The two that move under the retriever swap are the AES record, which gets
+*better*, and the SP 800-76 record, which gets worse. They cancel: the judged
+metric is 10/12 on all three recordings and the phrase list is 11/12 on all
+three.
+
+**What survives.** Not the finding. What survives is better than the finding
+was:
+
+- **The generator's wording drifts; its behaviour does not.** Eight of twelve
+  answers re-worded across two days, and not one verdict moved on any axis.
+  Every earlier entry here treating drift as a threat to the measurement was
+  right about the text and wrong about the consequence - and this is the first
+  time the distinction has been measured rather than assumed.
+- **The retriever's effect on refusals is two records, in opposite
+  directions.** That is a real effect and an honest zero on the aggregate,
+  which is only visible per question ([#25](#25) again).
+- **The hand labels still read lower on hybrid**, and they do it on the
+  `fabricated` axis - the one where the judge agrees with a human at chance
+  ([#28](#28)). Whether that is the retriever is not settled, because the
+  control has not been hand-labelled. The instrument that can see the effect
+  and the instrument that was pointed at the control are not the same one.
+
+**Lesson.** **A comparison between two recordings is not a comparison between
+two systems.** Everything that changed between them is in the difference,
+including the day. The cost of the control was twelve minutes of generation and
+a four-line flag; the cost of skipping it would have been a confident causal
+claim in a portfolio document, which is the most expensive kind of wrong.
+
+And the smaller one: the mechanism a finding suggests is a separate claim from
+the finding, and it is usually cheaper to check than the finding itself. One
+`grep` for BM25-only chunks in three records took a minute and refuted the
+explanation I was about to publish.
+
+---
+
+<a id="28"></a>
+
+## 28. The judge is settled on the axis it was not needed for
+
+**Symptom.** The argument for building an LLM judge, written across
+[#18](#18) and the module docstring, is one sentence: the phrase list decides
+whether an answer declined and has no opinion about whether it then invented
+something, so a hedge that declines and fabricates is a pass for it,
+unconditionally. The judge exists for the second axis.
+
+Until 16.09 that axis had never been measured against a human, because no
+labelled answer in the fixture fabricated anything - the cell was empty. The
+re-labelled set has two.
+
+**Diagnosis.** Measured, on twelve records, against fresh hand labels:
+
+| axis | `qwen3:8b` | `gemma4` |
+|---|---|---|
+| `refused` | 12/12, kappa **1.00** | 11/12, kappa 0.75 |
+| `fabricated` | 9/12, kappa **-0.12** | 10/12, kappa 0.00 |
+
+The refused axis is settled - qwen3 reproduces the human exactly, and so does
+the phrase list, which is why the judge was never needed there. The fabricated
+axis is at chance for both judges, and gemma4's 10/12 is the tell: two of the
+twelve answers fabricate, so a judge that answers "no" every time scores 10/12
+and a kappa of 0.00. That is [#20](#20) in a second place - raw agreement is
+unreadable when the classes are this skewed.
+
+Per record: the humans found two fabrications, qwen3 found one and it was a
+different one, gemma4 found none.
+
+**Lesson.** **A component's justification has to be measured on the thing it
+was justified by.** This judge was validated for days on the axis it agrees
+about, while the axis it exists for went unmeasured because the fixture had no
+records of that shape. The number that would have falsified it was never
+available, and its absence read as support.
+
+What this does not license is deleting the judge on twelve records with a kappa
+that would swing on one relabelled answer. What it licenses is saying, in the
+README and in the docstring, which axis is trusted and which is not - and that
+the next useful work is more records of the shape that exercises it, not a
+better prompt.

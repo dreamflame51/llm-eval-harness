@@ -237,12 +237,12 @@ The generator's drift between processes cannot silently invalidate a hand label 
 
 **Run**
 
-- `python scripts/record_answers.py --set refusal --out eval/refusal_answers.hybrid.yaml`
+- `python scripts/record_answers.py --set refusal --out eval/refusal_answers.next.yaml`
 
 **Evidence**
 
 - [`eval/refusal_answers.yaml`](../eval/refusal_answers.yaml)
-- [`eval/refusal_answers.hybrid.yaml`](../eval/refusal_answers.hybrid.yaml)
+- [`eval/dense_baseline/refusal_answers.yaml`](../eval/dense_baseline/refusal_answers.yaml)
 - [`eval/answerable_answers.yaml`](../eval/answerable_answers.yaml)
 
 ## REQ-10

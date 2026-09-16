@@ -18,12 +18,8 @@ Two difficulty classes, reported separately because they are not equally hard:
 
 The split was made on the expectation that out_of_corpus is the easier class -
 a baseline that only an ungrounded system fails. The hand labels do not show
-that. Across the twelve labelled answers: in_corpus_gap 6/6 declined without
-fabricating, out_of_corpus 5/6, and the single failure of the set is an
-out_of_corpus record: asked for the minimum AES key size in FIPS 197, which is
-not in the corpus, the model answered "128 bits" from a chunk that mentions
-AES-128 as a card authentication key - the right number pulled out of text
-that was answering a different question. One record of difference at n=12 supports no ordering at
+that. On the current set: in_corpus_gap 5/6 declined without fabricating,
+out_of_corpus 4/6. Two records of difference at n=12 supports no ordering at
 all, in either direction. Reported separately because they are different
 questions, not because one of them is known to be harder.
 
@@ -35,27 +31,32 @@ against the chunks the generator actually saw (judge.py). It is computed over
 the frozen answers in eval/refusal_answers.yaml from verdicts committed under
 eval/judge_cache/, so it needs no model and does not move between runs.
 
-The phrase list below stays, and the measurement did not demote it. Against the
-twelve hand labels it called the refused axis correctly 12 out of 12, kappa
-1.00 - better than either judge (qwen3 11/12, gemma4 8/12). Its headline number
-on this set is 11/12, the same as the labels, failing on the same single
-record. Every claim previously made here about it being brittle was an argument
-from what it might do, not from what it did.
+The phrase list below stays, and the measurement did not demote it. Its
+headline on the current set is 11/12, and it was 11/12 on the set before it.
 
-What it still cannot do is the other axis. The phrase list decides refusal and
+What it cannot do is the other axis. The phrase list decides refusal and
 nothing else, so an answer that declines and then invents a figure counts as a
-success for it, unconditionally. That is the judge's only measured advantage,
-and this fixture does not yet exercise it: no labelled answer falls in the
-declined-and-invented cell. The judge is kept because it measures a second
-thing, not because it beat the first - and if a record of that shape is ever
-added, the phrase list will pass it and the judge will have to catch it.
+success for it, unconditionally. That is the judge's only claimed advantage -
+and re-labelling the set by hand on 16.09 put a number on it for the first time
+on records that actually carry fabrication:
 
-The judge is qwen3:8b, chosen by measurement and not by size: against the hand
-labels it agrees 11/12 on the headline decision, gemma4 8/12. Neither reaches
-the phrase list on the refused axis alone. gemma4's misses
-are systematic rather than random - it reads a recital of nearby corpus
-content as an answer where the labels read a refusal - and it judged its own
-answers, which is why a second judge was run at all. Both judges pass
+    axis        qwen3:8b vs labels      gemma4 vs labels
+    refused     12/12, kappa  1.00      11/12, kappa 0.75
+    fabricated   9/12, kappa -0.12      10/12, kappa 0.00
+
+The refused axis is settled and the fabricated axis is not measurably better
+than guessing, on either judge. Raw agreement of 75-83% hides that, which is
+[#20](docs/lessons.md#20) again: with two labelled fabrications out of twelve,
+a judge that says "no" every time scores 10/12. The humans found two, qwen3
+found one - a different one - and gemma4 found none.
+
+So the judge is kept for the axis it was built for and the axis it is trusted
+on are not the same thing, and that has to be said out loud rather than left in
+a docstring that predates the measurement (docs/lessons.md #28). n is twelve;
+the kappas are brittle; the direction is not.
+
+The judge is qwen3:8b, chosen by measurement and not by size. gemma4 judged its
+own answers, which is why a second judge was run at all. Both pass
 scripts/calibrate_judge.py, so a verdict of "nothing fabricated" is a verdict
 and not a stuck axis.
 

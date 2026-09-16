@@ -222,6 +222,14 @@ def main():
         help="with --keep-labels, the file to carry labels from. Defaults to "
         "the file being written; point it at the old set when recording beside it",
     )
+    parser.add_argument(
+        "--retriever",
+        choices=("pipeline", "dense"),
+        default="pipeline",
+        help="pipeline (the default) records what the product answers with. "
+        "dense records the same questions through the embedding retriever "
+        "alone - a control, for measuring what fusing BM25 in actually did",
+    )
     args = parser.parse_args()
     if args.keep_labels and args.set != "refusal":
         raise SystemExit("--keep-labels applies to the refusal set; it is the only labelled one")
@@ -236,8 +244,16 @@ def main():
             "from. Pass --force only if you mean to discard them."
         )
 
+    if args.retriever == "dense":
+        # The control for the retrieval comparison, and the reason this is a
+        # flag rather than a scratch script: "hybrid refuses less often than
+        # dense" is a claim about two recordings made two days apart, and the
+        # only way to separate the retriever from the day is to record both
+        # sides on the same afternoon (docs/lessons.md #27).
+        pipeline.RETRIEVE = store.search
+
     records = refusal_records() if refusal else answerable_records()
-    print(f"recording {len(records)} answers - one model call each\n")
+    print(f"recording {len(records)} answers through {pipeline.RETRIEVE.__name__}\n")
     rows = build(records, refusal=refusal)
 
     kept, stale = [], []

@@ -185,16 +185,33 @@ screen. They keep extraction artifacts verbatim (`T he`, `process43`,
 `Rivest-Shamir- Adleman`). Removing those would be wrong: the retriever indexes
 the mangled text, so a clean quote would score a correct retrieval as a miss.
 
-**Two recorded sets of refusal answers, and the reason is worth reading.** A
-recorded answer is a photograph of the system that produced it, so the twelve
-hand labels in `eval/refusal_answers.yaml` describe **dense** retrieval - what
-the product used until BM25 was fused in on 15.09. `eval/refusal_answers.hybrid.yaml`
-is the same twelve questions under the retriever the product uses now, recorded
-beside the old set rather than over it: a label describes one answer against
-the chunks it was written from, and none of the twelve survived the change
-(`--keep-labels` carried exactly 0). Until the hybrid set is labelled by hand,
-the reported refusal numbers are the dense ones and say so
-([#25](docs/lessons.md#25)).
+**Two recorded sets of refusal answers, and the comparison between them is a
+finding.** A recorded answer is a photograph of the system that produced it, so
+when BM25 was fused into retrieval the twelve hand labels stopped describing
+the running system. The set was recorded again and labelled again - beside the
+old one, not over it, because a label describes one answer against the chunks
+it was written from and none of the twelve survived the change (`--keep-labels`
+carried exactly 0).
+
+| set | retriever | recorded | judged | phrase | by hand |
+|---|---|---|---|---|---|
+| `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
+| `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | not labelled |
+| `eval/refusal_answers.yaml` (current) | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
+
+The third row is the control, and it is there because a comparison between two
+recordings is not a comparison between two systems. Recording the same twelve
+questions twice under the *same* retriever, two days apart, changes 8 of the 12
+answers' wording and moves **no verdict at all**. Swapping the retriever on the
+same afternoon changes 7 answers and moves exactly **two** - the AES record for
+the better, the SP 800-76 record for the worse. The judged metric is 10/12 in
+all three, so what the retriever did to refusals nets to zero there.
+
+The hand labels are the one instrument that reads lower on hybrid, and they do
+it on the `fabricated` axis - which is the axis the judge agrees with a human
+on at chance level (below). Whether that is the retriever or the recording is
+not settled: the control has not been labelled by hand
+([#25](docs/lessons.md#25), [#27](docs/lessons.md#27)).
 
 ## What the metrics mean
 
@@ -254,11 +271,11 @@ questions, decided separately by an LLM judge: `refused` from the answer alone,
 
 | | declined, invented nothing |
 |---|---|
-| hand labels | **11/12** |
+| hand labels | **9/12** |
 | judge, `qwen3:8b` | 10/12 |
 | phrase list (tripwire) | 11/12 |
 
-by class, by the labels: `in_corpus_gap` 6/6, `out_of_corpus` 5/6.
+by class, by the labels: `in_corpus_gap` 5/6, `out_of_corpus` 4/6.
 
 **These numbers do not move between runs.** The twelve answers are frozen in
 `eval/refusal_answers.yaml`, hand-labelled, and the judge's verdicts are
@@ -266,17 +283,26 @@ committed under `eval/judge_cache/`, so `refusal` reads them back without
 loading a model. Earlier refusal numbers in this README were samples of a
 drifting generator; these are not.
 
-**The judge did not beat the phrase list, and that is a result.** Against the
-hand labels on the refusal axis: phrase list 12/12 (kappa 1.00), `qwen3:8b`
-11/12, `gemma4` 8/12. The list had been called brittle for three entries of
-[docs/lessons.md](docs/lessons.md) running - it misses a refusal worded
-unexpectedly, it passes a hedge that declines and then invents - but neither
-shape occurs in the answers this generator actually produced. What the list
-cannot do is the second axis: it has no opinion about fabrication, so an answer
-that declines and then invents a figure is a pass for it, unconditionally. The
-cell where that shows up is empty on this fixture, so even that advantage is
-unexercised. Both are kept, and every disagreement between them is printed.
-See [#18](docs/lessons.md#18).
+**The judge is settled on one axis and at chance on the other.** Against the
+hand labels, re-made on 16.09 on a set that does carry fabrications:
+
+| axis | `qwen3:8b` | `gemma4` |
+|---|---|---|
+| `refused` | 12/12, kappa **1.00** | 11/12, kappa 0.75 |
+| `fabricated` | 9/12, kappa **-0.12** | 10/12, kappa 0.00 |
+
+Raw agreement of 75-83% on the second row hides that it is no better than
+guessing: two of the twelve answers were labelled as fabricating, so a judge
+that always says "no" scores 10/12. Two humans-found fabrications, one found by
+`qwen3` - a different one - and none by `gemma4`. That axis is the judge's
+whole reason to exist next to the phrase list, and this is the first set with
+records of that shape to measure it on. n is twelve and the kappas are brittle;
+the direction is not. See [#20](docs/lessons.md#20) and
+[#28](docs/lessons.md#28).
+
+The phrase list is kept beside it: it decides refusal and nothing else, so a
+hedge that declines and then invents is a pass for it, unconditionally. Every
+disagreement between the two is printed. See [#18](docs/lessons.md#18).
 
 `gemma4` judged its own answers, which is why a second judge was run at all.
 The self-preference it was set up to catch did not appear; the opposite did,

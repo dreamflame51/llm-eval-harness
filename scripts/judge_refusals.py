@@ -20,9 +20,10 @@ than twelve times.
 """
 
 import argparse
+import pathlib
 import time
 
-from llm_eval_harness.dataset import refusal_answers
+from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, refusal_answers
 from llm_eval_harness.judge import (
     AXES,
     decision,
@@ -64,6 +65,13 @@ def parse_args():
         action="store_true",
         help="re-ask even when a verdict is cached, replacing it",
     )
+    parser.add_argument(
+        "--file",
+        type=pathlib.Path,
+        default=REFUSAL_ANSWERS_PATH,
+        help="the recorded set to judge. Verdicts from different sets share one "
+        "cache file safely - the answer and its chunks are in the key",
+    )
     return parser.parse_args()
 
 
@@ -82,7 +90,7 @@ def line(i, total, entry, from_cache):
 
 def main():
     args = parse_args()
-    records = refusal_answers()
+    records = refusal_answers(args.file)
     if args.limit:
         records = records[: args.limit]
     axes = tuple(args.axes) if args.axes else AXES
@@ -90,7 +98,7 @@ def main():
     structured = not args.free
 
     resolved = thinking_default(args.model) if think == "default" else think
-    print(f"{args.model}, {len(records)} records x {len(axes)} axes")
+    print(f"{args.model}, {len(records)} records x {len(axes)} axes from {args.file}")
     print(f"mode {mode_string(resolved, structured)}\n")
 
     latencies = []
