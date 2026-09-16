@@ -34,7 +34,7 @@ from llm_eval_harness.chunker import chunk_text
 from llm_eval_harness.dataset import answerable_records
 from llm_eval_harness.evaluator import K, evaluate_retrieval
 from llm_eval_harness.loader import load_pdf
-from llm_eval_harness.store import EMBEDDER, build_index, client, search
+from llm_eval_harness.store import build_index, client, embedder, search
 from llm_eval_harness.validate import CORPUS_DIR, _norm
 
 # One factor at a time: the embedding model is held fixed, so every difference
@@ -77,18 +77,17 @@ def ceilings(records, docs, size, overlap, k=K):
 def score(chunks, size, overlap):
     """Index this chunking into a throwaway collection and score the retriever."""
     name = f"sweep-{size}-{overlap}"
+    chroma = client()
     try:
-        client.delete_collection(name)  # leftover from an interrupted run
+        chroma.delete_collection(name)  # leftover from an interrupted run
     except NotFoundError:
         pass
-    collection = client.create_collection(name, embedding_function=EMBEDDER)
+    coll = chroma.create_collection(name, embedding_function=embedder())
     try:
-        build_index(chunks, coll=collection)
-        return evaluate_retrieval(
-            search_fn=lambda q, k=K: search(q, k=k, coll=collection)
-        )
+        build_index(chunks, coll=coll)
+        return evaluate_retrieval(search_fn=lambda q, k=K: search(q, k=k, coll=coll))
     finally:
-        client.delete_collection(name)
+        chroma.delete_collection(name)
 
 
 HEADER = (

@@ -1,3 +1,5 @@
+import functools
+
 import chromadb
 from chromadb.utils import embedding_functions
 
@@ -8,12 +10,29 @@ from llm_eval_harness.lexical import BM25, rrf
 # equal chunking (hit@5 0.308 vs 0.192). Stated explicitly rather than left to
 # Chroma's default so a future change is a decision, not a drift.
 # Changing it invalidates every stored vector - rebuild data/chroma from zero.
-EMBEDDER = embedding_functions.SentenceTransformerEmbeddingFunction(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
-client = chromadb.PersistentClient(path="data/chroma")
-collection = client.get_or_create_collection("docs", embedding_function=EMBEDDER)
+# Built on first use, not on import. These three used to be module-level
+# expressions, so `import store` - and therefore `import pipeline` - loaded a
+# sentence-transformer and opened the Chroma directory before anything had
+# asked for a search. Two modules carry lazy imports of their own to dodge
+# that, which is the symptom: a cost nobody asked for gets routed around
+# rather than removed. cache, not a global, so the "built once" part survives.
+
+
+@functools.cache
+def embedder():
+    return embedding_functions.SentenceTransformerEmbeddingFunction(model_name=MODEL_NAME)
+
+
+@functools.cache
+def client():
+    return chromadb.PersistentClient(path="data/chroma")
+
+
+@functools.cache
+def collection():
+    return client().get_or_create_collection("docs", embedding_function=embedder())
 
 
 def build_index(chunks, coll=None):
@@ -21,8 +40,8 @@ def build_index(chunks, coll=None):
     # chunk count depends on the chunk size: 5054 at 800/160 fits, 8085 at
     # 500/100 does not. Batching here rather than at the call site keeps that
     # limit from deciding which chunk sizes the project is able to index.
-    target = coll or collection
-    batch = client.get_max_batch_size()
+    target = coll or collection()
+    batch = client().get_max_batch_size()
     for start in range(0, len(chunks), batch):
         window = chunks[start : start + batch]
         target.upsert(
@@ -35,7 +54,7 @@ def build_index(chunks, coll=None):
 def search(query, k=5, coll=None):
     if k <= 0:
         return []
-    res = (coll or collection).query(query_texts=[query], n_results=k)
+    res = (coll or collection()).query(query_texts=[query], n_results=k)
     docs = res["documents"][0]
     metas = res["metadatas"][0]
     dists = res["distances"][0]
@@ -61,7 +80,7 @@ def lexical_index(coll=None):
     cannot disagree about what the corpus is: whatever was embedded is what
     gets word-matched.
     """
-    target = coll or collection
+    target = coll or collection()
     if target.name not in _lexical:
         stored = target.get(include=["documents", "metadatas"])
         _lexical[target.name] = BM25(

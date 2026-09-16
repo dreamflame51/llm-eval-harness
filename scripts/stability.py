@@ -40,6 +40,8 @@ import subprocess
 import sys
 import time
 
+from llm_eval_harness import pins
+
 OUT = pathlib.Path("eval/drift.json")
 
 # Run one pass and print it as JSON on stdout. Kept as a string rather than a
@@ -96,42 +98,39 @@ def run_once(limit, in_process):
     raise SystemExit(f"child produced no result:\n{done.stdout[-2000:]}\n{done.stderr[-2000:]}")
 
 
-EXPECTED = pathlib.Path("eval/expected_metrics.json")
-
-
 def compare_to_pinned(verdicts):
     """
-    Live verdicts against the ones pinned from the frozen answers.
+    Live phrase verdicts, run by run, against the ones pinned from the frozen
+    answers.
 
     This is the gate the measurement earns. The metric here can only move in
     steps of one record, so a bar on the average is either "one record" or
     nothing; what is worth failing on is a question the phrase list used to
-    recognise as a refusal and no longer does. That comparison is only
-    possible per question, and only because the frozen verdicts are pinned.
+    recognise as a refusal and no longer does.
 
-    Returns (flips, checked). A question the pin does not know about is
-    reported rather than ignored - it means the fixture grew and the pin did
-    not.
+    The comparison itself is pins.compare - the same one scripts/live_check.py
+    uses, which judges rather than phrase-matches. What is local to this script
+    is the loop over runs: any run disagreeing with the pin counts, because
+    "usually a refusal" is exactly the state this check exists to surface, and
+    the run number is reported so a reader can see whether it was the first.
     """
-    if not EXPECTED.exists():
-        return None
-    pinned = json.loads(EXPECTED.read_text(encoding="utf-8"))["refusal"].get("per_question")
+    pinned = pins.pinned_verdicts()
     if not pinned:
         return None
 
-    flips, unknown = [], []
-    for question, flags in verdicts.items():
-        was = pinned.get(question)
-        if was is None:
-            unknown.append(question)
-            continue
-        # Any run disagreeing with the pin counts: the question is either
-        # recognised as a refusal or it is not, and "usually" is the state
-        # this check exists to surface.
-        for i, flag in enumerate(flags, 1):
-            if flag != was["phrase"]:
-                flips.append((question, i, was["phrase"], flag))
-                break
+    flips, unknown, seen = [], [], set()
+    for run in range(max((len(flags) for flags in verdicts.values()), default=0)):
+        observed = {
+            question: {"phrase": flags[run]}
+            for question, flags in verdicts.items()
+            if run < len(flags)
+        }
+        result = pins.compare(observed, pinned, axes=("phrase",))
+        unknown = result["unknown"]
+        for question, _, was, now in result["flips"]:
+            if question not in seen:
+                seen.add(question)
+                flips.append((question, run + 1, was, now))
     return {"flips": flips, "unknown": unknown, "checked": len(verdicts) - len(unknown)}
 
 
@@ -222,11 +221,7 @@ def main():
         print(f"\nAGAINST THE PIN: {len(against_pinned['flips'])} question(s) changed verdict")
         for question, run, was, now in against_pinned["flips"]:
             print(f"  run {run}: {was} -> {now}  {question[:60]}")
-        print(
-            "\nThe live generator no longer behaves the way the frozen answers say it does.\n"
-            "Either the system regressed, or the frozen set is stale and needs re-recording -\n"
-            "scripts/record_answers.py, and the labels that survive it are reported."
-        )
+        print("\n" + pins.STALE_OR_REGRESSED)
         raise SystemExit(1)
     print(f"\nAll {against_pinned['checked']} questions agree with the pinned verdicts.")
 

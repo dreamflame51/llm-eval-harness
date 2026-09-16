@@ -250,7 +250,7 @@ def main():
         options={"temperature": 0, "seed": 0},
         retriever=pipeline.RETRIEVE.__name__,
         k=pipeline.K,
-        embedder=store.EMBEDDER.__class__.__name__ + " all-MiniLM-L6-v2",
+        embedder=store.MODEL_NAME,
         size=chunker.SIZE,
         overlap=chunker.OVERLAP,
     )

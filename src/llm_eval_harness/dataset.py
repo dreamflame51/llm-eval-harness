@@ -60,25 +60,6 @@ def load_ground_truth(
     return data
 
 
-def get_qa(
-    index_or_question: int | str,
-    path: str | pathlib.Path = GROUND_TRUTH_PATH,
-) -> dict[str, Any]:
-    """
-    Return a single ground-truth record.
-
-    Guaranteed keys: question, answer, contexts, answerable.
-    Optional keys (when present): source, refusal_type, page.
-    """
-    records = load_ground_truth(path)
-    if isinstance(index_or_question, int):
-        return records[index_or_question]
-    for rec in records:
-        if rec["question"] == index_or_question:
-            return rec
-    raise KeyError(f"Question not found: {index_or_question!r}")
-
-
 def _normalize(record: dict[str, Any]) -> dict[str, Any]:
     """Emit the canonical shape used by downstream evaluation code."""
     out = {

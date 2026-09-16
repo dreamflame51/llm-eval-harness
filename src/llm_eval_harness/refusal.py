@@ -61,6 +61,13 @@ and not a stuck axis.
 
 Run:  uv run python -m llm_eval_harness.refusal          judged, from the cache
       uv run python -m llm_eval_harness.refusal --live   generate and match
+
+--live is the diagnostic of the three commands that generate fresh answers: it
+prints each answer in full and flags concrete figures, and it decides nothing.
+scripts/stability.py repeats that to measure how far the number moves when
+nothing changes, and scripts/live_check.py runs it once and judges both axes
+against the pin. The last two can fail a release; this one cannot. The map is
+in the README, and what the two gates share is llm_eval_harness/pins.py.
 """
 
 import re

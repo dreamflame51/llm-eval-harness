@@ -39,7 +39,7 @@ Served by REQ-01 (gate), REQ-06 (gate), REQ-07 (gate), REQ-10 (gate).
 Served by REQ-08 (gate), REQ-09 (gate).
 
 
-10 requirements, 27 test references, 6 held as gates.
+10 requirements, 30 test references, 6 held as gates.
 
 | id | requirement | held as | lesson |
 |---|---|---|---|
@@ -52,7 +52,7 @@ Served by REQ-08 (gate), REQ-09 (gate).
 | REQ-07 | Every reported number can be recomputed with no model installed, by someone who has only the repository. | gate | [17](lessons.md#17) |
 | REQ-08 | A change to the judge's prompt cannot leave the report quoting verdicts written for the previous one. | gate | [18](lessons.md#18) |
 | REQ-09 | The generator's drift between processes cannot silently invalidate a hand label or a cached verdict: what was judged is frozen, and a label travels to a new recording only when the text it describes is unchanged. | gate | [17](lessons.md#17) |
-| REQ-10 | No reported number moves without someone saying so in a commit. | gate | [12](lessons.md#12) |
+| REQ-10 | No reported number moves without someone saying so in a commit - and a question that changes behaviour is caught even when the average does not move, which on 16.09 is what happened. | gate | [25](lessons.md#25) |
 
 ## REQ-01
 
@@ -237,16 +237,17 @@ The generator's drift between processes cannot silently invalidate a hand label 
 
 **Run**
 
-- `python scripts/record_answers.py --set refusal --keep-labels`
+- `python scripts/record_answers.py --set refusal --out eval/refusal_answers.hybrid.yaml`
 
 **Evidence**
 
 - [`eval/refusal_answers.yaml`](../eval/refusal_answers.yaml)
+- [`eval/refusal_answers.hybrid.yaml`](../eval/refusal_answers.hybrid.yaml)
 - [`eval/answerable_answers.yaml`](../eval/answerable_answers.yaml)
 
 ## REQ-10
 
-No reported number moves without someone saying so in a commit.
+No reported number moves without someone saying so in a commit - and a question that changes behaviour is caught even when the average does not move, which on 16.09 is what happened.
 
 **Held as** gate.
 
@@ -254,10 +255,14 @@ No reported number moves without someone saying so in a commit.
 
 - `tests/eval/test_regression.py::test_the_phrase_list_tripwire_has_not_moved`
 - `tests/eval/test_regression.py::test_the_class_split_has_not_moved`
+- `tests/eval/test_regression.py::test_no_single_question_changed_verdict`
+- `tests/eval/test_pins.py::test_a_verdict_that_moved_is_reported_with_both_values`
+- `tests/eval/test_pins.py::test_a_flip_in_the_other_direction_counts_too`
 
 **Run**
 
 - `python scripts/freeze_metrics.py`
+- `python scripts/live_check.py`
 
 **Evidence**
 

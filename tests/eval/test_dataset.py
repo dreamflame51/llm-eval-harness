@@ -5,7 +5,7 @@ import pytest
 from llm_eval_harness.dataset import (
     REFUSAL_TYPES,
     answerable_records,
-    get_qa,
+    library_scores,
     load_ground_truth,
     refusal_answers,
     refusal_records,
@@ -65,14 +65,27 @@ def test_refusal_type_filter_partitions_the_refusal_set():
     assert by_class == len(refusal_records())
 
 
-def test_get_qa_by_index_and_by_question():
-    first = get_qa(0)
-    assert get_qa(first["question"])["answer"] == first["answer"]
+# --- the library score files, whichever shape they are in ------------------
 
 
-def test_get_qa_raises_on_unknown_question():
-    with pytest.raises(KeyError):
-        get_qa("no such question")
+def test_library_scores_reads_both_shapes(tmp_path):
+    # The two files really are shaped differently and both are committed, so
+    # this is the one place that difference is allowed to exist. The test is
+    # here because three readers used to carry their own copy of it.
+    as_map = tmp_path / "map.json"
+    as_map.write_text('{"per_record": {"q1": {"faithfulness": 1.0}}}', encoding="utf-8")
+    as_list = tmp_path / "list.json"
+    as_list.write_text(
+        '{"per_record": [{"question": "q1", "faithfulness": 1.0}]}', encoding="utf-8"
+    )
+    assert library_scores(as_map)["q1"]["faithfulness"] == 1.0
+    assert library_scores(as_list)["q1"]["faithfulness"] == 1.0
+
+
+def test_library_scores_of_a_file_that_is_not_there_is_empty(tmp_path):
+    # An unfinished run is an ordinary state here, not an error: the callers
+    # decide what to do with nothing, and one of them pins numbers.
+    assert library_scores(tmp_path / "absent.json") == {}
 
 
 # --- the frozen answers ----------------------------------------------------

@@ -34,7 +34,7 @@ DEPTH = 10
 
 
 def chunks_from_index():
-    stored = collection.get(include=["documents", "metadatas"])
+    stored = collection().get(include=["documents", "metadatas"])
     return [
         {"text": text, "source": meta.get("source")}
         for text, meta in zip(stored["documents"], stored["metadatas"], strict=True)

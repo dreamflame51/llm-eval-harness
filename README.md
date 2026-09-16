@@ -148,6 +148,16 @@ minutes on this hardware:
 | `uv run pytest` | the harness test suite |
 | `uv run pytest practice` | interview drill code, kept out of the main suite |
 
+**Three commands generate fresh answers, and they are not interchangeable.**
+They were converging on each other by accident, so the map is written down
+here and the comparison they share lives in `llm_eval_harness/pins.py`:
+
+| command | asks | fails a release? |
+|---|---|---|
+| `refusal.py --live` | what does it say right now? Phrase-matched, answers printed in full | no - a diagnostic |
+| `stability.py` | how much does the number move when nothing changes? N runs, fresh process each | yes, if a question flips against the pin |
+| `live_check.py` | does the live system still behave as the frozen set says? One run, judged on both axes | yes |
+
 ## The reference set
 
 `eval/ground_truth.yaml` - 38 records:

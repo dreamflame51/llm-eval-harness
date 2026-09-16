@@ -164,21 +164,28 @@
     - tests/eval/test_record_answers.py::test_a_changed_answer_does_not
     - tests/eval/test_label_refusals.py::test_the_frozen_text_is_not_reformatted
   checks:
-    - python scripts/record_answers.py --set refusal --keep-labels
+    - python scripts/record_answers.py --set refusal --out eval/refusal_answers.hybrid.yaml
   evidence:
     - eval/refusal_answers.yaml
+    - eval/refusal_answers.hybrid.yaml
     - eval/answerable_answers.yaml
   lesson: docs/lessons.md#17
 
 - id: REQ-10
   requirement: >-
-    No reported number moves without someone saying so in a commit.
+    No reported number moves without someone saying so in a commit - and a
+    question that changes behaviour is caught even when the average does not
+    move, which on 16.09 is what happened.
   measured: gate
   tests:
     - tests/eval/test_regression.py::test_the_phrase_list_tripwire_has_not_moved
     - tests/eval/test_regression.py::test_the_class_split_has_not_moved
+    - tests/eval/test_regression.py::test_no_single_question_changed_verdict
+    - tests/eval/test_pins.py::test_a_verdict_that_moved_is_reported_with_both_values
+    - tests/eval/test_pins.py::test_a_flip_in_the_other_direction_counts_too
   checks:
     - python scripts/freeze_metrics.py
+    - python scripts/live_check.py
   evidence:
     - eval/expected_metrics.json
-  lesson: docs/lessons.md#12
+  lesson: docs/lessons.md#25
