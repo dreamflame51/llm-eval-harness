@@ -56,8 +56,11 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get("Content-Length") or 0)
+            # AttributeError is in the list because "question" is not
+            # guaranteed to be a string: {"question": 5} used to reach .strip()
+            # and take the handler down with a traceback instead of a 400.
             question = json.loads(self.rfile.read(length))["question"].strip()
-        except (ValueError, KeyError, TypeError):
+        except (ValueError, KeyError, TypeError, AttributeError):
             self._send(400, "text/plain; charset=utf-8", b"send {'question': '...'}")
             return
         if not question or len(question) > MAX_QUESTION:

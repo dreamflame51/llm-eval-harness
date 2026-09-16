@@ -24,6 +24,7 @@ import statistics
 
 import pytest
 
+from llm_eval_harness.dataset import library_scores
 from llm_eval_harness.judge import cache_freshness
 from llm_eval_harness.refusal import JUDGE, evaluate_judged
 
@@ -135,8 +136,7 @@ def test_library_scores_have_not_moved(expected, library):
     if not path.exists():
         pytest.skip(f"{path} missing - that run has not been repeated here")
 
-    stored = json.loads(path.read_text(encoding="utf-8"))["per_record"]
-    rows = list(stored.values()) if isinstance(stored, dict) else stored
+    rows = list(library_scores(path).values())
     for metric, value in pinned.items():
         values = [row[metric] for row in rows if row.get(metric) is not None]
         assert values, f"{library}: no records scored {metric}"

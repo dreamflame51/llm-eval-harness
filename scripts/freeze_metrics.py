@@ -24,6 +24,7 @@ import statistics
 
 import yaml
 
+from llm_eval_harness.dataset import library_scores
 from llm_eval_harness.judge import cache_freshness
 from llm_eval_harness.refusal import JUDGE, evaluate_judged
 
@@ -40,10 +41,7 @@ def library_means(path, records):
     that produces a test that fails seconds later - which is how this guard
     got written.
     """
-    if not path.exists():
-        return None
-    stored = json.loads(path.read_text(encoding="utf-8"))["per_record"]
-    rows = list(stored.values()) if isinstance(stored, dict) else stored
+    rows = list(library_scores(path).values())
     if len(rows) < records:
         return None
 

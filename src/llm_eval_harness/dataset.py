@@ -15,6 +15,7 @@ against it and scoring the result belongs in evaluator.py.
 
 from __future__ import annotations
 
+import json
 import pathlib
 from collections.abc import Iterator
 from typing import Any
@@ -179,6 +180,27 @@ def refusal_answers(
                     f"got {labels[key]!r}"
                 )
     return data
+
+
+def library_scores(path: str | pathlib.Path) -> dict[str, dict[str, Any]]:
+    """
+    A library's per-record scores, keyed by question. Empty when absent.
+
+    The two score files are shaped differently - scripts/ragas_eval.py writes a
+    mapping keyed by question, scripts/deepeval_eval.py writes a list of rows -
+    because they were written weeks apart and nothing forced them to agree.
+    Both are committed and neither can be reshaped without rewriting a file
+    whose values are pinned, so the difference is absorbed here instead: three
+    readers (the readout page, the freeze script and the regression test) had
+    each grown a private copy of the same sniff.
+    """
+    path = pathlib.Path(path)
+    if not path.exists():
+        return {}
+    stored = json.loads(path.read_text(encoding="utf-8"))["per_record"]
+    if isinstance(stored, dict):
+        return stored
+    return {row["question"]: row for row in stored}
 
 
 if __name__ == "__main__":

@@ -211,9 +211,15 @@ def evaluate_judged(model=JUDGE, rows=None):
     by_class = {}
     for result in results:
         bucket = by_class.setdefault(
-            result["refusal_type"], {"n": 0, "clean": 0, "refused": 0, "fabricated": 0}
+            result["refusal_type"],
+            {"n": 0, "decided": 0, "clean": 0, "refused": 0, "fabricated": 0},
         )
         bucket["n"] += 1
+        # Counted separately from n for the same reason the headline excludes
+        # undecided records: a class whose cache has a hole would otherwise
+        # report clean out of a denominator the total does not use, and the two
+        # halves of the same table would be answering different questions.
+        bucket["decided"] += result["clean"] is not None
         bucket["clean"] += bool(result["clean"])
         bucket["refused"] += bool(result["refused"])
         bucket["fabricated"] += bool(result["fabricated"])
@@ -244,9 +250,11 @@ def print_judged(result):
     if result["undecided"]:
         print(f"no verdict for {result['undecided']} - run scripts/judge_refusals.py")
     for refusal_type, bucket in sorted(result["by_class"].items(), key=lambda x: str(x[0])):
+        undecided = bucket["n"] - bucket["decided"]
         print(
-            f"  {refusal_type}: {bucket['clean']}/{bucket['n']} clean "
+            f"  {refusal_type}: {bucket['clean']}/{bucket['decided']} clean "
             f"({bucket['refused']} refused, {bucket['fabricated']} fabricated)"
+            + (f", {undecided} without a verdict" if undecided else "")
         )
 
     print(f"\nphrase list (tripwire): refusal rate {result['phrase_rate']:.2f}")

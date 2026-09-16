@@ -64,7 +64,8 @@ def main():
         records = records[: args.limit]
 
     print(f"{len(records)} questions, generated now and judged by {args.judge}")
-    print("this calls the model twice per record and is not fast\n", flush=True)
+    print("all answers first, then all verdicts - three model calls a record, "
+          "and not fast\n", flush=True)
 
     # A cache in a temporary directory: these verdicts describe text that will
     # not exist after this run, and mixing them into eval/judge_cache/ would
@@ -73,16 +74,29 @@ def main():
     cache, rows = {}, []
     started = time.perf_counter()
 
+    # Generating and judging are two passes, not one loop, because they use two
+    # different models and only one of them fits in 4 GB of VRAM at a time.
+    # Interleaved, this reloaded a model on every call - two dozen reloads for
+    # twelve records - and each reload re-decides the GPU/CPU layer split,
+    # which is the exact source of the drift this check gates on
+    # (docs/lessons.md #17). Batched by model, it happens once.
+    fresh_answers = []
     for i, record in enumerate(records, 1):
         answer = pipeline.answer(record["question"])
-        fresh = {
-            "question": record["question"],
-            "answer": answer["answer"].strip(),
-            "retrieved": [
-                {"source": c["source"], "text": c["text"], "distance": c.get("distance")}
-                for c in answer["contexts"]
-            ],
-        }
+        fresh_answers.append(
+            {
+                "question": record["question"],
+                "answer": answer["answer"].strip(),
+                "retrieved": [
+                    {"source": c["source"], "text": c["text"], "distance": c.get("distance")}
+                    for c in answer["contexts"]
+                ],
+            }
+        )
+        print(f"  generated {i:>2}/{len(records)}  {record['question'][:52]}", flush=True)
+
+    print(f"\njudging with {args.judge}\n", flush=True)
+    for i, (record, fresh) in enumerate(zip(records, fresh_answers, strict=True), 1):
         verdicts = {}
         for axis in AXES:
             _, entry, _ = judge_record(

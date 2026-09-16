@@ -33,12 +33,12 @@ coverage@5 counts word runs from the gold span, context_recall asks a model
 whether the reference is covered.
 """
 
-import json
 import pathlib
 import statistics
 
 import yaml
 
+from llm_eval_harness.dataset import library_scores
 from llm_eval_harness.refusal import looks_like_refusal
 
 ANSWERS = pathlib.Path("eval/answerable_answers.yaml")
@@ -52,6 +52,13 @@ BASELINE = pathlib.Path("eval/dense_baseline")
 
 METRICS = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 
+# Quoted, not computed: this script runs in the CI job that has no index and
+# no model, and recomputing these would need both. What the quote has to carry
+# is which system it describes - a bare number here read as current for a day
+# after the retriever changed under it (docs/lessons.md #25).
+RETRIEVAL = {"hit": 0.538, "covered": 0.577, "coverage": 0.606}
+RETRIEVAL_MEASURED = "hybrid retrieval, measured 2026-09-16"
+
 
 def load():
     """
@@ -63,20 +70,7 @@ def load():
     and are skipped.
     """
     rows = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
-    ragas = (
-        json.loads(RAGAS.read_text(encoding="utf-8"))["per_record"]
-        if RAGAS.exists()
-        else {}
-    )
-    deepeval = (
-        {
-            row["question"]: row
-            for row in json.loads(DEEPEVAL.read_text(encoding="utf-8"))["per_record"]
-        }
-        if DEEPEVAL.exists()
-        else {}
-    )
-    return rows, ragas, deepeval
+    return rows, library_scores(RAGAS), library_scores(DEEPEVAL)
 
 
 def paired(ragas, deepeval, metric):
@@ -104,11 +98,9 @@ def baseline_means():
         ("RAGAS", BASELINE / "ragas_scores.json"),
         ("DeepEval", BASELINE / "deepeval_scores.json"),
     ):
-        if not path.exists():
+        rows = list(library_scores(path).values())
+        if not rows:
             continue
-        stored = json.loads(path.read_text(encoding="utf-8"))["per_record"]
-        records = stored.values() if isinstance(stored, dict) else stored
-        rows = list(records)
         out[name] = {
             metric: statistics.mean(
                 [row[metric] for row in rows if row.get(metric) is not None]
@@ -226,11 +218,12 @@ def main():
             print(f"    DeepEval: {reason[:150]}")
 
     print(
-        "\nThe harness's own retrieval numbers over the same fixture: "
-        "hit@5 0.423, covered@5 0.462,\ncoverage@5 0.544 "
-        "(uv run python -m llm_eval_harness.evaluator). They are computed from "
-        "word runs\nagainst the gold span, not by a model, and they answer a "
-        "narrower question than\ncontext_recall does - compare the direction, "
+        f"\nThe harness's own retrieval numbers over the same fixture, "
+        f"{RETRIEVAL_MEASURED}:\nhit@5 {RETRIEVAL['hit']}, covered@5 {RETRIEVAL['covered']}, "
+        f"coverage@5 {RETRIEVAL['coverage']} "
+        "(uv run python -m llm_eval_harness.evaluator).\nThey are computed from "
+        "word runs against the gold span, not by a model, and they answer\na "
+        "narrower question than context_recall does - compare the direction, "
         "not the digits."
     )
 

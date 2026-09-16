@@ -27,7 +27,7 @@ from xml.etree import ElementTree
 
 import yaml
 
-from llm_eval_harness.dataset import refusal_answers
+from llm_eval_harness.dataset import library_scores, refusal_answers
 from llm_eval_harness.judge import decided_records
 from llm_eval_harness.refusal import looks_like_refusal
 
@@ -171,16 +171,6 @@ def head_commit():
         return None
 
 
-def scores(path):
-    """per_record from either shape: keyed by question, or a list of rows."""
-    if not path.exists():
-        return {}
-    stored = json.loads(path.read_text(encoding="utf-8"))["per_record"]
-    if isinstance(stored, dict):
-        return stored
-    return {row["question"]: row for row in stored}
-
-
 def mean(rows, metric):
     values = [row[metric] for row in rows.values() if row.get(metric) is not None]
     return statistics.mean(values) if values else None
@@ -211,10 +201,10 @@ def build(run_tests=False):
             }
         )
 
-    dense = scores(BASELINE / "ragas_scores.json")
-    hybrid = scores(pathlib.Path("eval/ragas_scores.json"))
-    deepeval = scores(BASELINE / "deepeval_scores.json")
-    deepeval_now = scores(pathlib.Path("eval/deepeval_scores.json"))
+    dense = library_scores(BASELINE / "ragas_scores.json")
+    hybrid = library_scores(pathlib.Path("eval/ragas_scores.json"))
+    deepeval = library_scores(BASELINE / "deepeval_scores.json")
+    deepeval_now = library_scores(pathlib.Path("eval/deepeval_scores.json"))
 
     answers_now = yaml.safe_load(
         pathlib.Path("eval/answerable_answers.yaml").read_text(encoding="utf-8")

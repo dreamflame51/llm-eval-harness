@@ -21,7 +21,7 @@ ceilings printed by scripts/sweep.py.
 import time
 
 from llm_eval_harness.dataset import answerable_records
-from llm_eval_harness.evaluator import FULL, context_coverage, rank_of_first_hit
+from llm_eval_harness.evaluator import evaluate_retrieval
 from llm_eval_harness.lexical import BM25, rrf
 from llm_eval_harness.store import collection, search
 
@@ -42,19 +42,21 @@ def chunks_from_index():
 
 
 def score(records, retrieve, k=K):
-    ranks, coverages = [], []
-    for record in records:
-        retrieved = retrieve(record["question"], k)
-        ranks.append(rank_of_first_hit(record["contexts"], retrieved))
-        coverages.append(context_coverage(record["contexts"], retrieved))
-    n = len(records)
-    found = [rank for rank in ranks if rank is not None]
+    """
+    The harness's own metrics, over one retriever.
+
+    Through evaluate_retrieval rather than recomputing them: this file used to
+    carry its own copy of the arithmetic, so a change to what covered@k counts
+    would have moved the reported number and left this comparison quietly
+    scoring by the old definition. Renaming the keys is all that is left of it.
+    """
+    result = evaluate_retrieval(records=records, k=k, search_fn=retrieve)
     return {
-        "hit": len(found) / n,
-        "mrr": sum(1 / rank for rank in found) / n,
-        "coverage": sum(coverages) / n,
-        "covered": sum(1 for c in coverages if c >= FULL) / n,
-        "per_record": coverages,
+        "hit": result["hit_at_k"],
+        "mrr": result["mrr"],
+        "coverage": result["coverage_at_k"],
+        "covered": result["covered_at_k"],
+        "per_record": [coverage for _, coverage in result["coverages"]],
     }
 
 
