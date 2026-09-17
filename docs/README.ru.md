@@ -13,6 +13,10 @@
 скриптом `scripts/make_dashboard.py` из закоммиченных файлов, модель для отрисовки не
 вызывается.
 
+**[Схема](https://claude.ai/artifact/XFTmdyQpzYAR1jGS8zuDmN)** — та же система, нарисованная: путь
+вопроса, прибор, наведённый на каждую стадию, что CI гоняет на каждый push и чего не может вообще.
+Десять минут, чисел запоминать не надо. Исходник: [system-map.html](system-map.html).
+
 English: [../README.md](../README.md) ·
 Журнал проблем: [lessons.ru.md](lessons.ru.md) ·
 Что утверждается и чем проверяется: [traceability.md](traceability.md) ·

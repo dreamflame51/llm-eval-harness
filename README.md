@@ -13,6 +13,10 @@ record, RAGAS against DeepEval, the traceability matrix and where the V-model le
 missing. Built from the committed files by `scripts/make_dashboard.py`; no model is
 called to render it.
 
+**[The map](https://claude.ai/artifact/XFTmdyQpzYAR1jGS8zuDmN)** - the same system drawn: the path
+a question takes, the instrument pointed at each stage, what CI runs on every push and what it
+cannot run at all. Ten minutes, no numbers to memorise. Source: [docs/system-map.html](docs/system-map.html).
+
 Problem log: [docs/lessons.md](docs/lessons.md) &middot;
 What is claimed and what checks it: [docs/traceability.md](docs/traceability.md) &middot;
 Where the levels are missing: [docs/v-model.md](docs/v-model.md)

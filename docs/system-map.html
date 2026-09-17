@@ -1,0 +1,699 @@
+<title>What Checks What</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f1f3ef;
+    --surface: #fbfbf9;
+    --sunk: #e9ebe5;
+    --ink: #12171c;
+    --ink-2: #49525b;
+    --muted: #868e96;
+    --rule: rgba(18, 23, 28, 0.16);
+    --grid: rgba(18, 23, 28, 0.07);
+    --auto: #14607f;
+    --model: #9a6410;
+    --human: #a63c2b;
+    --good: #2c6b48;
+    --display: "IBM Plex Sans Condensed", "Helvetica Neue", Arial, sans-serif;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #0f1214;
+      --surface: #171b1e;
+      --sunk: #1e2326;
+      --ink: #f0f3f1;
+      --ink-2: #b6bfc5;
+      --muted: #7c858c;
+      --rule: rgba(240, 243, 241, 0.18);
+      --grid: rgba(240, 243, 241, 0.08);
+      --auto: #56a8ca;
+      --model: #d9a349;
+      --human: #e2735e;
+      --good: #63b189;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #0f1214;
+    --surface: #171b1e;
+    --sunk: #1e2326;
+    --ink: #f0f3f1;
+    --ink-2: #b6bfc5;
+    --muted: #7c858c;
+    --rule: rgba(240, 243, 241, 0.18);
+    --grid: rgba(240, 243, 241, 0.08);
+    --auto: #56a8ca;
+    --model: #d9a349;
+    --human: #e2735e;
+    --good: #63b189;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 44px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+  }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; }
+  h1 {
+    font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  h2 { font-size: clamp(21px, 3vw, 26px); letter-spacing: -0.005em; }
+  h3 { font-size: 15px; font-weight: 700; letter-spacing: 0.01em; }
+  p { margin: 0; max-width: 68ch; color: var(--ink-2); }
+  .lede { font-size: 17px; max-width: 62ch; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  header { display: flex; flex-direction: column; gap: 14px; }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 34px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+    margin-top: 4px;
+  }
+  .fact { display: flex; flex-direction: column; }
+  .fact b {
+    font-family: var(--display);
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .fact span {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+  .head { display: flex; flex-direction: column; gap: 6px; }
+
+  /* ---- who can run a check: the page's one encoding ---- */
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .lg { background: var(--surface); padding: 13px 15px 15px; display: flex; flex-direction: column; gap: 3px; }
+  .lg .k { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; color: var(--ink); }
+  .lg .n { font-size: 12.5px; color: var(--ink-2); }
+  .dot { width: 10px; height: 10px; flex: none; }
+  .dot.auto { background: var(--auto); }
+  .dot.ondemand { background: transparent; border: 2px solid var(--auto); }
+  .dot.model { background: var(--model); }
+  .dot.human { background: var(--human); }
+
+  figure { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .plate {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 18px 16px 16px;
+    overflow-x: auto;
+  }
+  svg { display: block; height: auto; }
+  .fig { color: var(--ink-2); min-width: 640px; }
+  .fig text { font-family: var(--sans); font-size: 12.5px; fill: var(--ink); }
+  .fig text.sub { font-family: var(--mono); font-size: 10.5px; fill: var(--muted); }
+  .fig text.edge { font-family: var(--mono); font-size: 10.5px; fill: var(--ink-2); }
+  .fig text.head { font-family: var(--mono); font-size: 10.5px; fill: var(--muted); letter-spacing: 0.1em; }
+  .fig rect.box { fill: var(--sunk); stroke: var(--rule); stroke-width: 1; }
+  .fig rect.lead { fill: none; stroke: currentColor; stroke-width: 1.4; }
+  .fig line, .fig path.link { stroke: currentColor; stroke-width: 1.3; fill: none; }
+  .fig path.arrowhead { fill: var(--ink-2); }
+  .fig .human-stroke { stroke: var(--human); }
+  .fig .model-stroke { stroke: var(--model); }
+  .fig .auto-stroke { stroke: var(--auto); }
+  .fig text.human-fill { fill: var(--human); }
+  .fig text.model-fill { fill: var(--model); }
+  .fig text.auto-fill { fill: var(--auto); }
+  figcaption { font-size: 13px; color: var(--ink-2); max-width: 74ch; }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  /* ---- instrument grid ---- */
+  .stations {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .station { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .station > .eyebrow { padding-bottom: 6px; border-bottom: 2px solid var(--ink); }
+  .inst {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--auto);
+    padding: 9px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .inst.ondemand { border-left-style: dashed; }
+  .inst.model { border-left-color: var(--model); }
+  .inst.human { border-left-color: var(--human); }
+  .inst .t { font-family: var(--mono); font-size: 12px; color: var(--ink); overflow-wrap: anywhere; }
+  .inst .d { font-size: 12.5px; color: var(--ink-2); }
+  .inst .v {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .inst .v small { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--muted); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--grid); }
+  th {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.q { color: var(--ink); }
+  .scroll { overflow-x: auto; }
+
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .half { background: var(--surface); padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+  .half ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 13.5px; }
+  .half li { margin-bottom: 4px; }
+  .half li code, p code, figcaption code { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+
+  .case {
+    display: grid;
+    grid-template-columns: 116px 1fr;
+    gap: 4px 18px;
+    padding: 14px 0;
+    border-top: 1px solid var(--grid);
+  }
+  .case:first-of-type { border-top: 1px solid var(--rule); }
+  .case .tag { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+  .case .what { font-weight: 600; color: var(--ink); font-size: 14.5px; }
+  .case .how { grid-column: 2; font-size: 13.5px; color: var(--ink-2); max-width: 72ch; }
+  @media (max-width: 560px) {
+    .case { grid-template-columns: 1fr; }
+    .case .how { grid-column: 1; }
+  }
+
+  footer { border-top: 1px solid var(--rule); padding-top: 16px; color: var(--muted); font-size: 12.5px; display: flex; flex-direction: column; gap: 6px; }
+  footer code { font-family: var(--mono); font-size: 12px; }
+  a { color: var(--auto); }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">llm-eval-harness &middot; a RAG system and the instruments pointed at it</p>
+    <h1>What checks what</h1>
+    <p class="lede">
+      A retrieval-augmented system answers questions about five NIST publications. The harness
+      around it exists because <strong>retrieval that looks relevant is easy</strong> &mdash; so
+      every stage below has an instrument pointed at it, and the interesting part is not the
+      metrics but <strong>which of them a machine can run, and which need a model or a person.</strong>
+    </p>
+    <div class="facts">
+      <div class="fact"><b>5</b><span>NIST publications</span></div>
+      <div class="fact"><b>5 054</b><span>indexed chunks</span></div>
+      <div class="fact"><b>38</b><span>reference records</span></div>
+      <div class="fact"><b>214</b><span>tests</span></div>
+      <div class="fact"><b>10</b><span>traced requirements</span></div>
+      <div class="fact"><b>29</b><span>logged failures</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">The one encoding on this page</p>
+      <h2>Every check is coloured by what it needs to run</h2>
+      <p>
+        This is the distinction the whole project is organised around. A number that can only be
+        produced by a person is not worse than one CI prints &mdash; but it is a different kind of
+        number, and pretending otherwise is how a harness ends up measuring only what is cheap.
+      </p>
+    </div>
+    <div class="legend">
+      <div class="lg">
+        <div class="k"><span class="dot auto"></span>Nothing but the repository</div>
+        <div class="n">Runs in CI on every push. Deterministic, seconds.</div>
+      </div>
+      <div class="lg">
+        <div class="k"><span class="dot ondemand"></span>The index</div>
+        <div class="n">CI on request: rebuilding it embeds 5 054 chunks.</div>
+      </div>
+      <div class="lg">
+        <div class="k"><span class="dot model"></span>A local model</div>
+        <div class="n">Never CI &mdash; the runner has no GPU and no Ollama.</div>
+      </div>
+      <div class="lg">
+        <div class="k"><span class="dot human"></span>A person</div>
+        <div class="n">Hand labels and the usefulness session. No substitute found.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">Figure 1 &middot; the product</p>
+      <h2>What happens when somebody asks a question</h2>
+    </div>
+    <figure>
+      <div class="plate">
+        <svg class="fig" viewBox="0 0 1100 320" width="1100" role="img"
+             aria-label="Five PDFs are loaded and cut into 5054 chunks, which fill two indexes: a Chroma embedding index and a BM25 word index. A question is matched against both, the two rankings are fused by reciprocal rank, and the top five passages go to gemma4, which returns an answer together with those passages.">
+          <defs>
+            <marker id="ar1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto">
+              <path class="arrowhead" d="M0 0 L10 4 L0 8 z"></path>
+            </marker>
+          </defs>
+
+          <text class="head" x="16" y="18">BUILT ONCE</text>
+          <text class="head" x="16" y="196">EVERY QUESTION</text>
+
+          <rect class="box" x="16" y="34" width="136" height="50"></rect>
+          <text x="30" y="55">5 NIST PDFs</text>
+          <text class="sub" x="30" y="72">~700 pages, committed</text>
+
+          <line x1="152" y1="59" x2="246" y2="59" marker-end="url(#ar1)"></line>
+          <text class="edge" x="156" y="49">load_pdf</text>
+          <text class="edge" x="156" y="80">chunk 800/160</text>
+
+          <rect class="box" x="252" y="34" width="132" height="50"></rect>
+          <text x="266" y="55">5 054 chunks</text>
+          <text class="sub" x="266" y="72">the same text, twice indexed</text>
+
+          <path class="link" d="M384 52 C 430 52, 430 40, 470 40" marker-end="url(#ar1)"></path>
+          <path class="link" d="M384 68 C 430 68, 430 128, 470 128" marker-end="url(#ar1)"></path>
+
+          <rect class="box" x="476" y="16" width="214" height="50"></rect>
+          <text x="490" y="37">Chroma &mdash; embeddings</text>
+          <text class="sub" x="490" y="54">all-MiniLM-L6-v2, meaning</text>
+
+          <rect class="box" x="476" y="104" width="214" height="50"></rect>
+          <text x="490" y="125">BM25 &mdash; words</text>
+          <text class="sub" x="490" y="142">exact terms, no stopwords</text>
+
+          <rect class="box" x="16" y="212" width="136" height="50"></rect>
+          <text x="30" y="233">a question</text>
+          <text class="sub" x="30" y="250">ask.py, or the browser</text>
+
+          <path class="link" stroke-dasharray="5 4" d="M152 237 L 444 237 L 444 52 L 470 52" marker-end="url(#ar1)"></path>
+          <path class="link" stroke-dasharray="5 4" d="M444 140 L 470 140" marker-end="url(#ar1)"></path>
+          <text class="edge" x="192" y="228">matched against both, top 10 each</text>
+          <text class="edge" x="396" y="30">indexed</text>
+
+          <rect class="box" x="736" y="60" width="118" height="50"></rect>
+          <text x="750" y="81">RRF fuse</text>
+          <text class="sub" x="750" y="98">rank, not score</text>
+
+          <path class="link" d="M690 41 C 715 41, 712 76, 730 76" marker-end="url(#ar1)"></path>
+          <path class="link" d="M690 129 C 715 129, 712 94, 730 94" marker-end="url(#ar1)"></path>
+
+          <line x1="854" y1="85" x2="916" y2="85" marker-end="url(#ar1)"></line>
+          <text class="edge" x="856" y="75">top 5</text>
+
+          <rect class="box" x="922" y="60" width="162" height="50"></rect>
+          <text x="936" y="81">gemma4, locally</text>
+          <text class="sub" x="936" y="98">temperature 0, seed 0</text>
+
+          <line x1="1003" y1="110" x2="1003" y2="206" marker-end="url(#ar1)"></line>
+          <text class="edge" x="1011" y="152">answers only</text>
+          <text class="edge" x="1011" y="167">from those 5</text>
+
+          <rect class="lead" x="836" y="212" width="248" height="50"></rect>
+          <text x="850" y="233">the answer + those 5 passages</text>
+          <text class="sub" x="850" y="250">shown together, always</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>The passages are part of the product, not a debug view.</b> This system's worst failure
+        is a fluent invented figure, and the cheapest defence is not a better model: it is showing
+        the reader the text the answer was drawn from, so checking costs one glance. It is also
+        what lets a reader tell a correct refusal from a retrieval miss.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">Figure 2 &middot; the instruments</p>
+      <h2>Four stations, and what each one is measured with</h2>
+      <p>
+        Every number here is read back from a committed file, so the figures below reproduce on a
+        machine with no model installed &mdash; that is the point of freezing the answers and the
+        judge's verdicts rather than the summaries.
+      </p>
+    </div>
+    <div class="stations">
+      <div class="station">
+        <p class="eyebrow">1 &middot; the reference set</p>
+        <div class="inst">
+          <div class="t">validate</div>
+          <div class="d">Is every gold quote still in the extracted text, and does a chunk hold it whole?</div>
+          <div class="v">48<small> / 51 clean</small></div>
+        </div>
+        <div class="inst">
+          <div class="t">test_ground_truth</div>
+          <div class="d">Fails the build if a quote drifts from the corpus. Re-parses five PDFs.</div>
+          <div class="v">gate</div>
+        </div>
+      </div>
+
+      <div class="station">
+        <p class="eyebrow">2 &middot; retrieval</p>
+        <div class="inst ondemand">
+          <div class="t">evaluator</div>
+          <div class="d">Did the five passages carry the supporting text? <code>hit@5</code> is strict, <code>covered@5</code> accepts a span rebuilt from two chunks.</div>
+          <div class="v">0.538<small> hit@5 &middot; 0.577 covered@5</small></div>
+        </div>
+        <div class="inst ondemand">
+          <div class="t">compare_retrievers</div>
+          <div class="d">Dense, BM25, or the two fused. The fusion wins by four records and loses two.</div>
+          <div class="v">+0.115<small> hit@5 over dense</small></div>
+        </div>
+      </div>
+
+      <div class="station">
+        <p class="eyebrow">3 &middot; the answer</p>
+        <div class="inst">
+          <div class="t">refusal &mdash; judged</div>
+          <div class="d">On questions the corpus cannot answer: declined <em>and</em> invented nothing.</div>
+          <div class="v">10<small> / 12 clean</small></div>
+        </div>
+        <div class="inst">
+          <div class="t">RAGAS &middot; DeepEval</div>
+          <div class="d">Two libraries over one frozen set of answers. Where they disagree, the number is about the library.</div>
+          <div class="v">0.854<small> / 0.756 faithfulness</small></div>
+        </div>
+        <div class="inst model">
+          <div class="t">live_check</div>
+          <div class="d">Generates now, judges now, fails if any question stops behaving as pinned.</div>
+          <div class="v">12<small> / 12 as pinned &middot; 13 min</small></div>
+        </div>
+      </div>
+
+      <div class="station">
+        <p class="eyebrow">4 &middot; the instruments themselves</p>
+        <div class="inst human">
+          <div class="t">hand labels</div>
+          <div class="d">Twelve answers read by a person on two axes. The ground truth the judges are scored against.</div>
+          <div class="v">9<small> / 12 clean</small></div>
+        </div>
+        <div class="inst human">
+          <div class="t">judge vs human</div>
+          <div class="d">Agreement, in kappa. Settled on <em>refused</em>; at chance on <em>fabricated</em>, which is the axis the judge exists for.</div>
+          <div class="v">1.00<small> refused &middot; &minus;0.12 fabricated</small></div>
+        </div>
+        <div class="inst human">
+          <div class="t">usefulness session</div>
+          <div class="d">Eight real tasks, one person, four outcomes. The only check here a machine cannot run.</div>
+          <div class="v">6<small> / 8 finished on the passage shown</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">Figure 3 &middot; continuous integration</p>
+      <h2>The jobs split by what each one needs, not by what it is</h2>
+    </div>
+    <figure>
+      <div class="plate">
+        <svg class="fig" viewBox="0 0 1100 372" width="1100" role="img"
+             aria-label="A push runs three jobs: lint, the test suite, and metrics, which needs only committed files. A manual dispatch with a checkbox runs the retrieval job, which rebuilds the index. Three further checks never run in CI: live_check and the judge need a local model, and the hand labelling and usefulness session need a person.">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto">
+              <path class="arrowhead" d="M0 0 L10 4 L0 8 z"></path>
+            </marker>
+          </defs>
+
+          <rect class="box" x="16" y="52" width="180" height="46"></rect>
+          <text x="30" y="72">git push</text>
+          <text class="sub" x="30" y="88">any branch</text>
+
+          <line x1="196" y1="75" x2="246" y2="34" marker-end="url(#ar2)"></line>
+          <line x1="196" y1="75" x2="246" y2="90" marker-end="url(#ar2)"></line>
+          <line x1="196" y1="75" x2="246" y2="146" marker-end="url(#ar2)"></line>
+
+          <rect class="box" x="252" y="12" width="300" height="44"></rect>
+          <text x="266" y="32">lint &mdash; ruff over the tree</text>
+          <text class="sub" x="266" y="48">needs: nothing</text>
+
+          <rect class="box" x="252" y="68" width="300" height="44"></rect>
+          <text x="266" y="88">tests &mdash; 214 of them</text>
+          <text class="sub" x="266" y="104">needs: the PDFs and the embedder</text>
+
+          <rect class="box" x="252" y="124" width="300" height="44"></rect>
+          <text x="266" y="144">metrics &mdash; validate, refusal, judges</text>
+          <text class="sub" x="266" y="160">needs: committed files only</text>
+
+          <path class="link" d="M552 146 L 596 146" marker-end="url(#ar2)"></path>
+          <rect class="lead" x="602" y="118" width="230" height="56"></rect>
+          <text x="616" y="140">run summary on the PR</text>
+          <text class="sub" x="616" y="157">this run's own numbers</text>
+
+          <rect class="box auto-stroke" x="16" y="212" width="180" height="46"></rect>
+          <text x="30" y="232">run workflow</text>
+          <text class="sub" x="30" y="248">with the box ticked</text>
+
+          <line x1="196" y1="235" x2="246" y2="235" marker-end="url(#ar2)"></line>
+          <rect class="box" x="252" y="212" width="300" height="44"></rect>
+          <text x="266" y="232">retrieval &mdash; rebuild, then score</text>
+          <text class="sub" x="266" y="248">needs: 5 054 embeddings, may be red</text>
+
+          <line x1="16" y1="292" x2="1084" y2="292" stroke-dasharray="3 4"></line>
+          <text class="head" x="16" y="284">CI STOPS HERE</text>
+
+          <rect class="box model-stroke" x="16" y="308" width="340" height="48"></rect>
+          <text class="model-fill" x="30" y="328">live_check, judge_refusals, record</text>
+          <text class="sub" x="30" y="345">needs a local model, absent on CI</text>
+
+          <rect class="box human-stroke" x="376" y="308" width="340" height="48"></rect>
+          <text class="human-fill" x="390" y="328">label_refusals, usefulness</text>
+          <text class="sub" x="390" y="345">needs a person, no substitute found</text>
+
+          <rect class="box" x="736" y="308" width="348" height="48"></rect>
+          <text x="750" y="328">their output is committed</text>
+          <text class="sub" x="750" y="345">so CI prints what it cannot compute</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>The bottom row is the reason the top row can be cheap.</b> Answers, hand labels and the
+        judge's verdicts are produced locally and committed, so the <code>metrics</code> job
+        recomputes every reported figure from files in seconds, on a runner with no model at all.
+        Nothing in that job is a gate: a threshold invented to keep a pipeline green is how a
+        measurement turns into a ritual.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">What fails a build, and what does not</p>
+      <h2>Six gates, four measurements, no thresholds</h2>
+    </div>
+    <div class="split">
+      <div class="half">
+        <h3>Gates &mdash; a test goes red</h3>
+        <ul>
+          <li>Every gold quote still appears in the corpus, verbatim.</li>
+          <li>Every reported number equals the value pinned in <code>expected_metrics.json</code>.</li>
+          <li>No single question changed verdict &mdash; the average can hold still while two records swap.</li>
+          <li>The judge's cache still describes the current prompt.</li>
+          <li>A hand label travels to a new recording only if the answer and every chunk are identical.</li>
+          <li>Every test and evidence path named in the traceability matrix exists.</li>
+        </ul>
+      </div>
+      <div class="half">
+        <h3>Measurements &mdash; a number a person reads</h3>
+        <ul>
+          <li>Retrieval: <code>hit@5</code>, <code>covered@5</code>, <code>coverage@5</code>, MRR.</li>
+          <li>Refusal, judged, and the phrase-list tripwire beside it.</li>
+          <li>RAGAS against DeepEval on identical answers.</li>
+          <li>Agreement between the judges, and with the hand labels.</li>
+        </ul>
+        <p style="font-size:13px">
+          No acceptance threshold has been agreed for any metric in this project. The reason is on
+          the page: this one moves in steps of one record out of twelve, so a bar on the average is
+          either &ldquo;one record&rdquo; or nothing. What is gated instead is <b>equality</b>, and
+          <b>a verdict flipping</b>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">Figure 4 &middot; coverage</p>
+      <h2>The same thing placed on the V-model</h2>
+    </div>
+    <figure>
+      <div class="plate">
+        <svg class="fig" viewBox="0 0 1100 330" width="1100" role="img"
+             aria-label="The V-model: five specification levels descending on the left - user needs, system requirements, architecture, module design, code - each paired with the level that verifies it on the right: the usefulness session, the live check and metric commands, the retriever comparison and sweep, the unit suite, and lint with the suite in CI.">
+          <defs>
+            <marker id="ar3" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto">
+              <path class="arrowhead" d="M0 0 L10 4 L0 8 z"></path>
+            </marker>
+          </defs>
+
+          <text class="head" x="16" y="18">SPECIFIED</text>
+          <text class="head" x="700" y="18">VERIFIED BY</text>
+
+          <rect class="box" x="16" y="30" width="250" height="42"></rect>
+          <text x="30" y="49">User needs</text>
+          <text class="sub" x="30" y="65">eval/needs.yaml &mdash; four of them</text>
+
+          <rect class="box" x="90" y="88" width="250" height="42"></rect>
+          <text x="104" y="107">System requirements</text>
+          <text class="sub" x="104" y="123">eval/traceability.yaml &mdash; ten claims</text>
+
+          <rect class="box" x="164" y="146" width="250" height="42"></rect>
+          <text x="178" y="165">Architecture</text>
+          <text class="sub" x="178" y="181">chunking, embeddings, fusion</text>
+
+          <rect class="box" x="238" y="204" width="250" height="42"></rect>
+          <text x="252" y="223">Module design</text>
+          <text class="sub" x="252" y="239">the docstrings carry the reasoning</text>
+
+          <rect class="box" x="312" y="262" width="196" height="42"></rect>
+          <text x="326" y="281">Code</text>
+          <text class="sub" x="326" y="297">what actually runs</text>
+
+          <rect class="lead human-stroke" x="818" y="30" width="266" height="42"></rect>
+          <text class="human-fill" x="832" y="49">the usefulness session</text>
+          <text class="sub" x="832" y="65">8 tasks, one person, run once</text>
+
+          <rect class="box" x="744" y="88" width="266" height="42"></rect>
+          <text x="758" y="107">live_check, the metric commands</text>
+          <text class="sub" x="758" y="123">judged against the pinned verdicts</text>
+
+          <rect class="box" x="670" y="146" width="266" height="42"></rect>
+          <text x="684" y="165">compare_retrievers, sweep</text>
+          <text class="sub" x="684" y="181">every choice made by measurement</text>
+
+          <rect class="box" x="596" y="204" width="266" height="42"></rect>
+          <text x="610" y="223">the unit suite</text>
+          <text class="sub" x="610" y="239">214 tests</text>
+
+          <rect class="box" x="534" y="262" width="254" height="42"></rect>
+          <text x="548" y="281">ruff and pytest, every push</text>
+          <text class="sub" x="548" y="297">the only fully automatic pair</text>
+
+          <line x1="266" y1="51" x2="812" y2="51" stroke-dasharray="4 5"></line>
+          <line x1="340" y1="109" x2="738" y2="109" stroke-dasharray="4 5"></line>
+          <line x1="414" y1="167" x2="664" y2="167" stroke-dasharray="4 5"></line>
+          <line x1="488" y1="225" x2="590" y2="225" stroke-dasharray="4 5"></line>
+          <line x1="508" y1="283" x2="528" y2="283" stroke-dasharray="4 5"></line>
+        </svg>
+      </div>
+      <figcaption>
+        <b>A level whose right-hand side is empty is a claim nobody checks.</b> Four named gaps in
+        this V have been closed; the fifth is open and stated: the <em>fabricated</em> axis has no
+        working instrument &mdash; the phrase list has no opinion about it, and both judges agree
+        with a human at chance. The top pair is the one a machine cannot close.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">Why any of it earns its keep</p>
+      <h2>Four things the instruments caught that reading the code would not</h2>
+    </div>
+    <div>
+      <div class="case">
+        <div class="tag">the fixture</div>
+        <div class="what">The frozen answers described a retriever we had replaced</div>
+        <div class="how">
+          BM25 was fused into retrieval; the answerable set was re-recorded and the labelled refusal
+          set was not. For a day the reported refusal metric described the old system. Caught by the
+          live check on its first real run &mdash; and both headline numbers were identical across
+          the change, while three of twelve questions behaved differently.
+        </div>
+      </div>
+      <div class="case">
+        <div class="tag">the instrument</div>
+        <div class="what">A cache keyed by the question, not by what was judged</div>
+        <div class="how">
+          Judging a second recording of the same twelve questions gave the older recording the newer
+          verdicts. The cache key had always covered the answer and the chunks; the lookup threw that
+          away. Caught by the per-question gate within minutes of being introduced.
+        </div>
+      </div>
+      <div class="case">
+        <div class="tag">the trade</div>
+        <div class="what">Better retrieval, worse grounding &mdash; and only a human could see it</div>
+        <div class="how">
+          Fusing BM25 in raised <code>hit@5</code> from 0.423 to 0.538 and cost two records of
+          grounding. Every automated instrument reads all three recordings identically; the hand
+          labels do not. Establishing it needed a control: the same twelve questions recorded the
+          same afternoon through the old retriever.
+        </div>
+      </div>
+      <div class="case">
+        <div class="tag">the reason</div>
+        <div class="what">The change worked; the explanation written next to it did not</div>
+        <div class="how">
+          BM25 went in because &ldquo;the misses are questions naming a document, and exact strings
+          are what word matching does better&rdquo;. Neither of the two gold spans contains the
+          identifier, and neither question is retrieved today. The improvement is real and lands on
+          four other records. An intervention that moves the metric is not evidence for the reason
+          you gave.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Every figure on this page is reproducible from the repository: <code>python -m
+      llm_eval_harness.validate</code>, <code>evaluator</code>, <code>refusal</code>,
+      <code>scripts/judge_report.py</code>, <code>scripts/compare_retrievers.py</code>.
+      The numbers with their per-record detail live on the
+      <a href="https://claude.ai/artifact/5DtQB21Gu6ZwAvzj5YbMxj">readout page</a>.
+    </p>
+    <p>
+      Answers are generated by gemma4 and frozen, because the generator rewrites most of them
+      between processes while its behaviour, measured, does not move.
+    </p>
+  </footer>
+</div>
