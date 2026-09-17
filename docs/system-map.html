@@ -292,74 +292,85 @@
   <section>
     <div class="head">
       <p class="eyebrow">Figure 1 &middot; the product</p>
-      <h2>What happens when somebody asks a question</h2>
+      <h2>Two phases, and the only thing they share</h2>
+      <p>
+        Cutting the corpus into chunks and filling the indexes happens <em>once</em>, and again
+        only when the corpus, the chunk size or the embedding model changes. Answering a question
+        touches none of that: it reads the two indexes and rebuilds nothing.
+      </p>
     </div>
     <figure>
       <div class="plate">
-        <svg class="fig" viewBox="0 0 1100 320" width="1100" role="img"
-             aria-label="Five PDFs are loaded and cut into 5054 chunks, which fill two indexes: a Chroma embedding index and a BM25 word index. A question is matched against both, the two rankings are fused by reciprocal rank, and the top five passages go to gemma4, which returns an answer together with those passages.">
+        <svg class="fig" viewBox="0 0 1320 356" width="1320" role="img"
+             aria-label="Two separate phases. Once, at ingest: five PDFs are loaded and cut into 5054 chunks, which are written into two indexes - a Chroma embedding index and a BM25 word index. Then, on every question: the question is answered by reading those two indexes for ten candidates each, fusing the rankings by reciprocal rank into five passages, and sending those to gemma4, which returns an answer together with the passages. The index is the only thing the two phases share.">
           <defs>
             <marker id="ar1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto">
               <path class="arrowhead" d="M0 0 L10 4 L0 8 z"></path>
             </marker>
           </defs>
 
-          <text class="head" x="16" y="18">BUILT ONCE</text>
-          <text class="head" x="16" y="196">EVERY QUESTION</text>
+          <!-- offline lane -->
+          <text class="head" x="16" y="14">ONCE &mdash; WHEN THE CORPUS OR THE CHUNKING CHANGES</text>
 
-          <rect class="box" x="16" y="34" width="136" height="50"></rect>
-          <text x="30" y="55">5 NIST PDFs</text>
-          <text class="sub" x="30" y="72">~700 pages, committed</text>
+          <rect class="box" x="16" y="30" width="150" height="52"></rect>
+          <text x="30" y="52">5 NIST PDFs</text>
+          <text class="sub" x="30" y="69">~700 pages, committed</text>
 
-          <line x1="152" y1="59" x2="246" y2="59" marker-end="url(#ar1)"></line>
-          <text class="edge" x="156" y="49">load_pdf</text>
-          <text class="edge" x="156" y="80">chunk 800/160</text>
+          <line x1="166" y1="56" x2="280" y2="56" marker-end="url(#ar1)"></line>
+          <text class="edge" x="172" y="46">load_pdf</text>
+          <text class="edge" x="172" y="77">chunk 800/160</text>
 
-          <rect class="box" x="252" y="34" width="132" height="50"></rect>
-          <text x="266" y="55">5 054 chunks</text>
-          <text class="sub" x="266" y="72">the same text, twice indexed</text>
+          <rect class="box" x="286" y="30" width="150" height="52"></rect>
+          <text x="300" y="52">5 054 chunks</text>
+          <text class="sub" x="300" y="69">one text, indexed twice</text>
 
-          <path class="link" d="M384 52 C 430 52, 430 40, 470 40" marker-end="url(#ar1)"></path>
-          <path class="link" d="M384 68 C 430 68, 430 128, 470 128" marker-end="url(#ar1)"></path>
+          <path class="link" d="M436 48 C 520 48, 530 40, 610 40" marker-end="url(#ar1)"></path>
+          <path class="link" d="M436 64 C 520 64, 530 104, 610 104" marker-end="url(#ar1)"></path>
+          <text class="edge" x="470" y="34">embed</text>
+          <text class="edge" x="470" y="125">tokenise</text>
 
-          <rect class="box" x="476" y="16" width="214" height="50"></rect>
-          <text x="490" y="37">Chroma &mdash; embeddings</text>
-          <text class="sub" x="490" y="54">all-MiniLM-L6-v2, meaning</text>
+          <rect class="box" x="616" y="14" width="230" height="52"></rect>
+          <text x="630" y="36">Chroma &mdash; embeddings</text>
+          <text class="sub" x="630" y="53">all-MiniLM-L6-v2, meaning</text>
 
-          <rect class="box" x="476" y="104" width="214" height="50"></rect>
-          <text x="490" y="125">BM25 &mdash; words</text>
-          <text class="sub" x="490" y="142">exact terms, no stopwords</text>
+          <rect class="box" x="616" y="78" width="230" height="52"></rect>
+          <text x="630" y="100">BM25 &mdash; words</text>
+          <text class="sub" x="630" y="117">exact terms, no stopwords</text>
 
-          <rect class="box" x="16" y="212" width="136" height="50"></rect>
-          <text x="30" y="233">a question</text>
-          <text class="sub" x="30" y="250">ask.py, or the browser</text>
+          <!-- the boundary -->
+          <line x1="16" y1="160" x2="1304" y2="160" stroke-dasharray="3 5"></line>
+          <text class="head" x="880" y="154">THE INDEX IS ALL THE TWO PHASES SHARE</text>
 
-          <path class="link" stroke-dasharray="5 4" d="M152 237 L 444 237 L 444 52 L 470 52" marker-end="url(#ar1)"></path>
-          <path class="link" stroke-dasharray="5 4" d="M444 140 L 470 140" marker-end="url(#ar1)"></path>
-          <text class="edge" x="192" y="228">matched against both, top 10 each</text>
-          <text class="edge" x="396" y="30">indexed</text>
+          <!-- online lane -->
+          <text class="head" x="16" y="192">EVERY QUESTION &mdash; ABOUT 50 SECONDS, NOTHING REBUILT</text>
 
-          <rect class="box" x="736" y="60" width="118" height="50"></rect>
-          <text x="750" y="81">RRF fuse</text>
-          <text class="sub" x="750" y="98">rank, not score</text>
+          <rect class="box" x="16" y="208" width="150" height="52"></rect>
+          <text x="30" y="230">a question</text>
+          <text class="sub" x="30" y="247">ask.py, or the browser</text>
 
-          <path class="link" d="M690 41 C 715 41, 712 76, 730 76" marker-end="url(#ar1)"></path>
-          <path class="link" d="M690 129 C 715 129, 712 94, 730 94" marker-end="url(#ar1)"></path>
+          <line x1="166" y1="234" x2="580" y2="234" marker-end="url(#ar1)"></line>
+          <text class="edge" x="250" y="224">asked once, read twice</text>
 
-          <line x1="854" y1="85" x2="916" y2="85" marker-end="url(#ar1)"></line>
-          <text class="edge" x="856" y="75">top 5</text>
+          <rect class="box" x="586" y="208" width="290" height="52"></rect>
+          <text x="600" y="230">retrieve, then fuse</text>
+          <text class="sub" x="600" y="247">top 10 each &rarr; RRF &rarr; top 5</text>
 
-          <rect class="box" x="922" y="60" width="162" height="50"></rect>
-          <text x="936" y="81">gemma4, locally</text>
-          <text class="sub" x="936" y="98">temperature 0, seed 0</text>
+          <line x1="731" y1="208" x2="731" y2="136" marker-end="url(#ar1)"></line>
+          <text class="edge" x="741" y="180">reads, never writes</text>
 
-          <line x1="1003" y1="110" x2="1003" y2="206" marker-end="url(#ar1)"></line>
-          <text class="edge" x="1011" y="152">answers only</text>
-          <text class="edge" x="1011" y="167">from those 5</text>
+          <line x1="876" y1="234" x2="920" y2="234" marker-end="url(#ar1)"></line>
 
-          <rect class="lead" x="836" y="212" width="248" height="50"></rect>
-          <text x="850" y="233">the answer + those 5 passages</text>
-          <text class="sub" x="850" y="250">shown together, always</text>
+          <rect class="box" x="926" y="208" width="170" height="52"></rect>
+          <text x="940" y="230">gemma4, locally</text>
+          <text class="sub" x="940" y="247">temperature 0, seed 0</text>
+
+          <line x1="1096" y1="234" x2="1130" y2="234" marker-end="url(#ar1)"></line>
+
+          <rect class="lead" x="1136" y="208" width="168" height="52"></rect>
+          <text x="1150" y="230">answer + 5 passages</text>
+          <text class="sub" x="1150" y="247">always shown together</text>
+
+          <text class="edge" x="586" y="286">answers only from those five &mdash; and says so when they do not answer</text>
         </svg>
       </div>
       <figcaption>
@@ -367,6 +378,12 @@
         is a fluent invented figure, and the cheapest defence is not a better model: it is showing
         the reader the text the answer was drawn from, so checking costs one glance. It is also
         what lets a reader tell a correct refusal from a retrieval miss.
+        <br><br>
+        The split matters for the measurement too: everything above the line is deterministic and
+        can be rebuilt from the committed PDFs &mdash; CI does exactly that in the
+        <span style="font-family:var(--mono);font-size:12px">retrieval</span> job &mdash; while
+        everything below it involves a model and is the part that has to be pinned rather than
+        recomputed.
       </figcaption>
     </figure>
   </section>
