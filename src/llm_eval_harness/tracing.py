@@ -37,23 +37,54 @@ import atexit
 import contextlib
 import functools
 import os
+import socket
 import sys
+import urllib.parse
 
 _state = {"on": None}
 
 
+def _reachable(host, timeout=1.0):
+    """
+    Is anything listening there? A TCP connect, not a health check.
+
+    The question is only whether the exporter has somewhere to send, and the
+    answer has to be cheap and certain: a keyless container, a 404, a wrong
+    path all count as reachable, because the SDK will get an answer rather
+    than hang.
+    """
+    parsed = urllib.parse.urlparse(host)
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    try:
+        with socket.create_connection((parsed.hostname or "localhost", port), timeout):
+            return True
+    except OSError:
+        return False
+
+
 def enabled():
     """
-    True when both keys are in the environment. Decided once, on first use.
+    True when both keys are set and the collector is actually there.
 
-    Read at first call rather than at import, so a script that loads a .env
-    before touching the pipeline still turns tracing on - and so importing this
-    module costs nothing in the default case.
+    Decided once, on first use - at first call rather than at import, so a
+    script that loads a .env before touching the pipeline still turns tracing
+    on, and importing this module costs nothing in the default case.
+
+    The reachability probe is the part worth keeping. Keys left in a shell
+    after the stack is stopped is the normal state of things, not an edge case,
+    and without this every command pays eight seconds at exit while the
+    exporter retries, then prints "Failed to export span batch" - which looks
+    like the harness broke. One second, once per process, buys the promise that
+    tracing never changes what a run does or how long it takes.
     """
     if _state["on"] is None:
-        _state["on"] = bool(
+        keys = bool(
             os.environ.get("LANGFUSE_PUBLIC_KEY") and os.environ.get("LANGFUSE_SECRET_KEY")
         )
+        host = os.environ.get("LANGFUSE_HOST", "http://localhost:3000")
+        _state["on"] = keys and _reachable(host)
+        if keys and not _state["on"]:
+            print(f"tracing: nothing listening at {host}, continuing untraced", file=sys.stderr)
     return _state["on"]
 
 

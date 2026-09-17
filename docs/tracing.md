@@ -105,6 +105,20 @@ The UI is at `http://localhost:3000`. With no keys in the environment,
 exactly as it did before &mdash; verified: 214 tests and the reported refusal
 figures are identical with the package installed and the keys unset.
 
+**Keys set and the stack stopped is the normal state of things**, not an edge
+case, so it is handled rather than warned about. Before the guard, that
+combination cost every command eight seconds at exit while the exporter
+retried, and then printed `Failed to export span batch` &mdash; which reads
+exactly like the harness breaking. A one-second TCP probe on first use decides
+it instead:
+
+```
+tracing: nothing listening at http://localhost:3000, continuing untraced
+```
+
+and the run proceeds at full speed. Measured: 10s to 2s on a probe that does no
+work at all.
+
 ## What the spike cost, and the one trap in it
 
 Six containers (web, worker, Postgres, ClickHouse, Redis, MinIO), about 16 GiB
