@@ -372,17 +372,23 @@
           <line x1="1096" y1="266" x2="1130" y2="266" marker-end="url(#ar1)"></line>
 
           <rect class="lead" x="1136" y="240" width="168" height="52"></rect>
-          <text x="1150" y="262">answer + 5 passages</text>
-          <text class="sub" x="1150" y="279">always shown together</text>
+          <text x="1150" y="262">answer + all 5 shown</text>
+          <text class="sub" x="1150" y="279">it may have leaned on one</text>
 
           <text class="edge" x="586" y="316">answers only from those five &mdash; and says so when they do not answer</text>
         </svg>
       </div>
       <figcaption>
-        <b>The passages are part of the product, not a debug view.</b> This system's worst failure
+        <b>Five passages go in; the answer may rest on one.</b> The model is handed all five and
+        told to use nothing else, but which of them carries the answer is its business and is not
+        reported. So all five are shown, with their distances, and the reader does the matching.
+        <br><br>
+        <b>That display is part of the product, not a debug view.</b> This system's worst failure
         is a fluent invented figure, and the cheapest defence is not a better model: it is showing
         the reader the text the answer was drawn from, so checking costs one glance. It is also
-        what lets a reader tell a correct refusal from a retrieval miss.
+        what lets a reader tell a correct refusal from a retrieval miss &mdash; five passages that
+        plainly do not contain the answer explain a refusal, and the same five under a confident
+        answer are the reason to disbelieve it.
         <br><br>
         <b>One store, one derived index.</b> BM25 is built from what Chroma already holds rather
         than from the PDFs, deliberately: that way the two retrievers cannot disagree about what
