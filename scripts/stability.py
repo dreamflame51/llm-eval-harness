@@ -34,13 +34,14 @@ threshold can read a measured number instead of an assumption.
 """
 
 import argparse
+import datetime
 import json
 import pathlib
 import subprocess
 import sys
 import time
 
-from llm_eval_harness import pins
+from llm_eval_harness import pins, tracing
 
 OUT = pathlib.Path("eval/drift.json")
 
@@ -50,14 +51,21 @@ OUT = pathlib.Path("eval/drift.json")
 # whole point.
 CHILD = """
 import json, sys
+from llm_eval_harness import tracing
 from llm_eval_harness.dataset import refusal_records
 from llm_eval_harness.refusal import evaluate_refusals
 
 limit = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+index = sys.argv[2] if len(sys.argv) > 2 else "?"
 records = refusal_records()
 if limit:
     records = records[:limit]
-result = evaluate_refusals(records)
+# The child opens its own run rather than inheriting a span: it is a separate
+# interpreter on purpose. What it does inherit, through the environment, is the
+# run's name, so all the repetitions carry one version stamp.
+with tracing.run(f"drift run {index}", run_index=index, records=len(records)):
+    result = evaluate_refusals(records)
+    tracing.flush()
 print("@@" + json.dumps({
     "rate": result["refusal_rate"],
     "answers": [
@@ -68,15 +76,17 @@ print("@@" + json.dumps({
 """
 
 
-def run_once(limit, in_process):
+def run_once(limit, in_process, index=1):
     if in_process:
+        from llm_eval_harness import tracing
         from llm_eval_harness.dataset import refusal_records
         from llm_eval_harness.refusal import evaluate_refusals
 
         records = refusal_records()
         if limit:
             records = records[:limit]
-        result = evaluate_refusals(records)
+        with tracing.run(f"drift run {index}", run_index=index, records=len(records)):
+            result = evaluate_refusals(records)
         return {
             "rate": result["refusal_rate"],
             "answers": [
@@ -86,7 +96,7 @@ def run_once(limit, in_process):
         }
 
     done = subprocess.run(
-        [sys.executable, "-c", CHILD, str(limit or 0)],
+        [sys.executable, "-c", CHILD, str(limit or 0), str(index)],
         capture_output=True,
         text=True,
         timeout=3600,
@@ -153,17 +163,23 @@ def main():
 
     rates, verdicts, answers = [], {}, {}
     started = time.perf_counter()
-    for run in range(1, args.runs + 1):
-        began = time.perf_counter()
-        result = run_once(args.limit, args.in_process)
-        rates.append(result["rate"])
-        for row in result["answers"]:
-            verdicts.setdefault(row["q"], []).append(row["refused"])
-            answers.setdefault(row["q"], set()).add(row["answer"])
-        print(
-            f"run {run}: refusal_rate={result['rate']:.3f}  {time.perf_counter() - began:.0f}s",
-            flush=True,
-        )
+    # One name for the whole measurement, exported to the children through the
+    # environment: five runs of the same thing are only worth anything if they
+    # can be told apart and still found together.
+    group = f"drift {datetime.datetime.now(tz=datetime.UTC):%Y-%m-%d %H:%M}"
+    with tracing.run(group, runs=args.runs, mode=mode):
+        for run in range(1, args.runs + 1):
+            began = time.perf_counter()
+            result = run_once(args.limit, args.in_process, index=run)
+            rates.append(result["rate"])
+            for row in result["answers"]:
+                verdicts.setdefault(row["q"], []).append(row["refused"])
+                answers.setdefault(row["q"], set()).add(row["answer"])
+            print(
+                f"run {run}: refusal_rate={result['rate']:.3f}  "
+                f"{time.perf_counter() - began:.0f}s",
+                flush=True,
+            )
 
     spread = max(rates) - min(rates)
     flips = [q for q, flags in verdicts.items() if len(set(flags)) > 1]

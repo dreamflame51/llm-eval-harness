@@ -34,6 +34,7 @@ Turn it on for a run:
 """
 
 import atexit
+import contextlib
 import functools
 import os
 import sys
@@ -90,6 +91,48 @@ def traced(name=None, as_type=None):
         return wrapper
 
     return decorate
+
+
+@contextlib.contextmanager
+def run(name, **metadata):
+    """
+    Mark everything traced inside as one run.
+
+    Two jobs, because a recording and a drift measurement are the two things
+    worth comparing here and neither is a single call:
+
+    - in this process, it opens a root span, so the twelve answers of a
+      recording sit inside one parent instead of arriving as twelve unrelated
+      traces;
+    - across processes, it puts the run's name in the environment, and stamps
+      it on every span as `version`. scripts/stability.py deliberately runs
+      each repetition in a fresh interpreter (that is the condition it
+      measures), so nesting is impossible there - but filtering five runs by
+      one version string is not.
+
+    The metadata is the run's identity: which retriever, which model, which
+    file it wrote. That is exactly what was missing when three recordings of
+    the same twelve questions had to be told apart by hand (docs/lessons.md
+    #25, #27).
+    """
+    inherited = os.environ.get("LANGFUSE_RUN")
+    group = inherited or name
+    os.environ["LANGFUSE_RUN"] = group
+    try:
+        if not enabled():
+            yield
+            return
+        from langfuse import get_client
+
+        with get_client().start_as_current_observation(
+            name=name, metadata={**metadata, "run": group}, version=group
+        ):
+            yield
+    finally:
+        if inherited is None:
+            os.environ.pop("LANGFUSE_RUN", None)
+        else:
+            os.environ["LANGFUSE_RUN"] = inherited
 
 
 def flush():

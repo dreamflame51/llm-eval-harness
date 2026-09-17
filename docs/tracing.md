@@ -47,6 +47,35 @@ Two things fall out of that table immediately, and neither was visible before:
   (`store.lexical_index`). Correct behaviour, never measured, and worth knowing
   before anyone reads a single slow retrieval as a retriever problem.
 
+## Runs, not calls
+
+A recording and a drift measurement are the two things in this project worth
+comparing, and neither is a single call. `tracing.run()` marks one:
+
+- **In this process** it opens a root span, so the twelve answers of a
+  recording arrive as one tree instead of twelve unrelated traces, with the
+  run's identity on it &mdash; retriever, generator, `k`, chunk size, output
+  file. That is precisely what was missing when three recordings of the same
+  twelve questions had to be told apart by hand ([#27](lessons.md#27)).
+- **Across processes** it exports the run's name in the environment and stamps
+  it on each run as `version`. `scripts/stability.py` runs every repetition in
+  a fresh interpreter on purpose &mdash; that is the condition it measures &mdash;
+  so the repetitions cannot nest, but they can carry one stamp:
+
+```
+version                    name              parent
+drift 2026-09-17 10:22     drift run 1       root      <- child process 1
+                             answer          (nested)
+                             retrieve        (nested)
+drift 2026-09-17 10:22     drift run 2       root      <- child process 2
+                             answer          (nested)
+                             retrieve        (nested)
+```
+
+Filtering on the version collects the repetitions; opening one shows its tree.
+`record_answers.py` and `stability.py` both go through it, and with tracing off
+the context manager is an empty `yield`.
+
 ## Running it
 
 Tracing is an extra. CI installs the base set and never sees it.

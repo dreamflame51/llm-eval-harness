@@ -30,7 +30,7 @@ import pathlib
 
 import yaml
 
-from llm_eval_harness import chunker, pipeline, store
+from llm_eval_harness import chunker, pipeline, store, tracing
 from llm_eval_harness.dataset import answerable_records, refusal_records
 
 OUT = pathlib.Path("eval/refusal_answers.yaml")
@@ -254,7 +254,19 @@ def main():
 
     records = refusal_records() if refusal else answerable_records()
     print(f"recording {len(records)} answers through {pipeline.RETRIEVE.__name__}\n")
-    rows = build(records, refusal=refusal)
+    # The run's identity, on the trace: which retriever, which model, which
+    # file. Three recordings of the same twelve questions had to be told apart
+    # by hand once (docs/lessons.md #27), and that is what this is for.
+    with tracing.run(
+        f"record {args.set} / {pipeline.RETRIEVE.__name__}",
+        retriever=pipeline.RETRIEVE.__name__,
+        generator=pipeline.MODEL,
+        k=pipeline.K,
+        chunking=f"{chunker.SIZE}/{chunker.OVERLAP}",
+        records=len(records),
+        out=str(out),
+    ):
+        rows = build(records, refusal=refusal)
 
     kept, stale = [], []
     if args.keep_labels:
