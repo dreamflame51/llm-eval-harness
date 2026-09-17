@@ -1455,8 +1455,28 @@ examples, check those examples afterwards. Not the average - the examples. Four
 records got better and neither of the two named ones was among them, and that
 gap is visible in one line of output nobody had a reason to read.
 
-**What follows, unowned for now.** A stopword list, or down-weighting terms
-common to the question template, is the obvious next experiment. It is a
-retrieval change: it moves every number in the README and has to be measured by
-the sweep, against the same fixture, like every other retrieval decision here.
-Written down rather than done.
+**What follows - and it was three minutes, so it was done rather than written
+down.** Strip the question-template words from the query before BM25 scores it,
+change nothing else, score the same fixture:
+
+| | hit@5 | covered@5 | coverage@5 | MRR |
+|---|---|---|---|---|
+| hybrid, as it is | 0.538 | 0.577 | 0.606 | 0.362 |
+| hybrid, question words removed | 0.538 | 0.577 | **0.633** | 0.365 |
+
+Nothing on either metric a decision is made from. Partial-credit coverage moves
+by 0.027, four records move at all - three up, one down from a perfect 1.00 -
+and **both of the questions this entry is about stay misses**: the SP 800-78-5
+scope question goes 0.00 to 0.20, the SP 800-53A purpose question 0.00 to 0.12.
+BM25 alone gains one record, 0.423 to 0.462, but BM25 alone is not what the
+product uses.
+
+So the fix suggested by this lesson would have repeated this lesson: adopted on
+the reasoning that it helps the identifier questions, credited with the +0.027,
+and it does not help them. The stopword list is a defensible tidy-up and it is
+not a retrieval improvement. Left alone, with the number written down.
+
+The caveat that keeps it honest: the list of template words was written by hand
+in one pass and not tuned. A better one might do better. What it will not do is
+turn 0.20 into a hit - those gold chunks share only `nist` and `sp` with their
+questions, idf 1.22 and 1.19, which is boilerplate, not evidence.

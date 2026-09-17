@@ -24,8 +24,14 @@ The tokenizer has no stopword list, which is the other half of it: in formal
 NIST prose the question words are rare and therefore heavy. "does" scores
 idf 4.76 and "what" 4.57, against 3.54 for "800-171ar3" - so for the scope
 question BM25's top three come from two other documents entirely, ranked on
-"what" and "scope". Fixing that is a retrieval change and would move every
-number in the README, so it is written down rather than done.
+"what" and "scope".
+
+Removing them was tried, because it costs three minutes to try and an argument
+to avoid. Same fixture, query stripped of template words, nothing else touched:
+hit@5 and covered@5 do not move at all, coverage@5 goes 0.606 to 0.633, four
+records shift and one of them gets worse. The two questions the paragraph above
+is about stay misses. So the stopword list is not the missing piece, and the
+number is in docs/lessons.md #29 rather than in this module.
 
 BM25 is the standard answer and it is twenty lines. Terms are scored by how
 often they appear in a chunk (saturating, so a chunk that repeats one word
