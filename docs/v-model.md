@@ -82,7 +82,7 @@ re-recorded by hand.
 Closed by `scripts/live_check.py`: it runs the real pipeline, judges the fresh
 answers with the same judge the reported metric uses, and fails when a verdict
 differs from the pinned one. It cannot run in CI - the runner has no Ollama -
-so it is a local gate, about twenty minutes for twelve records. It deliberately
+so it is a local gate, about thirteen minutes for twelve records. It deliberately
 does not collapse the two causes of a flip: the system regressed, **or** the
 frozen set is stale, and those are fixed differently.
 
@@ -91,6 +91,10 @@ set had never been re-recorded after BM25 was fused into retrieval, so the
 pinned verdicts described the dense system while the product had been answering
 with the hybrid one for a day ([#25](lessons.md#25)). Both headline numbers were
 identical across that change; three of the twelve questions were not.
+
+Run again on 17.09 against the promoted set, it is green: all twelve behave as
+pinned. That is what this gate is supposed to look like when nothing is wrong,
+and it took one failure first to know the difference.
 
 ### 4. The requirements were the harness's, not the product's - closed
 

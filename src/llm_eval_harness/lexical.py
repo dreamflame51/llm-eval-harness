@@ -5,11 +5,27 @@ Why a second retriever at all. Ten of the twenty-six answerable questions were
 not served their gold span in the top five, and the misses were not random:
 they cluster on questions that name a document by its identifier - "What is the
 scope of NIST SP 800-78-5?", "What flexibility does SP 800-171Ar3 give to
-assessors?". Both of those gold spans sit whole inside a single indexed chunk,
-and all-MiniLM-L6-v2 ranks that chunk below position fifty. An embedding
-represents "SP 800-78-5" as a smear of subword tokens that look much like
-"SP 800-73" and "SP 800-53A"; exact strings are the one thing word matching is
-better at than meaning matching.
+assessors?". Dense retrieval ranks those gold chunks below position fifty.
+
+**The reasoning that followed from that was wrong, and it is left here because
+the fix it produced works anyway.** The argument was that an identifier is an
+exact string and exact strings are what word matching does better. Measured on
+17.09 (docs/lessons.md #29): neither gold span contains the identifier at all -
+one says "The assessment procedures are flexible and can be customized", the
+other "This document contains the technical specifications needed for" - so
+there is no exact string in the text to match. BM25 ranks the first of the two
+at 30 and never finds the second inside 300; the fused top five contains
+neither at any depth tried.
+
+What the fusion did improve is four other records, and it cost two. That is a
+real gain and it is not the gain this paragraph predicted.
+
+The tokenizer has no stopword list, which is the other half of it: in formal
+NIST prose the question words are rare and therefore heavy. "does" scores
+idf 4.76 and "what" 4.57, against 3.54 for "800-171ar3" - so for the scope
+question BM25's top three come from two other documents entirely, ranked on
+"what" and "scope". Fixing that is a retrieval change and would move every
+number in the README, so it is written down rather than done.
 
 BM25 is the standard answer and it is twenty lines. Terms are scored by how
 often they appear in a chunk (saturating, so a chunk that repeats one word

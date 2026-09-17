@@ -64,6 +64,7 @@ anything.**
 | Measuring something nobody could use | [24](#24) |
 | A fixture that stopped describing the system | [25](#25), [26](#26) |
 | The comparison that was not a comparison | [27](#27) |
+| The number moved, the explanation was invented | [29](#29) |
 
 ---
 
@@ -1004,11 +1005,16 @@ were answered anyway, from chunks that did not support the answer.
 
 Ten of 26 with nothing to work from, then. Not evenly spread: they cluster on
 questions that name a document by its identifier - "the scope of NIST SP
-800-78-5", "what flexibility does SP 800-171Ar3 give". Both of those gold spans
-sit whole inside a single indexed chunk, and dense retrieval ranks that chunk
-below position fifty. An embedding smears "SP 800-78-5" across every
-neighbouring document number; an exact string is the one thing word matching
-does better.
+800-78-5", "what flexibility does SP 800-171Ar3 give". Dense retrieval ranks
+those gold chunks below position fifty. An embedding smears "SP 800-78-5"
+across every neighbouring document number; an exact string is the one thing
+word matching does better.
+
+> **Corrected 17.09.** The last sentence is where this entry reasoned instead
+> of measuring, and [#29](#29) takes it apart: neither gold span contains the
+> identifier, so there is no exact string to match, and BM25 does not retrieve
+> either of the two questions this paragraph names as its motivation. The fix
+> below is real; the story told about why is not.
 
 **Fix.** BM25 alongside the embeddings, the two rankings fused by reciprocal
 rank (`lexical.py`). Measured on the same fixture, with the metrics that were
@@ -1391,3 +1397,66 @@ that would swing on one relabelled answer. What it licenses is saying, in the
 README and in the docstring, which axis is trusted and which is not - and that
 the next useful work is more records of the shape that exercises it, not a
 better prompt.
+
+---
+
+<a id="29"></a>
+
+## 29. The fix worked. The reason written next to it did not.
+
+**Symptom.** None, again - this came out of reading an artifact nobody had to
+read. The CI `retrieval` job was triggered by hand to check that a refactor had
+not broken the index build; it rebuilt the index from the PDFs on a clean
+runner and reproduced every number to the digit. In its output, the list of
+questions the retriever still misses entirely contains both of the questions
+[#23](#23) names as the reason BM25 was added.
+
+**Diagnosis.** BM25 went in because "the misses cluster on questions that name
+a document by its identifier, and an exact string is what word matching does
+better". Every part of that was written from reasoning. Measured:
+
+| | dense | BM25 | hybrid, top 5 |
+|---|---|---|---|
+| "what flexibility does SP 800-171Ar3 give" | not in 300 | **30** | not found |
+| "what is the scope of NIST SP 800-78-5" | not in 300 | not in 300 | not found |
+
+Depths of 5, 10, 25, 50, 100 and 300 were tried for the fusion; the gold chunk
+never reaches the fused top five for either question.
+
+Then the premise itself. **Neither gold span contains the identifier.** One
+reads "The assessment procedures are flexible and can be customized to the
+needs of organizations and assessors"; the other "This document contains the
+technical specifications needed for the mandatory and optional cryptographic
+keys specified in FIPS 201-3". The identifier is in the question, never in the
+answer - so "exact strings are what word matching is better at" describes a
+string that is not there. A document states its own scope without naming
+itself, which in hindsight is how documents work.
+
+And the tokenizer has no stopword list. In formal NIST prose the question words
+are rare and therefore heavy: `does` scores idf 4.76 and `what` 4.57, against
+3.54 for `800-171ar3`. For the scope question BM25's top three chunks come from
+SP 800-30r1 and SP 800-37r2 - two documents the question is not about - carried
+there by "what" and "scope" while the identifier contributes nothing, because
+they do not contain it.
+
+**So what is true.** Fusing BM25 in improved four records and cost two, which
+is measured, reproduced in CI on another machine, and unchanged by any of this.
+The intervention was good. The explanation attached to it was a story that fit
+the evidence available at the time and was never checked against the evidence
+that would have falsified it - which was two lookups away the whole time.
+
+**Lesson.** **An intervention that improves the metric is not evidence for the
+reason you gave.** Those are two claims and they need two measurements. Here
+the number moved, everyone was satisfied, and the mechanism went into a module
+docstring, a lesson and a README, where it read as established for three days.
+
+The cheap habit that catches it: when a change is justified by specific
+examples, check those examples afterwards. Not the average - the examples. Four
+records got better and neither of the two named ones was among them, and that
+gap is visible in one line of output nobody had a reason to read.
+
+**What follows, unowned for now.** A stopword list, or down-weighting terms
+common to the question template, is the obvious next experiment. It is a
+retrieval change: it moves every number in the README and has to be measured by
+the sweep, against the same fixture, like every other retrieval decision here.
+Written down rather than done.
