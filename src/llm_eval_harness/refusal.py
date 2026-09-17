@@ -50,10 +50,17 @@ than guessing, on either judge. Raw agreement of 75-83% hides that, which is
 a judge that says "no" every time scores 10/12. The humans found two, qwen3
 found one - a different one - and gemma4 found none.
 
-So the judge is kept for the axis it was built for and the axis it is trusted
-on are not the same thing, and that has to be said out loud rather than left in
-a docstring that predates the measurement (docs/lessons.md #28). n is twelve;
-the kappas are brittle; the direction is not.
+And the case this module was restructured around has now occurred. One record
+declines and then asserts a frequency its chunks do not carry: refused=true,
+fabricated=true by hand. The phrase list passes it by construction. **The judge
+passes it too** - qwen3 reads it as refused and not fabricated. The cell that
+justified building a judge is no longer empty, and the judge did not catch the
+one case in it.
+
+So the axis the judge was built for and the axis it is trusted on are not the
+same, and that belongs here rather than in a docstring that predates the
+measurement (docs/lessons.md #28). n is twelve; the kappas are brittle; the
+direction is not.
 
 The judge is qwen3:8b, chosen by measurement and not by size. gemma4 judged its
 own answers, which is why a second judge was run at all. Both pass

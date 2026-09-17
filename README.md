@@ -293,10 +293,14 @@ hand labels, re-made on 16.09 on a set that does carry fabrications:
 
 Raw agreement of 75-83% on the second row hides that it is no better than
 guessing: two of the twelve answers were labelled as fabricating, so a judge
-that always says "no" scores 10/12. Two humans-found fabrications, one found by
-`qwen3` - a different one - and none by `gemma4`. That axis is the judge's
-whole reason to exist next to the phrase list, and this is the first set with
-records of that shape to measure it on. n is twelve and the kappas are brittle;
+that always says "no" scores 10/12. The humans found two, `qwen3` found one - a
+different one - and `gemma4` none.
+
+**One of those two is the case the judge was built for.** An answer that
+declines and then states a frequency its chunks do not carry: the phrase list
+passes it by construction, and `qwen3` passes it as well. That cell was empty
+for this fixture's whole life, which is why the claim could never be tested; it
+is occupied now, and nothing caught it. n is twelve and the kappas are brittle;
 the direction is not. See [#20](docs/lessons.md#20) and
 [#28](docs/lessons.md#28).
 

@@ -109,11 +109,29 @@ nothing serves and a requirement serving no need both fail the suite.
 What that does **not** do is validate anything. The needs are stated and
 traced; whether they are met is gap 2 above, answered once.
 
+### 5. The fabrication axis has no working instrument - open
+
+Opened on 16.09, the day it became measurable. The system's worst failure is a
+fluent invented figure attached to a refusal, and nothing automated sees one.
+The phrase list has no opinion about fabrication by construction; both judges
+agree with a human at chance on that axis (`qwen3` kappa -0.12, `gemma4` 0.00,
+against 1.00 and 0.75 on `refused`); and the single record in the set that
+declines and then asserts an unsupported figure passed through both.
+
+It could not have been opened earlier: no labelled answer fabricated anything,
+so the claim had nothing to fail against. That is the uncomfortable half - the
+gap was invisible precisely because the fixture was clean, and a clean fixture
+reads as evidence.
+
+What it needs is not a better prompt. Two positives out of twelve cannot
+separate a judge from a coin, and tuning against those twelve fits the test.
+It needs more records of that shape ([#28](lessons.md#28)).
+
 ## What follows
 
-All four gaps are closed, which is a statement about coverage and not about
-quality. What is left is the maintenance each one needs to keep meaning
-something:
+Four of the five gaps are closed, which is a statement about coverage and not
+about quality, and the fifth was opened by a measurement that only became
+possible this week. What is left:
 
 1. **Re-time the usefulness session on fresh tasks**, with the clock that now
    stops at the answer. Not on the eight already judged.
@@ -121,4 +139,8 @@ something:
    or the retriever. Nothing schedules it, and it will not run in CI.
 3. **Re-measure the drift** after a change to decoding or to the hardware: a
    spread of 0.000 over five runs bounds the noise from above, it does not
-   prove there is none.
+   prove there is none. The stronger measurement is now the pair of recordings
+   in [#27](lessons.md#27) - same retriever two days apart, 8 of 12 answers
+   re-worded and no verdict moved.
+4. **Add refusal records that decline and then invent**, which is the only way
+   gap 5 becomes measurable rather than merely stated.

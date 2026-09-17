@@ -56,12 +56,14 @@ anything.**
 | The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16) |
 | The ruler has a limit, and the limit moves | [5](#5), [6](#6), [14](#14) |
 | What measuring changed | [7](#7), [8](#8), [15](#15) |
-| Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21) |
+| Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21), [27](#27) |
 | Checks that check nothing | [10](#10), [20](#20) |
 | What the system actually gets wrong | [11](#11) |
-| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22) |
+| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22), [28](#28) |
 | A gap between two metrics that nobody owned | [23](#23) |
 | Measuring something nobody could use | [24](#24) |
+| A fixture that stopped describing the system | [25](#25), [26](#26) |
+| The comparison that was not a comparison | [27](#27) |
 
 ---
 
@@ -1313,6 +1315,27 @@ unreadable when the classes are this skewed.
 
 Per record: the humans found two fabrications, qwen3 found one and it was a
 different one, gemma4 found none.
+
+**And the cell finally occurred.** The argument above is not only about a
+kappa. One of the twelve answers declines and then states a frequency its
+chunks do not carry - `refused=true, fabricated=true` by hand, the exact shape
+that was named as the phrase list's blind spot when the judge was built. The
+phrase list passes it, as designed. **qwen3 passes it too**, reading it as
+refused and not fabricated. The one case that the judge exists to catch arrived
+and the judge did not catch it.
+
+That is worth more than the kappa, because it needs no statistics: the
+justification for the component was a specific failure shape, the shape
+occurred once, and the component scored the same as the thing it was supposed
+to improve on.
+
+**And the case the judge exists for has now happened.** One of the twelve
+declines and then states a minimum assessment frequency the chunks do not
+carry - `refused=true, fabricated=true` by hand, the cell that was empty for
+this fixture's whole life and the entire argument for replacing the phrase
+list. The phrase list passes it, as designed. qwen3 passes it too: refused,
+not fabricated. The judge was built for exactly one shape of failure, the shape
+finally appeared, and it went through.
 
 **Lesson.** **A component's justification has to be measured on the thing it
 was justified by.** This judge was validated for days on the axis it agrees

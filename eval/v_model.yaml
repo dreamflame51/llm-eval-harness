@@ -101,3 +101,19 @@ gaps:
     not validated.'
   blocks: nothing now
   next: '-'
+- id: GAP-5
+  title: The fabrication axis has no working instrument
+  detail: 'The failure this system is most at risk from is a fluent invented figure attached
+    to a refusal, and nothing automated detects it. The phrase list has no opinion about
+    fabrication by construction. Both judges, measured on 16.09 against fresh hand labels
+    on a set that finally contains fabrications, agree with a human at chance on that axis
+    - qwen3 kappa -0.12, gemma4 0.00, against 1.00 and 0.75 on the refused axis. The one
+    record that declines and then asserts an unsupported figure went through the phrase list
+    and through the judge. The only instrument that reads this axis is a person, twelve
+    records at a time. Opened the day it became measurable: the cell was empty before, so
+    the claim could not fail.'
+  blocks: Any automated claim about fabrication. scripts/live_check.py gates refusal
+    behaviour and cannot gate this
+  next: More records of this shape. An axis with two positives out of twelve cannot separate
+    a judge from a coin, and tuning the prompt against these twelve would fit the test
+    rather than the task

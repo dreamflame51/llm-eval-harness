@@ -48,6 +48,81 @@ RETRIEVERS = [
 ]
 
 
+# The three recordings of the same twelve refusal questions. Two differ by the
+# day they were made, two by the retriever, and the pair of comparisons is the
+# only thing that separates what the system does from what the generator says
+# differently this afternoon (docs/lessons.md #27).
+RECORDINGS = (
+    ("dense, 14.09", "dense", BASELINE / "refusal_answers.yaml"),
+    ("dense, 16.09", "dense", BASELINE / "refusal_answers.control.yaml"),
+    ("hybrid, 16.09", "hybrid", pathlib.Path("eval/refusal_answers.yaml")),
+)
+
+PAIRS = (
+    ("same retriever, two days apart", "dense, 14.09", "dense, 16.09"),
+    ("retriever swapped, same afternoon", "dense, 16.09", "hybrid, 16.09"),
+)
+
+
+def recordings(model="qwen3:8b"):
+    """Each recording as the instruments read it, and what separates each pair."""
+    scored = {}
+    for name, retriever, path in RECORDINGS:
+        if not path.exists():
+            continue
+        records = refusal_answers(path)
+        rows, _ = decided_records(model, records)
+        scored[name] = {
+            "retriever": retriever,
+            "by_question": {
+                record["question"]: {
+                    "answer": record["answer"],
+                    "refused": refused,
+                    "clean": None if refused is None or fabricated is None
+                    else (refused and not fabricated),
+                    "phrase": looks_like_refusal(record["answer"]),
+                    "hand": None if record["labels"]["refused"] is None
+                    else (record["labels"]["refused"] and not record["labels"]["fabricated"]),
+                }
+                for record, refused, fabricated in rows
+            },
+        }
+
+    sets = []
+    for name, entry in scored.items():
+        rows = entry["by_question"].values()
+        hand = [row["hand"] for row in rows if row["hand"] is not None]
+        sets.append({
+            "name": name,
+            "retriever": entry["retriever"],
+            "n": len(rows),
+            "judged": sum(1 for row in rows if row["clean"]),
+            "phrase": sum(1 for row in rows if row["phrase"]),
+            "hand": sum(1 for value in hand if value) if hand else None,
+        })
+
+    pairs = []
+    for label, left, right in PAIRS:
+        if left not in scored or right not in scored:
+            continue
+        a, b = scored[left]["by_question"], scored[right]["by_question"]
+        shared = [q for q in a if q in b]
+        moved = [
+            q for q in shared
+            if any(a[q][axis] != b[q][axis] for axis in ("refused", "clean", "phrase"))
+        ]
+        pairs.append({
+            "label": label,
+            "left": left,
+            "right": right,
+            "n": len(shared),
+            "answers_changed": sum(1 for q in shared if a[q]["answer"] != b[q]["answer"]),
+            "verdicts_moved": len(moved),
+            "questions": moved,
+        })
+    return {"sets": sets, "pairs": pairs}
+
+
 def test_inventory():
     """
     {test file: count}, by collection rather than by running anything.
@@ -268,6 +343,7 @@ def build(run_tests=False):
             if pathlib.Path("eval/usefulness.yaml").exists()
             else None
         ),
+        "recordings": recordings(),
         "tests": test_inventory(),
         "test_run": test_run() if run_tests else None,
         "ci": ci_status(sha) if (sha := head_commit()) else None,
