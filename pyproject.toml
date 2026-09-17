@@ -22,6 +22,14 @@ dependencies = [
     "sentence-transformers>=6.0.1",
 ]
 
+[project.optional-dependencies]
+# Tracing is an extra, not a dependency: CI installs the base set and every
+# reported number is computed without it. Turn it on for a run with
+#     uv sync --extra trace
+trace = [
+    "langfuse>=3.0.0",
+]
+
 [project.scripts]
 llm-eval-harness = "llm_eval_harness:main"
 

@@ -1,6 +1,7 @@
 import ollama
 
 from llm_eval_harness.store import hybrid_search
+from llm_eval_harness.tracing import traced
 
 MODEL = "gemma4:latest"
 K = 5
@@ -19,6 +20,7 @@ RETRIEVE = hybrid_search
 SYSTEM = "Give answers only based on context, if answer is not in context, say that answer is missing."
 
 
+@traced(name="answer")
 def answer(question):
     contexts = RETRIEVE(question, k=K)
     blocks = [f"[{c['source']}]\n{c['text']}" for c in contexts]

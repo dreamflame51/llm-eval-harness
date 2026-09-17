@@ -63,6 +63,7 @@ import re
 import time
 
 from llm_eval_harness.dataset import ROOT, refusal_answers
+from llm_eval_harness.tracing import traced
 
 CACHE_DIR = ROOT / "eval" / "judge_cache"
 
@@ -536,6 +537,7 @@ def write_cache(model, cache, cache_dir=CACHE_DIR):
 # --- running ---------------------------------------------------------------
 
 
+@traced(name="judge", as_type="generation")
 def ollama_chat(model, messages, axis, think=None, structured=True):
     """One call to the judge. Imported lazily: reporting from the cache and
     the tests must work with no ollama installed and no server running."""

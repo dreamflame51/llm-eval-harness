@@ -21,3 +21,8 @@ data/chroma/
 
 # Personal interview-prep notes. Kept on disk, out of a public repository.
 docs/rehearsal.md
+
+# Langfuse keys. The project's own numbers never depend on them - tracing is
+# additive and off by default - but a leaked secret key is still a leaked key.
+.env
+docker/langfuse/.env

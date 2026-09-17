@@ -4,6 +4,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 
 from llm_eval_harness.lexical import BM25, rrf
+from llm_eval_harness.tracing import traced
 
 # English-only: the corpus and the eval questions are English, and on the
 # ground-truth set this model beats paraphrase-multilingual-MiniLM-L12-v2 at
@@ -92,6 +93,7 @@ def lexical_index(coll=None):
     return _lexical[target.name]
 
 
+@traced(name="retrieve")
 def hybrid_search(query, k=5, coll=None, depth=DEPTH):
     """
     Dense and BM25, fused by reciprocal rank.
