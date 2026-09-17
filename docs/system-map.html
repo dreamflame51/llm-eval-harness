@@ -330,7 +330,7 @@
 
           <rect class="box" x="586" y="30" width="230" height="52"></rect>
           <text x="600" y="52">Chroma &mdash; the one store</text>
-          <text class="sub" x="600" y="69">chunks + vectors, on disk</text>
+          <text class="sub" x="600" y="69">vectors from all-MiniLM-L6-v2</text>
 
           <!-- 2: first question in a process -->
           <text class="head" x="16" y="118">ONCE PER PROCESS &mdash; ON THE FIRST QUESTION, ABOUT 13 SECONDS</text>
@@ -359,7 +359,9 @@
           <text class="edge" x="711" y="218">words</text>
 
           <path class="link" d="M850 240 L 850 106 L 760 106 L 760 88" marker-end="url(#ar1)"></path>
-          <text class="edge" x="858" y="180">vectors</text>
+          <text class="edge" x="858" y="168">vectors &mdash; the question</text>
+          <text class="edge" x="858" y="183">goes through the same</text>
+          <text class="edge" x="858" y="198">all-MiniLM-L6-v2</text>
 
           <line x1="876" y1="266" x2="920" y2="266" marker-end="url(#ar1)"></line>
 
@@ -387,6 +389,14 @@
         the corpus is &mdash; whatever was embedded is what gets word-matched. The price is the
         thirteen seconds the first question of every process pays, which is invisible in any
         average and was only ever seen in a trace.
+        <br><br>
+        <b>The same embedding model sits on both sides of the picture.</b>
+        <span style="font-family:var(--mono);font-size:12px">all-MiniLM-L6-v2</span> turns chunks
+        into vectors at ingest and the question into a vector at query time &mdash; dense search
+        is a comparison in that one space, so the two have to be produced by the same model.
+        Which is also why changing it is not a configuration change: every stored vector becomes
+        meaningless and the index has to be rebuilt from zero. It was chosen by measurement, not
+        by default: against a multilingual model at equal chunking it scored hit@5 0.308 to 0.192.
         <br><br>
         The phases matter for the measurement too: the first is deterministic and CI rebuilds it
         from the committed PDFs in the
