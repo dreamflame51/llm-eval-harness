@@ -28,9 +28,10 @@ On twelve records one record is eight points. Nothing here is printed to three
 decimals for that reason.
 """
 
+import argparse
 import pathlib
 
-from llm_eval_harness.dataset import refusal_answers
+from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, refusal_answers
 from llm_eval_harness.judge import (
     AXES,
     CACHE_DIR,
@@ -229,11 +230,25 @@ def print_against_labels(by_model, records, indent="  "):
         )
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--file",
+        type=pathlib.Path,
+        default=REFUSAL_ANSWERS_PATH,
+        help="the recorded set to report on. The control recording in "
+        "eval/dense_baseline/ is the other one worth reading: same questions, "
+        "same afternoon, the retriever the product stopped using",
+    )
+    return parser.parse_args()
+
+
 def main():
-    records = refusal_answers()
+    args = parse_args()
+    records = refusal_answers(args.file)
     names = models()
-    print(f"{len(records)} recorded answers, judges: {', '.join(names) or 'none'}")
-    print(f"verdicts from {CACHE_DIR}\n")
+    print(f"{len(records)} recorded answers from {args.file}")
+    print(f"judges: {', '.join(names) or 'none'}; verdicts from {CACHE_DIR}\n")
 
     by_model = {}
     for model in names:

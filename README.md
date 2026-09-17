@@ -196,21 +196,29 @@ carried exactly 0).
 | set | retriever | recorded | judged | phrase | by hand |
 |---|---|---|---|---|---|
 | `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
-| `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | not labelled |
+| `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | 11/12 |
 | `eval/refusal_answers.yaml` (current) | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
 
-The third row is the control, and it is there because a comparison between two
-recordings is not a comparison between two systems. Recording the same twelve
-questions twice under the *same* retriever, two days apart, changes 8 of the 12
-answers' wording and moves **no verdict at all**. Swapping the retriever on the
-same afternoon changes 7 answers and moves exactly **two** - the AES record for
-the better, the SP 800-76 record for the worse. The judged metric is 10/12 in
-all three, so what the retriever did to refusals nets to zero there.
+The middle row is a control, and it is there because a comparison between two
+recordings is not a comparison between two systems: the generator rewrites most
+of its answers between processes, so a difference between 14.09 and 16.09
+carries the day as well as the retriever. Holding the day fixed and swapping
+only the retriever is what the middle row buys.
 
-The hand labels are the one instrument that reads lower on hybrid, and they do
-it on the `fabricated` axis - which is the axis the judge agrees with a human
-on at chance level (below). Whether that is the retriever or the recording is
-not settled: the control has not been labelled by hand
+**Fusing BM25 into retrieval cost two records of grounding.** Two dense
+recordings score 11/12 by hand regardless of the day; the hybrid recording from
+the same afternoon scores 9/12. Every automated instrument is blind to it - the
+judge says 10/12 three times and the phrase list 11/12 three times - because
+both movements land on the `fabricated` axis, where the judge agrees with a
+human at chance (below).
+
+The mechanism is traced, not guessed. Asked which biometric formats SP 800-76
+specifies - a document the corpus does not contain - the dense recording
+declines and the hybrid one asserts CBEFF, from a chunk of SP 800-78-5 that
+sits at rank 4 of the hybrid five and appears nowhere in the dense five. It is
+not a BM25-only chunk: reciprocal rank fusion promoted a chunk dense retrieval
+had ranked below the cut. Retrieval metrics measure whether the right text
+arrives, not what arrives beside it
 ([#25](docs/lessons.md#25), [#27](docs/lessons.md#27)).
 
 ## What the metrics mean

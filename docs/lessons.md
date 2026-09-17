@@ -1283,6 +1283,49 @@ the finding, and it is usually cheaper to check than the finding itself. One
 `grep` for BM25-only chunks in three records took a minute and refuted the
 explanation I was about to publish.
 
+### Coda, 17.09: the control was labelled, and the finding came back
+
+Everything above was written with the control recorded and **unlabelled**. The
+hand labels are the only instrument in this project sensitive enough to see the
+effect, so the control was answering with the one instrument that cannot. A day
+later the twelve control answers were labelled by hand, and the table completes
+itself:
+
+| instrument | dense, 14.09 | dense, 16.09 | hybrid, 16.09 |
+|---|---|---|---|
+| judged, qwen3 | 10/12 | 10/12 | 10/12 |
+| phrase list | 11/12 | 11/12 | 11/12 |
+| **hand labels** | **11/12** | **11/12** | **9/12** |
+
+The middle column is the control, and it holds. Two recordings under the same
+retriever, two days apart, score identically by hand; swapping the retriever on
+one afternoon costs two records. **So the finding was right after all, and the
+retraction above was right too** - it was unsupported at the time, and the thing
+that supports it now is the control that was run to test it.
+
+The mechanism, this time traced rather than guessed. Asked which biometric
+formats SP 800-76 specifies - a document that is not in the corpus - the dense
+recording says "Answer is missing". The hybrid recording asserts CBEFF. The
+chunk carrying "Common Biometric Exchange Formats Framework" sits at rank 4 of
+the hybrid five and **appears nowhere in the dense five**; it comes from
+SP 800-78-5, a different document, and it has an embedding distance of 0.34, so
+it is not a BM25-only chunk at all. Reciprocal rank fusion promoted a chunk
+dense retrieval had ranked below the cut, and the model answered a question
+about an absent document from it.
+
+That is why the earlier check came up empty: the failure mode is not "BM25 adds
+a lexical match", it is "the fusion reorders, and a chunk that was harmless at
+rank nine is an invitation at rank four". Which is also why the retrieval
+metrics went up while this went down - they measure whether the right text
+arrives, not what arrives with it.
+
+**The lesson does not change; it gets a second half.** A comparison between two
+recordings is not a comparison between two systems - and a control is only a
+control if the instrument that can see the effect is pointed at it. The first
+version of this entry ran the control and read it with the judge, which is at
+chance on the axis in question ([#28](#28)). Two thirds of the work, and it
+produced the opposite conclusion.
+
 ---
 
 <a id="28"></a>

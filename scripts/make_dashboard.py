@@ -111,6 +111,13 @@ def recordings(model="qwen3:8b"):
             q for q in shared
             if any(a[q][axis] != b[q][axis] for axis in ("refused", "clean", "phrase"))
         ]
+        # The hand labels separately, because they are the only instrument that
+        # moves between the two recordings on the right, and an aggregate that
+        # mixed them with the judge's would hide exactly that (lessons #27).
+        by_hand = [
+            q for q in shared
+            if a[q]["hand"] is not None and b[q]["hand"] is not None and a[q]["hand"] != b[q]["hand"]
+        ]
         pairs.append({
             "label": label,
             "left": left,
@@ -118,7 +125,9 @@ def recordings(model="qwen3:8b"):
             "n": len(shared),
             "answers_changed": sum(1 for q in shared if a[q]["answer"] != b[q]["answer"]),
             "verdicts_moved": len(moved),
+            "hand_moved": len(by_hand),
             "questions": moved,
+            "hand_questions": by_hand,
         })
     return {"sets": sets, "pairs": pairs}
 
