@@ -1,0 +1,119 @@
+# The V-model levels and the gaps between them, as data.
+#
+# The prose lives in docs/v-model.md; this file holds the parts that two
+# readers need - that document's table and the panel on the readout page - so
+# the two cannot drift apart. scripts/traceability.py regenerates the table
+# inside the document from here.
+#
+# state on a level is one of: present, partial, missing.
+# state on a gap is absent while it is open, and "closed" once something
+# closes it - kept rather than deleted, because what the project used to be
+# missing is the more useful half of the record.
+
+levels:
+- level: User needs
+  side: specification
+  specified: eval/needs.yaml
+  verified: the requirements serving each, and scripts/usefulness.py
+  state: partial
+  note: 'Four needs, written last and linked to the requirements that serve them, checked
+    in both directions, and validated once on eight real tasks - six finished on the passage
+    shown, none answered wrongly. Still partial: one session, judged by the author, and
+    the timing half of it is unusable (GAP-2).'
+- level: System requirements
+  side: specification
+  specified: eval/traceability.yaml
+  verified: pytest, the metric commands, scripts/live_check.py
+  state: partial
+  note: Ten claims, all of the form "the harness can tell X" rather than "the product
+    does Y for its user".
+- level: Architecture
+  side: design
+  specified: pipeline.py, store.py, chunking and retrieval decisions
+  verified: scripts/compare_retrievers.py, scripts/sweep.py
+  state: present
+  note: Every configuration choice here was made by measurement against the fixture rather
+    than by taste, and the sweep is committed as code.
+- level: Module design
+  side: design
+  specified: module docstrings
+  verified: the unit suite
+  state: present
+  note: The docstrings carry the reasoning, which is the half that does not survive in
+    code.
+- level: Code
+  side: implementation
+  specified: '-'
+  verified: ruff and pytest in CI
+  state: present
+  note: Lint and the suite run on every push.
+gaps:
+- id: GAP-1
+  title: No acceptance criterion on a metric's value
+  state: closed
+  detail: 'Every number was reported and read; none could fail. The drift has now been
+    measured - five runs, each in a fresh process, spread 0.000 - and the measurement
+    changed the shape of the answer rather than supplying a number to compare against:
+    this metric moves in steps of one record, 0.083 on twelve, so a bar on the average
+    is either "one record" or nothing. What is gated instead is a verdict flipping, per
+    question, and the measured noise is pinned beside the values so the gate can be read
+    against what it was set from.'
+  blocks: nothing now
+  next: Re-measure the drift after a change to decoding or the hardware
+- id: GAP-2
+  title: Verification without validation
+  state: closed
+  detail: 'Everything asks whether the system does what we specified. Nothing asked whether
+    the specified thing is worth having. Closed by sitting with the system on the eight
+    tasks in eval/usefulness_tasks.yaml and recording what happened: six accepted on the
+    passage shown, one correct decline, one answer that had to be checked elsewhere, none
+    wrong (eval/usefulness.yaml, 2026-09-16). What it does not close is the timing claim
+    - the clock ran on into the judging, so those seconds are an upper bound and not a
+    comparison with doing the task by hand.'
+  blocks: nothing now, though eight tasks judged by the system's own author can falsify
+    a claim of usefulness, not certify one
+  next: Re-time on fresh tasks with the fixed clock - not on these eight, which have been
+    seen
+- id: GAP-3
+  title: The system-test level is frozen
+  detail: 'Generation metrics score answers recorded once, so a regression introduced
+    in pipeline.py moved no reported number until somebody re-recorded by hand. Closed
+    by scripts/live_check.py: it runs the real pipeline, judges the fresh answers with
+    the same judge the reported metric uses, and fails when a verdict differs from the
+    pinned one. It cannot run in CI - the runner has no Ollama - so it is a local gate,
+    about twenty minutes for twelve records. On its first real run, 16.09, it failed
+    and was right to: the frozen refusal set had never been re-recorded after BM25 was
+    fused into retrieval, so every pinned verdict described the dense system while the
+    product answered with the hybrid one (docs/lessons.md #25). Both headline numbers
+    were unchanged by that; three of the twelve questions were not.'
+  blocks: nothing now, though nothing schedules it either
+  next: Run it before a release and after touching pipeline.py or the retriever - the
+    change it has already caught once
+  state: closed
+- id: GAP-4
+  title: The requirements were the harness's, not the product's
+  state: closed
+  detail: 'The top-left box of the V was empty, so the traceability matrix had nothing
+    above itself to trace to. Closed by eval/needs.yaml: four needs written as what a
+    person wants from the system, each naming the requirements that serve it, with the
+    link checked in both directions - a need nothing serves, and a requirement serving
+    no need, both fail the suite. What remains is GAP-2: the needs are stated and traced,
+    not validated.'
+  blocks: nothing now
+  next: '-'
+- id: GAP-5
+  title: The fabrication axis has no working instrument
+  detail: 'The failure this system is most at risk from is a fluent invented figure attached
+    to a refusal, and nothing automated detects it. The phrase list has no opinion about
+    fabrication by construction. Both judges, measured on 16.09 against fresh hand labels
+    on a set that finally contains fabrications, agree with a human at chance on that axis
+    - qwen3 kappa -0.12, gemma4 0.00, against 1.00 and 0.75 on the refused axis. The one
+    record that declines and then asserts an unsupported figure went through the phrase list
+    and through the judge. The only instrument that reads this axis is a person, twelve
+    records at a time. Opened the day it became measurable: the cell was empty before, so
+    the claim could not fail.'
+  blocks: Any automated claim about fabrication. scripts/live_check.py gates refusal
+    behaviour and cannot gate this
+  next: More records of this shape. An axis with two positives out of twelve cannot separate
+    a judge from a coin, and tuning the prompt against these twelve would fit the test
+    rather than the task

@@ -3,7 +3,8 @@ import uuid
 import chromadb
 import pytest
 
-from llm_eval_harness.store import EMBEDDER, build_index, search
+from llm_eval_harness import store
+from llm_eval_harness.store import build_index, embedder, search
 
 CHUNKS = [
     {
@@ -24,11 +25,21 @@ CHUNKS = [
 ]
 
 
+class BatchLimit:
+    """Stands in for the Chroma client, which build_index asks one thing."""
+
+    def __init__(self, size):
+        self.size = size
+
+    def get_max_batch_size(self):
+        return self.size
+
+
 @pytest.fixture
 def empty_coll():
     client = chromadb.EphemeralClient()
     return client.get_or_create_collection(
-        f"test-{uuid.uuid4()}", embedding_function=EMBEDDER
+        f"test-{uuid.uuid4()}", embedding_function=embedder()
     )
 
 
@@ -45,6 +56,19 @@ def test_empty_index_returns_nothing(empty_coll):
 
 def test_build_index(filled_coll):
     assert filled_coll.count() == 3
+
+
+def test_build_index_splits_batches_without_losing_chunks(empty_coll, monkeypatch):
+    # Chroma rejects an upsert bigger than its own limit, and the chunk count
+    # follows the chunk size: 500/100 over this corpus produces 8085 chunks
+    # against a limit of 5461. A batch size of 2 here exercises the same loop
+    # without embedding thousands of documents.
+    #
+    # The accessor is replaced rather than a method on the real client, so this
+    # test no longer opens data/chroma to ask a question it then fakes.
+    monkeypatch.setattr(store, "client", lambda: BatchLimit(2))
+    build_index(CHUNKS, empty_coll)
+    assert empty_coll.count() == len(CHUNKS)
 
 
 def test_search_returns_k_results(filled_coll):

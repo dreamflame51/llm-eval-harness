@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ask the NIST corpus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --plane: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --rule: rgba(11, 11, 11, 0.10);
+    --accent: #2a78d6;
+    --warn: #eb6834;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --plane: #0d0d0d;
+      --surface: #1a1a19;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --rule: rgba(255, 255, 255, 0.10);
+      --accent: #3987e5;
+      --warn: #d95926;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 36px 60px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  h1 { font-size: 26px; font-weight: 600; margin: 6px 0 8px; letter-spacing: -0.015em; }
+  p.lede { color: var(--ink-2); margin: 0 0 22px; }
+
+  form { display: flex; gap: 8px; margin-bottom: 8px; }
+  input[type=text] {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    padding: 11px 13px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+  }
+  input[type=text]:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button {
+    font: inherit;
+    font-weight: 500;
+    padding: 11px 18px;
+    color: #fff;
+    background: var(--accent);
+    border: 0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button[disabled] { opacity: 0.55; cursor: default; }
+
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 26px; }
+  .examples button {
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--rule);
+    padding: 5px 10px;
+    font-size: 12.5px;
+    font-weight: 400;
+    border-radius: 999px;
+  }
+
+  #status { color: var(--muted); font-size: 13px; min-height: 20px; margin-bottom: 14px; }
+  .answer {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 18px 20px;
+    white-space: pre-wrap;
+    margin-bottom: 14px;
+  }
+  .warn {
+    border-left: 3px solid var(--warn);
+    background: var(--surface);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-bottom: 14px;
+  }
+  h2 {
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 24px 0 10px;
+  }
+  .chunk {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .chunk-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .chunk p { margin: 0; font-size: 13.5px; color: var(--ink-2); overflow-wrap: anywhere; }
+  footer { margin-top: 34px; color: var(--muted); font-size: 12.5px; }
+  footer a { color: inherit; }
+  code { font-family: var(--mono); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">local &middot; gemma4 + hybrid retrieval over 5 NIST publications</p>
+  <h1>Ask the corpus</h1>
+  <p class="lede">
+    Answers come only from SP 800-37r2, SP 800-53Ar5, SP 800-171Ar3, SP 800-78-5 and
+    SP 800-30r1. The passages the answer was drawn from are shown underneath it, so an
+    answer can be checked without opening a PDF &mdash; and so a refusal can be told apart
+    from a retrieval miss.
+  </p>
+
+  <form id="form">
+    <input type="text" id="q" name="q" placeholder="What has to be in an authorization package?" autocomplete="off" autofocus>
+    <button type="submit" id="go">Ask</button>
+  </form>
+  <div class="examples" id="examples"></div>
+
+  <div id="status"></div>
+  <div id="result"></div>
+
+  <footer>
+    Served by <code>scripts/serve.py</code> on this machine; nothing leaves it. The first
+    question loads the model and takes about a minute. The same pipeline is what
+    <code>scripts/ask.py</code> and every metric in this repository measure.
+  </footer>
+</div>
+
+<script>
+  const EXAMPLES = [
+    "What has to be in an authorization package?",
+    "What is the difference between the Examine and Test assessment methods?",
+    "Which elliptic curves are recommended for PIV keys?",
+    "What is the maximum time permitted between authorization reviews?",
+  ];
+  const SUSPICIOUS = 0.5;
+
+  const form = document.getElementById("form");
+  const input = document.getElementById("q");
+  const go = document.getElementById("go");
+  const status = document.getElementById("status");
+  const result = document.getElementById("result");
+
+  document.getElementById("examples").innerHTML = EXAMPLES.map(
+    (e, i) => `<button type="button" data-i="${i}">${e}</button>`
+  ).join("");
+  document.getElementById("examples").addEventListener("click", (event) => {
+    const i = event.target.dataset.i;
+    if (i === undefined) return;
+    input.value = EXAMPLES[i];
+    form.requestSubmit();
+  });
+
+  const escape = (s) =>
+    String(s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    );
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (!question) return;
+
+    go.disabled = true;
+    result.innerHTML = "";
+    const started = Date.now();
+    const tick = setInterval(() => {
+      status.textContent = `asking the model... ${Math.round((Date.now() - started) / 1000)}s`;
+    }, 500);
+    status.textContent = "asking the model...";
+
+    try {
+      const response = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      const data = await response.json();
+      clearInterval(tick);
+      status.textContent = `${((Date.now() - started) / 1000).toFixed(0)}s · ${data.contexts.length} passages retrieved`;
+
+      const distances = data.contexts.map((c) => c.distance).filter((d) => d !== null);
+      const nearest = distances.length ? Math.min(...distances) : null;
+      const warning =
+        nearest !== null && nearest > SUSPICIOUS
+          ? `<div class="warn">Nearest passage is ${nearest.toFixed(2)} away, past the ${SUSPICIOUS} mark.
+             The retriever found nothing close to this question, so read the answer as a guess at best.</div>`
+          : "";
+
+      result.innerHTML =
+        `<div class="answer">${escape(data.answer)}</div>` +
+        warning +
+        `<h2>Answered from</h2>` +
+        data.contexts
+          .map(
+            (c, i) =>
+              `<div class="chunk"><div class="chunk-head">` +
+              `<span>[${i + 1}] ${escape(c.source)}</span>` +
+              `<span>${c.distance === null ? "matched by wording" : "distance " + c.distance.toFixed(3)}</span>` +
+              `</div><p>${escape(c.text)}</p></div>`
+          )
+          .join("");
+    } catch (error) {
+      clearInterval(tick);
+      status.textContent = "";
+      result.innerHTML = `<div class="warn">${escape(error.message || error)}</div>`;
+    } finally {
+      go.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

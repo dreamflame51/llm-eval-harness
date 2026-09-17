@@ -5,7 +5,11 @@ These pin the scoring logic, not the model: whether gemma actually declines is
 what `python -m llm_eval_harness.refusal` reports.
 """
 
-from llm_eval_harness.refusal import evaluate_refusals, looks_like_refusal
+from llm_eval_harness.refusal import (
+    evaluate_judged,
+    evaluate_refusals,
+    looks_like_refusal,
+)
 
 REFUSAL = "The answer is missing from the provided context."
 FABRICATION = "The maximum interval between authorization reviews is three years."
@@ -103,6 +107,74 @@ def test_no_records_does_not_divide_by_zero():
     assert result["n"] == 0
     assert result["refusal_rate"] == 0.0
     assert result["by_class"] == {}
+
+
+# --- evaluate_judged -------------------------------------------------------
+
+
+def judged(*triples):
+    """(answer, refused, fabricated) -> rows in the shape decided_records gives."""
+    return [
+        (
+            {
+                "question": f"q{i}",
+                "answer": answer,
+                "refusal_type": "in_corpus_gap",
+                "labels": {"refused": None, "fabricated": None, "note": ""},
+            },
+            refused,
+            fabricated,
+        )
+        for i, (answer, refused, fabricated) in enumerate(triples)
+    ]
+
+
+def test_clean_needs_both_halves():
+    result = evaluate_judged(rows=judged((REFUSAL, True, False), (REFUSAL, True, True)))
+    # Declined in both. Only one of them invented nothing.
+    assert result["clean"] == 1
+    assert result["clean_rate"] == 0.5
+
+
+def test_an_undecided_record_is_not_counted_as_a_failure():
+    # A gap in the cache is absence of a verdict. Scoring it as a miss would
+    # make an unfinished judging run look like a worse system.
+    result = evaluate_judged(rows=judged((REFUSAL, True, False), (REFUSAL, None, None)))
+    assert result["undecided"] == 1
+    assert result["clean_rate"] == 1.0
+    assert result["n"] == 2
+
+
+def test_the_phrase_list_is_scored_on_the_same_answers():
+    rows = judged((REFUSAL, True, False), (FABRICATION, False, True))
+    result = evaluate_judged(rows=rows)
+    assert result["phrase_rate"] == 0.5
+    assert [r["phrase"] for r in result["results"]] == [True, False]
+
+
+def test_a_hedge_shows_up_as_a_disagreement():
+    # The shape the replacement exists for: the phrase list sees a refusal,
+    # the judge sees an answer.
+    hedged = "The context does not specify it, but it is typically three years."
+    result = evaluate_judged(rows=judged((hedged, False, True)))
+    row = result["results"][0]
+    assert row["phrase"] is True and row["refused"] is False
+    assert row["clean"] is False
+
+
+def test_classes_are_kept_apart():
+    rows = judged((REFUSAL, True, False), (REFUSAL, False, False))
+    rows[1][0]["refusal_type"] = "out_of_corpus"
+    result = evaluate_judged(rows=rows)
+    assert result["by_class"]["in_corpus_gap"]["clean"] == 1
+    assert result["by_class"]["out_of_corpus"]["clean"] == 0
+
+
+def test_no_rows_does_not_divide_by_zero():
+    result = evaluate_judged(rows=[])
+    assert result["n"] == 0
+    assert result["clean_rate"] == 0.0
+    assert result["phrase_rate"] == 0.0
 
 
 def test_the_real_fixture_has_both_classes():

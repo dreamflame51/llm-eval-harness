@@ -5,8 +5,9 @@ import pytest
 from llm_eval_harness.dataset import (
     REFUSAL_TYPES,
     answerable_records,
-    get_qa,
+    library_scores,
     load_ground_truth,
+    refusal_answers,
     refusal_records,
 )
 
@@ -39,6 +40,14 @@ def test_refusal_records_have_empty_contexts_and_a_declared_class():
         assert rec["refusal_type"] in REFUSAL_TYPES
 
 
+def test_refusal_records_declare_whether_the_topic_is_in_the_corpus():
+    # Not scored. It is the evidence the refusal classes will be re-cut from -
+    # document presence and topic presence came apart on the FIPS 197 record -
+    # and a record added without it would quietly shrink that evidence.
+    for rec in refusal_records():
+        assert isinstance(rec.get("topic_in_corpus"), bool), rec["question"]
+
+
 def test_answerable_records_have_contexts():
     for rec in answerable_records():
         assert rec["contexts"], rec["question"]
@@ -56,14 +65,87 @@ def test_refusal_type_filter_partitions_the_refusal_set():
     assert by_class == len(refusal_records())
 
 
-def test_get_qa_by_index_and_by_question():
-    first = get_qa(0)
-    assert get_qa(first["question"])["answer"] == first["answer"]
+# --- the library score files, whichever shape they are in ------------------
 
 
-def test_get_qa_raises_on_unknown_question():
+def test_library_scores_reads_both_shapes(tmp_path):
+    # The two files really are shaped differently and both are committed, so
+    # this is the one place that difference is allowed to exist. The test is
+    # here because three readers used to carry their own copy of it.
+    as_map = tmp_path / "map.json"
+    as_map.write_text('{"per_record": {"q1": {"faithfulness": 1.0}}}', encoding="utf-8")
+    as_list = tmp_path / "list.json"
+    as_list.write_text(
+        '{"per_record": [{"question": "q1", "faithfulness": 1.0}]}', encoding="utf-8"
+    )
+    assert library_scores(as_map)["q1"]["faithfulness"] == 1.0
+    assert library_scores(as_list)["q1"]["faithfulness"] == 1.0
+
+
+def test_library_scores_of_a_file_that_is_not_there_is_empty(tmp_path):
+    # An unfinished run is an ordinary state here, not an error: the callers
+    # decide what to do with nothing, and one of them pins numbers.
+    assert library_scores(tmp_path / "absent.json") == {}
+
+
+# --- the frozen answers ----------------------------------------------------
+
+
+def test_recorded_answers_cover_the_refusal_questions():
+    # The judged set and the fixture it came from must not drift apart: a
+    # question added to ground_truth.yaml without re-recording would be scored
+    # by nothing at all.
+    questions = {rec["question"] for rec in refusal_records()}
+    assert {rec["question"] for rec in refusal_answers()} == questions
+
+
+def test_every_recorded_answer_can_be_judged():
+    for i, rec in enumerate(refusal_answers()):
+        assert rec["answer"].strip(), i
+        assert rec["retrieved"], i
+        assert all(chunk["text"].strip() for chunk in rec["retrieved"]), i
+
+
+def test_hand_labels_are_present_as_keys_even_when_unfilled():
+    # None is valid - the labelling is done by hand and may not have happened
+    # yet. A missing key is not: it would read as "unlabelled" while actually
+    # meaning the record was written by something that does not know the
+    # contract.
+    for rec in refusal_answers():
+        for key in ("refused", "fabricated"):
+            assert key in rec["labels"], rec["question"]
+            assert rec["labels"][key] in (True, False, None), rec["question"]
+
+
+def answers(tmp_path, body):
+    path = tmp_path / "answers.yaml"
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def test_rejects_a_recorded_answer_without_chunks(tmp_path):
+    body = (
+        '- question: "a"\n  answer: "b"\n  retrieved: []\n'
+        "  labels: {refused: null, fabricated: null}\n"
+    )
+    with pytest.raises(ValueError):
+        refusal_answers(answers(tmp_path, body))
+
+
+def test_rejects_a_label_that_is_not_a_boolean(tmp_path):
+    # "maybe" in a label would silently become truthy downstream.
+    body = (
+        '- question: "a"\n  answer: "b"\n  retrieved: [{text: "c"}]\n'
+        '  labels: {refused: "maybe", fabricated: null}\n'
+    )
+    with pytest.raises(TypeError):
+        refusal_answers(answers(tmp_path, body))
+
+
+def test_rejects_a_recorded_answer_without_labels(tmp_path):
+    body = '- question: "a"\n  answer: "b"\n  retrieved: [{text: "c"}]\n'
     with pytest.raises(KeyError):
-        get_qa("no such question")
+        refusal_answers(answers(tmp_path, body))
 
 
 # --- malformed fixtures ----------------------------------------------------

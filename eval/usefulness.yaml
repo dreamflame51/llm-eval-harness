@@ -1,0 +1,71 @@
+# Recorded by scripts/usefulness.py: one person, real tasks, whether the
+# system finished them. The validation level - see docs/v-model.md, GAP-2.
+# Not a metric to optimise: eight tasks can falsify 'this is useful', not
+# certify it, and re-running the session on the same tasks after tuning the
+# system against them would measure the tuning.
+
+- id: T-1
+  task: You are putting an authorization package together for a system that inherits controls
+    from a shared service. What has to be in the package, and what can you point at the provider
+    for?
+  outcome: accepted
+  seconds: 433
+  by_hand_seconds: 180
+  note: ''
+  judged: '2026-09-16'
+- id: T-2
+  task: A contract requires assessing CUI security requirements. Which document describes
+    the procedures, and what does it say about how much rigour to apply?
+  outcome: accepted
+  seconds: 197
+  by_hand_seconds: 80
+  note: ''
+  judged: '2026-09-16'
+- id: T-3
+  task: Somebody asks whether a control assessment has to be done by an independent assessor.
+    Does the corpus say?
+  outcome: accepted
+  seconds: 298
+  by_hand_seconds: 180
+  note: ''
+  judged: '2026-09-16'
+- id: T-4
+  task: You need to generate PIV authentication keys. Which algorithms and key sizes are permitted,
+    and until when?
+  outcome: accepted
+  seconds: 112
+  by_hand_seconds: 100
+  note: ''
+  judged: '2026-09-16'
+- id: T-5
+  task: Explain to a colleague, in two sentences, the difference between a risk assessment
+    and the wider risk management process.
+  outcome: accepted
+  seconds: 198
+  by_hand_seconds: 100
+  note: ''
+  judged: '2026-09-16'
+- id: T-6
+  task: Your continuous monitoring programme is thin. Does that change how long an authorization
+    can last?
+  outcome: accepted
+  seconds: 221
+  by_hand_seconds: 100
+  note: ''
+  judged: '2026-09-16'
+- id: T-7
+  task: What does the corpus say about multi-factor authentication requirements for remote
+    access?
+  outcome: declined
+  seconds: 236
+  by_hand_seconds: 200
+  note: ''
+  judged: '2026-09-16'
+- id: T-8
+  task: You have to decide whether examining a document is enough evidence for a control,
+    or whether you must test it. What guidance is there?
+  outcome: checked
+  seconds: 270
+  by_hand_seconds: 180
+  note: '**Partially correct, but incomplete for the question.**'
+  judged: '2026-09-16'

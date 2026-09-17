@@ -1,0 +1,70 @@
+# Tasks for the usefulness session - the validation level, not verification.
+#
+# Everything else in this repository asks whether the system does what was
+# specified. This asks whether the specified thing is worth having: can a
+# person finish a real task with it, without opening the PDFs
+# (docs/v-model.md, GAP-2).
+#
+# Two rules about what belongs here, and both matter more than the wording:
+#
+# 1. **Not from eval/ground_truth.yaml.** Those questions were used to choose
+#    the chunk size, the embedding model and the retriever. Scoring usefulness
+#    on them measures how well the system was fitted to them.
+# 2. **Tasks, not questions.** "What is a common control?" is a lookup. "You
+#    are inheriting controls from a provider - what do you have to assess
+#    yourself?" is what somebody actually needs, and it is allowed to need two
+#    passages, or to have no answer in the corpus at all.
+#
+# These eight are a draft written by someone who has read the corpus, not by
+# someone who works with it. Replace any that do not match a task you would
+# really have - the point of this level is that the tasks are real.
+
+- id: T-1
+  task: >-
+    You are putting an authorization package together for a system that
+    inherits controls from a shared service. What has to be in the package,
+    and what can you point at the provider for?
+  expect: partly answerable - the package contents are in SP 800-37r2
+
+- id: T-2
+  task: >-
+    A contract requires assessing CUI security requirements. Which document
+    describes the procedures, and what does it say about how much rigour to
+    apply?
+  expect: answerable from SP 800-171Ar3
+
+- id: T-3
+  task: >-
+    Somebody asks whether a control assessment has to be done by an
+    independent assessor. Does the corpus say?
+  expect: unknown to the author - a real "does it say?" question
+
+- id: T-4
+  task: >-
+    You need to generate PIV authentication keys. Which algorithms and key
+    sizes are permitted, and until when?
+  expect: answerable from SP 800-78-5
+
+- id: T-5
+  task: >-
+    Explain to a colleague, in two sentences, the difference between a risk
+    assessment and the wider risk management process.
+  expect: answerable from SP 800-30r1, needs two passages
+
+- id: T-6
+  task: >-
+    Your continuous monitoring programme is thin. Does that change how long an
+    authorization can last?
+  expect: partly - SP 800-37r2 covers the mechanism, not a number
+
+- id: T-7
+  task: >-
+    What does the corpus say about multi-factor authentication requirements
+    for remote access?
+  expect: probably absent - the question a reader would ask anyway
+
+- id: T-8
+  task: >-
+    You have to decide whether examining a document is enough evidence for a
+    control, or whether you must test it. What guidance is there?
+  expect: answerable from SP 800-53Ar5

@@ -51,6 +51,10 @@ def check_contexts(ground_truth, docs, chunks):
     Returns (missing, split):
       missing - not in any document text  -> the fixture quote is fabricated
       split   - in the text but in no single chunk -> chunking cuts it
+
+    A split context is not unreachable. hit@k cannot serve it, because that
+    metric asks one chunk to hold the span whole; coverage@k can, because it
+    accepts the span rebuilt from several retrieved chunks. See evaluator.py.
     """
     doc_texts = [_norm(t) for t in docs.values()]  # once, not per context
     chunk_texts = [_norm(c["text"]) for c in chunks]  # once
@@ -97,7 +101,8 @@ if __name__ == "__main__":
     _report(
         "SPLIT",
         split,
-        "present but cut by a chunk boundary - the retriever cannot return "
-        "them whole; tune chunk size/overlap",
+        "present but cut by a chunk boundary - out of reach for hit@k, which "
+        "wants one chunk to hold the span whole; coverage@k still scores them, "
+        "at the cost of a second retrieval slot",
     )
     sys.exit(1 if missing else 0)

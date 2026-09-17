@@ -8,9 +8,21 @@ the real retriever is good. Whether it is good is what running
 
 import pytest
 
-from llm_eval_harness.evaluator import evaluate_retrieval, rank_of_first_hit
+from llm_eval_harness.evaluator import (
+    context_coverage,
+    covered_fraction,
+    evaluate_retrieval,
+    rank_of_first_hit,
+)
 
 GOLD = "the public exponent is 65537"
+
+# Long enough to be cut in halves that each clear MIN_RUN = 5 words. GOLD is
+# five words, so it can only ever be covered whole or not at all.
+SPAN = (
+    "the examine method is the process of reviewing the assessment objects "
+    "in order to facilitate understanding of the security controls"
+)
 
 
 def chunk(text):
@@ -59,6 +71,85 @@ def test_a_context_split_across_two_chunks_is_a_miss():
     # the metric must not paper over that by matching across the boundary.
     retrieved = [chunk("the public exponent"), chunk("is 65537")]
     assert rank_of_first_hit([GOLD], retrieved) is None
+
+
+# --- covered_fraction ------------------------------------------------------
+
+
+def halves(span):
+    words = span.split()
+    middle = len(words) // 2
+    return " ".join(words[:middle]), " ".join(words[middle:])
+
+
+def test_a_span_inside_one_chunk_is_fully_covered():
+    assert covered_fraction(SPAN, [chunk(f"... {SPAN} ...")]) == pytest.approx(1.0)
+
+
+def test_a_span_split_across_two_chunks_is_fully_covered():
+    # The case hit@k cannot express, and the reason this metric exists: both
+    # pieces were retrieved, so the evidence is in front of the model whole.
+    head, tail = halves(SPAN)
+    assert covered_fraction(SPAN, [chunk(head), chunk(tail)]) == pytest.approx(1.0)
+
+
+def test_one_retrieved_half_scores_half():
+    head, _ = halves(SPAN)
+    assert covered_fraction(SPAN, [chunk(head), chunk("noise")]) == pytest.approx(0.5)
+
+
+def test_unrelated_text_covers_nothing():
+    assert covered_fraction(SPAN, [chunk("an unrelated paragraph entirely")]) == 0.0
+
+
+def test_scattered_words_do_not_count_as_coverage():
+    # Every gold word is present, none of them contiguously. Without the
+    # MIN_RUN floor this would score 1.0 against text that supports nothing.
+    scattered = " x ".join(SPAN.split())
+    assert covered_fraction(SPAN, [chunk(scattered)]) == 0.0
+
+
+def test_a_run_does_not_end_inside_a_word():
+    # The chunk has "assessments" where the span has "assessment", so the run
+    # is nine words long, not ten. Without the boundary rule the tenth word
+    # would be credited to a chunk that does not contain it.
+    words = SPAN.split()
+    glued = " ".join(words[:10]) + "s in an unrelated sentence"
+    assert covered_fraction(SPAN, [chunk(glued)]) == pytest.approx(9 / 20)
+
+
+def test_a_span_glued_to_its_neighbouring_text_is_still_covered():
+    # pypdf splices footnote markers onto the text ("process43The purpose"), so
+    # a gold span quoted from that output can begin and end mid-word. hit@k
+    # matches those by plain substring; coverage has to agree, or the two
+    # metrics stop describing the same event.
+    glued = chunk(f"process43{SPAN}44Table")
+    assert rank_of_first_hit([SPAN], [glued]) == 1
+    assert covered_fraction(SPAN, [glued]) == pytest.approx(1.0)
+
+
+def test_a_context_shorter_than_min_run_must_match_in_full():
+    short = "public exponent"
+    assert covered_fraction(short, [chunk("the public exponent is")]) == pytest.approx(1.0)
+    assert covered_fraction(short, [chunk("public officers")]) == 0.0
+
+
+def test_coverage_ignores_whitespace_differences():
+    assert covered_fraction(GOLD, [chunk("the public\nexponent   is 65537")]) == 1.0
+
+
+def test_empty_retrieval_covers_nothing():
+    assert covered_fraction(SPAN, []) == 0.0
+
+
+def test_partial_coverage_of_two_contexts_does_not_add_up():
+    # Half of one span plus half of another is not a served record: the model
+    # still has neither piece of evidence whole.
+    head, _ = halves(SPAN)
+    other = "a second supporting span with quite enough words in it"
+    other_head, _ = halves(other)
+    coverage = context_coverage([SPAN, other], [chunk(head), chunk(other_head)])
+    assert coverage == pytest.approx(0.5)
 
 
 # --- evaluate_retrieval ----------------------------------------------------
@@ -130,6 +221,41 @@ def test_no_records_does_not_divide_by_zero():
     assert result["n"] == 0
     assert result["hit_at_k"] == 0.0
     assert result["mrr"] == 0.0
+
+
+def test_coverage_aggregates_over_questions():
+    result = evaluate_retrieval(
+        records("q1", "q2", "q3"),
+        search_fn=fake_search({"q1": 1, "q2": 3, "q3": None}),
+    )
+    # GOLD is served whole or not at all here, so coverage tracks the hits.
+    assert result["coverage_at_k"] == pytest.approx(2 / 3)
+    assert result["covered_at_k"] == pytest.approx(2 / 3)
+    assert result["coverages"] == [("q1", 1.0), ("q2", 1.0), ("q3", 0.0)]
+
+
+def test_covered_at_k_credits_what_hit_at_k_cannot():
+    # The invariant that justifies reporting both: every hit is covered, and
+    # the gap between them is the price chunking was charging.
+    head, tail = halves(SPAN)
+
+    def search(question, k=5):
+        return [chunk(head), chunk(tail)]
+
+    result = evaluate_retrieval(
+        [{"question": "q1", "answer": "a", "contexts": [SPAN]}], search_fn=search
+    )
+    assert result["hit_at_k"] == 0.0
+    assert result["mrr"] == 0.0
+    assert result["covered_at_k"] == 1.0
+    assert result["coverage_at_k"] == pytest.approx(1.0)
+
+
+def test_no_records_does_not_divide_by_zero_for_coverage():
+    result = evaluate_retrieval([], search_fn=fake_search({}))
+    assert result["coverage_at_k"] == 0.0
+    assert result["covered_at_k"] == 0.0
+    assert result["coverages"] == []
 
 
 def test_k_is_passed_through_to_the_retriever():

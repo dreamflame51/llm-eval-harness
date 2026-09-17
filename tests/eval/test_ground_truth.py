@@ -12,23 +12,38 @@ import pytest
 from llm_eval_harness.dataset import load_ground_truth
 from llm_eval_harness.validate import CORPUS_DIR, check_contexts, load_corpus
 
-pytestmark = pytest.mark.skipif(
-    not list(pathlib.Path(CORPUS_DIR).glob("*.pdf")),
-    reason=f"no PDFs in {CORPUS_DIR}",
-)
+# Marked slow, not excluded. It re-extracts five PDFs and takes about 100
+# seconds - two thirds of the whole suite - which is long enough that people
+# start running "the fast ones" locally and stop running this at all. So:
+# `uv run pytest` still runs everything, `-m "not slow"` skips it for the
+# fifteen-second loop while editing, and CI has no reason to skip it.
+#
+# This is the check that guards the ruler itself: every gold quote still
+# appearing in the extracted text is what makes every retrieval number mean
+# anything (docs/lessons.md #1).
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skipif(
+        not list(pathlib.Path(CORPUS_DIR).glob("*.pdf")),
+        reason=f"no PDFs in {CORPUS_DIR}",
+    ),
+]
 
 # Gold contexts that are present in the extracted text but longer than the
 # chunk overlap and unlucky with the boundary, so no single chunk holds them
-# whole. The retriever cannot return these - context recall will never credit
-# them. Keyed by a prefix of the context.
+# whole. Keyed by a prefix of the context.
 #
 # This is a baseline, not an approval: it fails both when a new context starts
 # being cut and when one of these stops being cut. Re-run
 # `uv run python -m llm_eval_harness.validate` after changing chunk size or
 # overlap and update the set deliberately.
+#
 # At 800/160 these are the only two, and each is the sole context of its
-# record, so both records are unreachable for hit@k: the metric ceiling is
-# 24/26, not 26/26. Do not read the missing 2 as a retrieval failure.
+# record, so for hit@k both records are unreachable: that metric's ceiling is
+# 24/26, not 26/26, and the missing 2 are not a retrieval failure. coverage@k
+# does reach them - it accepts a span rebuilt from two retrieved chunks - so
+# its ceiling is 26/26 and the two metrics are not comparable record for
+# record. That gap is the point of reporting both; see evaluator.py.
 KNOWN_SPLIT = {
     "The examine method is the process of reviewing",
     "This publication provides organizations with assessment procedures",
