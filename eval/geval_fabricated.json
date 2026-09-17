@@ -1,0 +1,97 @@
+{
+  "model": "qwen3:8b",
+  "threshold": 0.5,
+  "criteria": "Does the answer assert anything about the question that the retrieved chunks do not support? Judge against the chunks only. Do not use your own knowledge of the subject: a statement that is true in the world but absent from the chunks is unsupported. Content correctly drawn from the chunks is not fabricated, even when the question asked about a document that is not among them. Declining to answer is not an assertion - an answer that only reports the information as missing fabricates nothing. An answer that declines and then states a fact anyway does fabricate, when the chunks do not carry that fact. A high score means the answer asserts something the chunks do not support.",
+  "agreement": {
+    "n": 12,
+    "agree": 5,
+    "rate": 0.4166666666666667,
+    "kappa": 0.12499999999999997
+  },
+  "per_record": [
+    {
+      "question": "What is the maximum time permitted between authorization reviews under SP 800-37r2?",
+      "score": 1.0,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output correctly identifies that the Retrieval Context does not specify the maximum time permitted between authorization reviews under SP 800-37r2. It avoids making unsupported assertions and directly addresses the input question by stating the absence of specific information in the context. This aligns well with the evaluation steps, particularly steps 1, 2, and 3."
+    },
+    {
+      "question": "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?",
+      "score": 1.0,
+      "said": true,
+      "label": true,
+      "reason": "The Actual Output correctly identifies that the Retrieval Context does not specify a fixed minimum frequency for common controls under SP 800-37r2. It accurately reflects the information provided, avoiding unsupported assertions and external knowledge. The response addresses the input question by stating the absence of specific information, which aligns with the evaluation steps."
+    },
+    {
+      "question": "What is the maximum allowable password length specified in SP 800-63B?",
+      "score": 1.0,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output states 'Answer is missing,' which correctly identifies that the Retrieval Context does not contain information about the maximum allowable password length in SP 800-63B. This aligns with the evaluation steps by acknowledging missing information without fabricating or asserting unsupported claims."
+    },
+    {
+      "question": "What is the recommended minimum key size for AES in FIPS 197?",
+      "score": 0.3,
+      "said": false,
+      "label": false,
+      "reason": "The Actual Output states 'Answer is missing', which indicates a refusal to answer rather than an assertion. However, the Retrieval Context contains explicit information about AES key sizes in FIPS 197, including AES-128, AES-192, and AES-256. The response fails to address the question directly and does not derive the answer from the provided context, thus violating the requirement to answer based on the given information."
+    },
+    {
+      "question": "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?",
+      "score": 0.3,
+      "said": false,
+      "label": false,
+      "reason": "The Actual Output states 'Answer is missing,' which indicates a refusal to answer rather than an assertion. However, the Retrieval Context contains relevant information about residual risk and SP 800-30, suggesting the answer could be inferred. The response fails to address the question directly and does not attempt to derive an answer from the provided context, which is a shortcoming in alignment with the evaluation steps."
+    },
+    {
+      "question": "How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?",
+      "score": 1.0,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output states 'Answer is missing,' which indicates the response correctly identifies that the required information is not present in the Retrieval Context. The score is 10 because the response adheres to the evaluation steps by not fabricating information and clearly stating that the answer is not available in the provided context."
+    },
+    {
+      "question": "What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?",
+      "score": 1.0,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output states 'Answer is missing,' which indicates a refusal to answer rather than an assertion. However, the Retrieval Context does not mention any specific score required to pass an assessment under SP 800-171A Revision 3. The response correctly identifies the absence of information in the Retrieval Context, aligning with the evaluation steps by not fabricating information or making unsupported assertions."
+    },
+    {
+      "question": "What is the minimum PIN length required for a PIV Card according to SP 800-78-5?",
+      "score": 0.0,
+      "said": false,
+      "label": false,
+      "reason": "The Actual Output states that the answer is missing, which aligns with the evaluation steps by indicating that the required information is not present in the Retrieval Context. However, the score is not applicable as the Actual Output does not provide an answer, and the evaluation steps require assessing whether the output contains unsupported assertions or fabrications. Since the output is a refusal to answer rather than an assertion, it does not meet the criteria for a score based on content alignment."
+    },
+    {
+      "question": "What are the four security levels defined in FIPS 140-3 for cryptographic modules?",
+      "score": 0.8,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output states that the answer is missing, which aligns with the evaluation steps as it indicates the information is not present in the Retrieval Context. However, the Retrieval Context does mention FIPS 140-3 and its relevance to cryptographic modules, but it does not explicitly list the four security levels. The response correctly identifies the absence of the required information without fabricating it, which adheres to the evaluation criteria."
+    },
+    {
+      "question": "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?",
+      "score": 0.7,
+      "said": true,
+      "label": true,
+      "reason": "The Actual Output correctly references the Retrieval Context by stating that digitally signed biometrics use the CBEFF signature block, which is explicitly mentioned in the Retrieval Context. However, the output does not directly answer the question about the biometric data formats specified by SP 800-76, as it only mentions the CBEFF signature block without specifying the actual formats. The response is partially aligned but lacks direct addressing of the question."
+    },
+    {
+      "question": "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?",
+      "score": 0.8,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output correctly identifies the PIV Card interfaces defined by SP 800-73 and notes that the context does not specify which is used for contactless authentication. This aligns with the evaluation steps by not introducing unsupported assertions and accurately reflecting the Retrieval Context. However, the output does not address the question fully by failing to mention that the contactless authentication is typically associated with the PIV Card Application Card Command Interface (Part 2), which is implied in the context."
+    },
+    {
+      "question": "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?",
+      "score": 0.5,
+      "said": true,
+      "label": false,
+      "reason": "The Actual Output states 'Answer is missing,' which indicates a refusal to answer rather than an assertion. However, the Retrieval Context explicitly mentions that FIPS 201-3 defines requirements for identity proofing, registration, PIV Card issuance, and PIV Card usage. Since the Actual Output does not provide an answer derived from the Retrieval Context, it fails to address the input question directly, resulting in a score of 5."
+    }
+  ]
+}

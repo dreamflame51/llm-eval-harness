@@ -65,6 +65,7 @@ anything.**
 | A fixture that stopped describing the system | [25](#25), [26](#26) |
 | The comparison that was not a comparison | [27](#27) |
 | The number moved, the explanation was invented | [29](#29) |
+| What a metric cannot see by construction | [30](#30) |
 
 ---
 
@@ -1480,3 +1481,77 @@ The caveat that keeps it honest: the list of template words was written by hand
 in one pass and not tuned. A better one might do better. What it will not do is
 turn 0.20 into a hit - those gold chunks share only `nist` and `sp` with their
 questions, idf 1.22 and 1.19, which is boilerplate, not evidence.
+
+---
+
+<a id="30"></a>
+
+## 30. Two of someone else's metrics, and the two things ours could not see
+
+**Why run them at all.** Four metrics from two libraries were already in this
+project, chosen to overlap so the libraries could be compared. What had never
+been tried is the metrics that *do not* overlap - and two of them turned out to
+answer questions nothing here was asking.
+
+### GEval on the fabrication axis
+
+The open gap is that nothing automated reads that axis ([#28](#28)). So
+DeepEval's GEval was pointed at the same twelve hand-labelled answers, with the
+criterion copied word for word from the brief the human read, and the decision
+rule fixed at the library default before the run.
+
+| judge | raw agreement | kappa | fabrications caught |
+|---|---|---|---|
+| qwen3, ours | 9/12 | &minus;0.12 | 1 of 2 |
+| gemma4, ours | 10/12 | 0.00 | 0 of 2 |
+| **GEval** | **5/12** | **0.125** | **2 of 2** |
+
+**The worst raw agreement and the best kappa, in the same column.** Our judges
+reach 9 and 10 out of 12 by answering "not fabricated" almost always, which on
+a set with two positives is most of the way to a perfect score and no
+discrimination at all. GEval varies, and pays for it: seven false alarms out of
+ten clean answers. But it did not miss one - including the record that declines
+and then states a frequency, which both of ours and the phrase list all passed.
+
+So it is not a metric here, at seven false alarms in ten. It is a **tripwire**:
+a screen that says "read these nine" with the real ones inside. For an axis
+that currently has no instrument, that is not nothing. n is twelve and the
+positives are two, so perfect recall is a direction, not a proof.
+
+### Alignment against the gold passage
+
+Every generation-side number here scores the answer against **what retrieval
+served**. Point DeepEval's HallucinationMetric at the gold spans instead and it
+asks a different question - and immediately found something no support-based
+metric can:
+
+> **Q. What are the seven steps of the RMF?**
+> A. CATEGORIZE, AUTHORIZE, MONITOR, IMPLEMENT, SELECT, ASSESS, PREPARE.
+
+All seven named, the order scrambled, the preparatory step last. Retrieval was
+perfect for that record - coverage@5 1.00, rank 2 - and **DeepEval's own
+faithfulness scored the answer 1.00** while RAGAS scored it 0.14.
+
+The reason faithfulness cannot see it is structural: it decomposes an answer
+into claims and checks each against the context. Every step name is in the
+context, so every claim is supported. **Order is not a claim.** The same blind
+spot swallowed an enumeration that omits one of the families it was asked to
+name, scored 0.88.
+
+**Two caveats, because the metric is not usable as it stands.** Its scale runs
+backwards from its name - 1.00 comes with "fully aligns, no contradictions" -
+and it scores a refusal 0.00 with the reason "the actual output is missing", so
+declines have to be split out rather than averaged in. Of the six answers it
+called contradictory, one is the ordering error, one is a false "the context
+does not say" caused by retrieval, and four are omissions reported as
+contradictions.
+
+**Lesson.** **A metric that decomposes an answer into claims cannot see
+anything that lives in the arrangement of the claims** - order, completeness,
+emphasis. Four metrics, two libraries, one hand-rolled judge and a phrase list
+all agreed the RMF answer was fine, and it lists the steps of a seven-step
+process in the wrong order.
+
+And the smaller one, which is [#20](#20) a third time: raw agreement and kappa
+disagreed about which of three judges was best, and the one with the worst
+agreement was the only one that caught what it was built to catch.
