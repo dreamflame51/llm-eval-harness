@@ -145,7 +145,9 @@ def covered_fraction(gold_context, retrieved, min_run=MIN_RUN):
         reach = start
         for hay in haystacks:
             end = start + run
-            if end > n or not _occurs(" ".join(words[start:end]), hay, start > 0, end < n):
+            if end > n or not _occurs(
+                " ".join(words[start:end]), hay, start > 0, end < n
+            ):
                 continue
             while end < n and _occurs(
                 " ".join(words[start : end + 1]), hay, start > 0, end + 1 < n
@@ -205,7 +207,9 @@ def evaluate_retrieval(records=None, k=K, search_fn=None):
         # the gap between them stops meaning anything.
         retrieved = search_fn(rec["question"], k=k)
         ranks.append((rec["question"], rank_of_first_hit(rec["contexts"], retrieved)))
-        coverages.append((rec["question"], context_coverage(rec["contexts"], retrieved)))
+        coverages.append(
+            (rec["question"], context_coverage(rec["contexts"], retrieved))
+        )
 
     found = [rank for _, rank in ranks if rank is not None]
     n = len(ranks)
@@ -226,7 +230,9 @@ if __name__ == "__main__":
     k, n = result["k"], result["n"]
 
     print(f"{n} answerable questions, k={k}")
-    print(f"hit@{k}:      {result['hit_at_k']:.3f}  (one chunk holds a gold span whole)")
+    print(
+        f"hit@{k}:      {result['hit_at_k']:.3f}  (one chunk holds a gold span whole)"
+    )
     print(f"covered@{k}:  {result['covered_at_k']:.3f}  (the k chunks together do)")
     print(f"coverage@{k}: {result['coverage_at_k']:.3f}  (mean share of a gold span)")
     print(f"MRR:         {result['mrr']:.3f}")

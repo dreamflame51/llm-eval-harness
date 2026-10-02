@@ -113,6 +113,17 @@ REFUSAL_MARKERS = (
     # judge, now with three data points rather than one.
     "does not define",
     "doesn't define",
+    # Fourth widening (2026-10-02). Once the prompt called the context
+    # "documents", gemma wrote "the provided documents do not state" - same
+    # refusals, judge unmoved, plural verb - and live_check saw ten phrase
+    # flips. None of these occur in the committed answerable answers.
+    "do not state",
+    "do not specify",
+    "do not provide",
+    "do not contain",
+    "do not mention",
+    "do not define",
+    "not available in",
     "not provided",
     "not specified",
     "not mentioned",
@@ -264,7 +275,9 @@ def print_judged(result):
     )
     if result["undecided"]:
         print(f"no verdict for {result['undecided']} - run scripts/judge_refusals.py")
-    for refusal_type, bucket in sorted(result["by_class"].items(), key=lambda x: str(x[0])):
+    for refusal_type, bucket in sorted(
+        result["by_class"].items(), key=lambda x: str(x[0])
+    ):
         undecided = bucket["n"] - bucket["decided"]
         print(
             f"  {refusal_type}: {bucket['clean']}/{bucket['decided']} clean "
@@ -274,7 +287,9 @@ def print_judged(result):
 
     print(f"\nphrase list (tripwire): refusal rate {result['phrase_rate']:.2f}")
     disagreements = [
-        r for r in result["results"] if r["refused"] is not None and r["phrase"] != r["refused"]
+        r
+        for r in result["results"]
+        if r["refused"] is not None and r["phrase"] != r["refused"]
     ]
     print(f"disagrees with the judge on {len(disagreements)} of {result['n']}")
     for r in disagreements:
@@ -285,7 +300,9 @@ def print_judged(result):
 
     blind = [r for r in result["results"] if r["refused"] and r["fabricated"]]
     if blind:
-        print(f"\ndeclined and invented anyway ({len(blind)}) - invisible to the phrase list")
+        print(
+            f"\ndeclined and invented anyway ({len(blind)}) - invisible to the phrase list"
+        )
         for r in blind:
             print(f"  {r['question'][:64]}")
 
@@ -295,8 +312,12 @@ def print_judged(result):
 def print_live(result):
     print(f"{result['n']} unanswerable questions, generated now and phrase-matched")
     print(f"refusal rate: {result['refusal_rate']:.3f}")
-    for refusal_type, bucket in sorted(result["by_class"].items(), key=lambda x: str(x[0])):
-        print(f"  {refusal_type}: {bucket['refused']}/{bucket['n']} ({bucket['rate']:.3f})")
+    for refusal_type, bucket in sorted(
+        result["by_class"].items(), key=lambda x: str(x[0])
+    ):
+        print(
+            f"  {refusal_type}: {bucket['refused']}/{bucket['n']} ({bucket['rate']:.3f})"
+        )
 
     failures = [(q, t, a) for q, t, refused, a in result["results"] if not refused]
     if failures:
@@ -321,13 +342,17 @@ def print_live(result):
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Refusal check over the unanswerable records")
+    parser = argparse.ArgumentParser(
+        description="Refusal check over the unanswerable records"
+    )
     parser.add_argument(
         "--live",
         action="store_true",
         help="generate answers now and score them with the phrase list only",
     )
-    parser.add_argument("--judge", default=JUDGE, help="model whose cached verdicts to read")
+    parser.add_argument(
+        "--judge", default=JUDGE, help="model whose cached verdicts to read"
+    )
     args = parser.parse_args()
 
     if args.live:

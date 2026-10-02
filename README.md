@@ -150,7 +150,6 @@ minutes on this hardware:
 | `uv run python scripts/live_check.py` | does the live pipeline still behave the way the pinned numbers describe? (~20 min) |
 | `uv run python scripts/usefulness.py` | sit with the system on real tasks and record whether it was any use |
 | `uv run pytest` | the harness test suite |
-| `uv run pytest practice` | interview drill code, kept out of the main suite |
 
 **Three commands generate fresh answers, and they are not interchangeable.**
 They were converging on each other by accident, so the map is written down
@@ -394,7 +393,6 @@ eval/judge_cache/       the judge's verdicts, committed so the numbers reproduce
 tests/                  harness tests
 docs/                   problem log, Russian versions
 scripts/                judging, labelling, smoke check, calibration, sweep
-practice/               interview drills, outside the main test run
 data/corpus/            the five source PDFs
 data/chroma/            the index, rebuilt by ingest, not in git
 ```

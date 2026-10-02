@@ -43,13 +43,9 @@ dev = [
 ]
 
 [tool.ruff]
-src = ["src", "practice", "tests"]
+src = ["src", "tests"]
 
 [tool.pytest.ini_options]
-# Only the harness runs by default. practice/ is interview drill code - it hits
-# the network and is allowed to sit red while a task is in progress, so it must
-# not decide whether the project is green. Run it on purpose:
-#     uv run pytest practice
 testpaths = ["tests"]
 # scripts/ is importable because label_refusals.py edits the frozen answers
 # file in place, and that is worth a test rather than a careful hand.
