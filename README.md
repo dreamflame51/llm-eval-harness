@@ -101,8 +101,10 @@ Nothing in `metrics` is a gate. No acceptance threshold has been agreed for any
 metric in this project - see [docs/v-model.md](docs/v-model.md) - and a threshold
 invented to make a pipeline green is how a measurement turns into a ritual. What
 *is* gated: the suite, the lint, and `tests/eval/test_regression.py`, which pins
-every reported number by equality. A number that moves fails the build and has to be
-explained in a commit.
+every number read from a committed file - the judged refusal metric, the drift
+measurement, both library score files - by equality. A number that moves fails the
+build and has to be explained in a commit. The retrieval numbers are not among them:
+they need the index, which only the manual `retrieval` job builds.
 
 `retrieval` is manual because rebuilding the index embeds ~5000 chunks, and
 `continue-on-error` because a retrieval score moving by 0.02 is a measurement, not a
@@ -136,8 +138,8 @@ rather than linked.
 | `uv run python scripts/stability.py` | is the refusal score reproducible? |
 | `uv run python scripts/sweep.py` | which chunk size retrieves best? (minutes) |
 
-Rerun only when the judging itself changes - each needs Ollama and takes ~15
-minutes on this hardware:
+Rerun only when the judging itself changes - each needs Ollama and takes from a
+minute to hours on this hardware:
 
 | command | answers |
 |---|---|
