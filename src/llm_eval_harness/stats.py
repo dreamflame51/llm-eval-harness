@@ -1,0 +1,25 @@
+import math
+import random
+import statistics
+
+
+def wilson_ci(k, n, z=1.96):
+    """95% Wilson interval for k successes out of n."""
+    p = k / n
+    denom = 1 + z**2 / n
+    center = (p + z**2 / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z**2 / (4 * n**2)) / denom
+    return (center - half, center + half)
+
+
+def bootstrap_ci(values, n_boot=10_000, seed=0, alpha=0.05):
+    """Percentile bootstrap CI of the mean, resampling items with replacement."""
+    rng = random.Random(seed)
+    means = []
+    for _ in range(n_boot):
+        sample = rng.choices(values, k=len(values))
+        means.append(statistics.mean(sample))  # mean of this sample
+    means.sort()
+    low = means[int(alpha / 2 * n_boot)]
+    high = means[int((1 - alpha / 2) * n_boot)]  # mirror of low, from the top end
+    return (low, high)
