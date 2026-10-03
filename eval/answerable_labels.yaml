@@ -1,0 +1,166 @@
+﻿# Hand labels for the 26 frozen answers in eval/answerable_answers.yaml.
+#
+# One annotator (the author of the system), labelled in chat, one record at a
+# time. Keyed by question, so a re-recording of the answers does not silently
+# inherit labels that describe text it no longer contains: check that the
+# answer text still matches before reusing a label.
+#
+#   correct    the answer against the reference answer in ground_truth.yaml
+#              yes      - same meaning as the reference
+#              partial  - part right; something missing, extra or misleading
+#              no       - wrong, or a refusal
+#   faithful   every claim in the answer is supported by the retrieved chunks
+#              (second pass; null until then)
+#
+# Rubric rules, decided on a concrete record and applied to every like one:
+#   R1  steps of a process given as a numbered list in the wrong order is
+#       "partial", not "yes": every item is there, but the reader learns the
+#       wrong sequence (record 1, the seven RMF steps).
+#   R2  an answer that gets the core right and then says the rest is missing
+#       from the context is "partial", not "no" (record 2).
+#   R3  an answer that may well be true but contains none of the items asked
+#       for is "no" (record 5: package format instead of package contents).
+#   R4  a pure refusal is correct: "no" plus declined: true, so a refusal (a
+#       retrieval defect when the gold text was not retrieved) can be counted
+#       apart from a wrong answer (a generator defect) (record 11).
+#   R5  a compound question is "yes" only when every part is right, else
+#       "partial" (record 17: CUI expansion right, the "why" half off-target).
+
+- question: "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?"
+  correct: partial
+  faithful: null
+  note: all seven named, numbered in the wrong order with PREPARE last (R1)
+
+- question: "What is a common control according to SP 800-37 Revision 2?"
+  correct: partial
+  faithful: null
+  note: core idea (inherited by systems) right, providers missing; then says the definition is missing (R2)
+
+
+- question: "What is the difference between a common control and a hybrid control in the RMF?"
+  correct: "yes"
+  faithful: null
+  note: both halves of the reference present, hybrid as partially inherited
+
+- question: "What is the purpose of the Prepare step in the RMF?"
+  correct: "yes"
+  faithful: null
+  note: context and priorities, organization and system level - matches the reference
+
+- question: "What key artifacts are included in an authorization package under SP 800-37r2?"
+  correct: "no"
+  faithful: null
+  note: names none of the three reference artifacts; answers the format of the package, not its contents (R3)
+
+
+- question: "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?"
+  correct: "yes"
+  faithful: null
+  note: all four, in order
+
+- question: "What are the four components of the overall risk management process in SP 800-30r1?"
+  correct: "yes"
+  faithful: null
+  note: all four, in order
+
+- question: "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?"
+  correct: "yes"
+  faithful: null
+  note: all three tiers, correctly numbered
+
+- question: "What risk factors are considered when conducting a risk assessment per SP 800-30?"
+  correct: "yes"
+  faithful: null
+  note: all four factors; order irrelevant for a list of factors (R1 is about process steps). Both libraries scored faithfulness 0.00 - check in pass 2
+
+- question: "What is the purpose of the risk framing component of the risk management process?"
+  correct: "yes"
+  faithful: null
+  note: reference nearly verbatim, plus one extra clause. DeepEval faithfulness 0.00, RAGAS 1.00 - check in pass 2
+
+- question: "What is the primary purpose of NIST SP 800-53A Revision 5?"
+  correct: "no"
+  declined: true
+  faithful: null
+  note: pure refusal; retrieval served none of the gold span (coverage@5 0), so declining was the right behaviour (R4)
+
+
+- question: "Name the three primary assessment methods defined in SP 800-53A."
+  correct: "no"
+  declined: true
+  faithful: null
+  note: says the context does not name the three methods; honest refusal, names none (R4)
+
+- question: "What does the Examine assessment method involve?"
+  correct: "yes"
+  faithful: null
+  note: reference nearly verbatim
+
+- question: "What is the difference between the Examine and Test assessment methods in SP 800-53A?"
+  correct: "yes"
+  faithful: null
+  note: both definitions nearly verbatim
+
+- question: "How do the depth and coverage attributes of assessment methods affect the assessment?"
+  correct: "yes"
+  faithful: null
+  note: covers the reference and adds detail (basic/focused/comprehensive, assurance) - extra detail checked in pass 2
+
+- question: "What is the purpose of NIST SP 800-171A Revision 3?"
+  correct: "no"
+  declined: true
+  faithful: null
+  note: pure refusal (R4)
+
+- question: "What does CUI stand for and why is its protection important according to SP 800-171Ar3?"
+  correct: partial
+  faithful: null
+  note: expansion right; "why important" answers why defining information types matters, not why protecting CUI does (R5)
+
+
+- question: "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?"
+  correct: partial
+  faithful: null
+  note: the core (organizations set the level of rigor) present; depth/coverage and who assesses missing. First labelled "no", changed for consistency with R2/R3
+
+- question: "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?"
+  correct: partial
+  faithful: null
+  borderline: true
+  note: reference says the procedures are derived from 800-53A; the answer says 800-53A is a source of further guidance - a related but different relation. Could be "no" under R3; re-label in a week
+
+- question: "How many security requirement families are defined in SP 800-171Ar3, and name them?"
+  correct: partial
+  faithful: null
+  note: count 17 right; list stops at 13 items mid-word ("Identity") - the answer is truncated in the frozen file itself, a generation defect (token or context limit) (R5)
+
+- question: "What is the scope of NIST SP 800-78-5?"
+  correct: "no"
+  declined: true
+  faithful: null
+  note: pure refusal; one of the two questions no retriever configuration finds (lessons #29) (R4)
+
+- question: "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?"
+  correct: "yes"
+  faithful: null
+  note: FIPS 201-3, plus life-cycle detail
+
+- question: "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?"
+  correct: "yes"
+  faithful: null
+  note: 65537
+
+- question: "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?"
+  correct: "yes"
+  faithful: null
+  note: matches the reference exactly
+
+- question: "What elliptic curves are recommended for PIV keys in SP 800-78-5?"
+  correct: "yes"
+  faithful: null
+  note: P-256 and P-384
+
+- question: "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
+  correct: partial
+  faithful: null
+  note: the link (800-53A guides the Assess step) is there; what Assess determines and the three methods are missing
