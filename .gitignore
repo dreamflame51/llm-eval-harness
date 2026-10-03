@@ -24,6 +24,7 @@ docs/rehearsal.md
 LEARNING_PLAN.md
 METRICS_CHEATSHEET.md
 docs/LEARNING_LOG.md
+docs/INTERVIEW_QA.md
 
 # Langfuse keys. The project's own numbers never depend on them - tracing is
 # additive and off by default - but a leaked secret key is still a leaked key.
