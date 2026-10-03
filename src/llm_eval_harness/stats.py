@@ -23,3 +23,11 @@ def bootstrap_ci(values, n_boot=10_000, seed=0, alpha=0.05):
     low = means[int(alpha / 2 * n_boot)]
     high = means[int((1 - alpha / 2) * n_boot)]  # mirror of low, from the top end
     return (low, high)
+
+
+def mcnemar_exact(b, c):
+    """Two-sided exact McNemar p-value: b and c are the two kinds of flips."""
+    n = b + c
+    k = min(b, c)
+    tail = sum(math.comb(n, i) for i in range(k + 1)) / 2**n
+    return min(1.0, 2 * tail)
