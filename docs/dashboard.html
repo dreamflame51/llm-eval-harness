@@ -405,17 +405,17 @@
       <p>
         RAGAS and DeepEval scoring identical answers against identical chunks with the same local
         model. Averaged, the two faithfulness scores sit within 0.1 of each other. Per record they
-        correlate at <span style="font-family:var(--mono)">0.11</span>: the disagreements cancel.
+        correlate at <span style="font-family:var(--mono)">0.19</span> (0.11 on the dense baseline): the disagreements cancel.
       </p>
     </div>
     <div class="chart" id="scatterChart"></div>
     <div id="directionTable"></div>
     <p class="note" id="directionNote" hidden></p>
     <p class="note">
-      Points off the diagonal are where the libraries disagree. Three of the furthest are records
+      Points off the diagonal are where the libraries disagree. Some of the furthest are records
       where the generator declined: DeepEval scores &ldquo;Answer is missing&rdquo; a perfect 1.00
       &mdash; nothing in it contradicts the chunks &mdash; while RAGAS gives the identical four
-      words 0.00, 0.50 or 1.00 depending on whether its claim extractor found anything to check.
+      words anything from 0.00 to 1.00 depending on whether its claim extractor found anything to check.
     </p>
   </section>
 
