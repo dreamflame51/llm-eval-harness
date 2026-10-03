@@ -29,6 +29,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import time
 
 from llm_eval_harness.dataset import ROOT
@@ -101,17 +102,24 @@ def _load_env():
     load_dotenv(ROOT / ".env")
 
 
-def _client(provider):
-    from openai import OpenAI
-
+def credentials(provider):
+    """(base_url, api_key) for a hosted provider - for libraries that build
+    their own client (RAGAS through LangChain)."""
     _load_env()
     endpoint = HOSTED[provider]
     key = os.environ.get(endpoint.key_env)
     if not key:
         raise SystemExit(f"{endpoint.key_env} is not set - put it in .env (see .env.example)")
+    return endpoint.base_url, key
+
+
+def _client(provider):
+    from openai import OpenAI
+
+    base_url, key = credentials(provider)
     # max_retries=0: retrying is done below, where the wait is visible and the
     # policy is one thing rather than the SDK's plus ours stacked on each other.
-    return OpenAI(base_url=endpoint.base_url, api_key=key, max_retries=0, timeout=300)
+    return OpenAI(base_url=base_url, api_key=key, max_retries=0, timeout=300)
 
 
 def request_key(provider, model, messages, schema, options):
@@ -122,10 +130,25 @@ def request_key(provider, model, messages, schema, options):
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+class QuotaExhausted(RuntimeError):
+    """The server asked for a wait longer than MAX_WAIT_S - a daily quota,
+    not a per-minute one. Retrying cannot help until it resets."""
+
+
+# Gemini puts the wait in the error body rather than in a Retry-After header:
+# "retryDelay': '55786s'" - fifteen hours, for the free tier's 500 requests a
+# day per model. Read here, because a retry loop that cannot see it waits a
+# minute, fails, and repeats - which turned one quota error into an hour.
+_RETRY_DELAY = re.compile(r"retryDelay'?\"?\s*:\s*'?\"?(\d+(?:\.\d+)?)s")
+
+
 def _retry_after(exc):
-    """Seconds the server asked us to wait, or None."""
+    """Seconds the server asked us to wait - header first, then the body - or None."""
     response = getattr(exc, "response", None)
     value = response.headers.get("retry-after") if response is not None else None
+    if value is None:
+        found = _RETRY_DELAY.search(str(exc))
+        value = found.group(1) if found else None
     try:
         return float(value) if value is not None else None
     except ValueError:
@@ -170,9 +193,15 @@ def _hosted(provider, model, messages, schema, options):
                 usage.completion_tokens if usage else None,
             )
         except retryable as exc:
+            asked = _retry_after(exc)
+            if asked is not None and asked > MAX_WAIT_S:
+                raise QuotaExhausted(
+                    f"{provider}/{model}: quota exhausted, server asks to wait "
+                    f"{asked / 3600:.1f} h - stop and resume later; finished calls are cached"
+                ) from exc
             if attempt == MAX_ATTEMPTS:
                 raise
-            wait = backoff(attempt, _retry_after(exc))
+            wait = backoff(attempt, asked)
             print(
                 f"  {provider}: {type(exc).__name__}, retry {attempt}/{MAX_ATTEMPTS - 1} "
                 f"in {wait:.0f}s",

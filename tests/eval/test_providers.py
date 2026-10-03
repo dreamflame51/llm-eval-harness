@@ -46,6 +46,16 @@ def test_backoff_is_capped():
     assert providers.backoff(20, rng=random.Random(0)) == providers.MAX_WAIT_S
 
 
+def test_a_wait_written_in_the_error_body_is_read():
+    # Gemini's daily-quota 429 carries the wait in the body, not in a header.
+    body = "Error code: 429 - [{'error': {'details': [{'retryDelay': '55786s'}]}}]"
+    assert providers._retry_after(RuntimeError(body)) == 55786.0
+
+
+def test_no_wait_anywhere_is_none():
+    assert providers._retry_after(RuntimeError("Error code: 500")) is None
+
+
 def test_an_unknown_provider_is_refused():
     with pytest.raises(ValueError):
         providers.chat("openai", "gpt", [])
