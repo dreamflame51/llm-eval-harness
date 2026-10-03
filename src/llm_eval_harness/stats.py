@@ -31,3 +31,16 @@ def mcnemar_exact(b, c):
     k = min(b, c)
     tail = sum(math.comb(n, i) for i in range(k + 1)) / 2**n
     return min(1.0, 2 * tail)
+
+
+def confusion(pairs):
+    """pairs: list of (label, judged) booleans. Returns tp, fp, fn, tn, tpr, tnr."""
+    tp = sum(1 for label, judged in pairs if label and judged)
+    fp = sum(1 for label, judged in pairs if not label and judged)
+    fn = sum(1 for label, judged in pairs if label and not judged)
+    tn = sum(1 for label, judged in pairs if not label and not judged)
+    # None when the set has no positives (or no negatives) to measure against.
+    tpr = tp / (tp + fn) if tp + fn else None
+    tnr = tn / (tn + fp) if tn + fp else None
+    return tp, fp, fn, tn, tpr, tnr
+
