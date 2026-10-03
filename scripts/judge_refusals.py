@@ -38,7 +38,12 @@ THINK = {"auto": "default", "on": True, "off": False}
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", required=True, help="ollama model to judge with")
+    parser.add_argument(
+        "--model",
+        required=True,
+        help="judge label: an Ollama model (qwen3:8b), or a hosted one as "
+        "provider/model (groq/openai/gpt-oss-120b, gemini/gemini-3.5-flash-lite)",
+    )
     parser.add_argument(
         "--axis",
         choices=AXES,

@@ -537,7 +537,6 @@ def write_cache(model, cache, cache_dir=CACHE_DIR):
 # --- running ---------------------------------------------------------------
 
 
-@traced(name="judge", as_type="generation")
 def ollama_chat(model, messages, axis, think=None, structured=True):
     """One call to the judge. Imported lazily: reporting from the cache and
     the tests must work with no ollama installed and no server running."""
@@ -552,6 +551,36 @@ def ollama_chat(model, messages, axis, think=None, structured=True):
         model=model, messages=messages, options=OPTIONS, **kwargs
     )
     return response.message.content or ""
+
+
+@traced(name="judge", as_type="generation")
+def judge_chat(model, messages, axis, think=None, structured=True):
+    """
+    One call to the judge, local or hosted, chosen by the model label.
+
+    "qwen3:8b" goes to Ollama exactly as before; "groq/openai/gpt-oss-120b"
+    or "gemini/gemini-3.5-flash-lite" goes to that API (providers.py). The
+    label is what lands in the cache key and the cache file name, so verdicts
+    from two providers can never be mistaken for one another.
+
+    The request cache is off here: eval/judge_cache/ is this module's record
+    of a verdict, and a second cache underneath it would make --refresh, the
+    flag that measures judge noise, return the same reply every time.
+    """
+    from llm_eval_harness import providers
+
+    provider, name = providers.split(model)
+    if provider == "ollama":
+        return ollama_chat(model, messages, axis, think=think, structured=structured)
+    reply = providers.chat(
+        provider,
+        name,
+        messages,
+        schema=schema(axis) if structured else None,
+        cache=False,
+        temperature=OPTIONS["temperature"],
+    )
+    return reply.text
 
 
 def judge_record(
@@ -576,7 +605,7 @@ def judge_record(
     if not refresh and key in cache:
         return key, cache[key], True
 
-    chat_fn = chat_fn or ollama_chat
+    chat_fn = chat_fn or judge_chat
     messages = build_messages(axis, record, think=think)
     started = time.perf_counter()
     raw = chat_fn(model, messages, axis, think=think, structured=structured)
