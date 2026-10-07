@@ -1,0 +1,304 @@
+{
+  "model": "gemini/gemini-3.5-flash-lite",
+  "records": 26,
+  "metrics": [
+    "faithfulness",
+    "answer_relevancy",
+    "context_precision",
+    "context_recall"
+  ],
+  "seconds_per_metric": {
+    "faithfulness": 0.0,
+    "answer_relevancy": 0.0,
+    "context_precision": 21.8,
+    "context_recall": 257.3
+  },
+  "per_record": [
+    {
+      "question": "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output accurately and directly addresses all the seven steps of the NIST RMF without including any irrelevant information.",
+      "context_precision": 0.9167,
+      "context_precision_reason": "The score is 0.92 because the first, second, and fourth retrieval context nodes correctly provide the seven steps of the NIST RMF, such as when the first node states it explicitly lists the steps in a figure including 'CATEGORIZE, AUTHORIZE, MONITOR, IMPLEMENT, SELECT, ASSESS, PREPARE'. However, the score is not higher because the third retrieval context node, which discusses the objectives of the update, and the fifth retrieval context node, which only discusses privacy factors and the purpose of the Categorize step rather than the full list of seven steps, were ranked ahead of or among the relevant nodes instead of being ranked lower.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all the steps of the RMF listed in the expected output are fully supported by the information found in node(s) in retrieval context 1 and 2."
+    },
+    {
+      "question": "What is a common control according to SP 800-37 Revision 2?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 0.75,
+      "answer_relevancy_reason": "The score is 0.75 because the output includes an irrelevant and contradictory claim that a formal definition is missing, despite SP 800-37 Rev 2 providing common control definitions.",
+      "context_precision": 0.3333,
+      "context_precision_reason": "The score is 0.33 because the relevant node at rank 3 states 'Common controls can also be identified at different levels... Organizations may establish one or more lists of common controls that can be inherited by information systems' to answer the question, but it is ranked lower than irrelevant nodes. The irrelevant nodes at rank 1 ('The text discusses common control providers and hybrid controls, but does not explicitly define what a common control is.') and rank 2 ('The text only mentions definitions for identify CSF function and system-specific control without defining common controls.') should be ranked lower because they fail to provide the definition.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully and accurately supported by node(s) in retrieval context."
+    },
+    {
+      "question": "What is the difference between a common control and a hybrid control in the RMF?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response directly and accurately addresses the difference between common and hybrid controls in the RMF without including any irrelevant information.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because all retrieval context nodes are relevant, with the first node noting that 'common controls or portions of hybrid controls implemented and maintained by the common control provider are indicated as inherited', the second node explaining that hybrid controls cover aspects 'not covered by the organizational entities responsible for the common aspects of the control', the third node directly contrasting common controls, which are inherited, with hybrid controls that are 'partially inherited by one or more systems', the fourth node specifying that 'A requirement may not be fully met by a common control. In such cases, the control is considered a hybrid control', and the fifth node detailing how for hybrid controls, the organization specifies 'the parts of the control that are provided by the common control provider and the parts of the control that are implemented at the system level'.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all sentences in the expected output are fully supported by node(s) in the retrieval context, with sentence 1 attributed to the 3rd node and sentence 2 attributed to the 4th and 5th nodes."
+    },
+    {
+      "question": "What is the purpose of the Prepare step in the RMF?",
+      "faithfulness": 0.5,
+      "faithfulness_reason": "The score is 0.50 because the output incorrectly omits privacy risk, stating that the purpose of the Prepare step is only to manage security when the context explicitly states it manages both security and privacy risk.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the purpose of the Prepare step in the RMF without including any irrelevant information.",
+      "context_precision": 0.325,
+      "context_precision_reason": "The score is 0.33 because the first node states that 'This context discusses RMF steps and mentions the Prepare step, but does not state its specific purpose.' and the second node states that 'This context discusses RMF execution flexibility and entering at different steps, but does not provide the purpose of the Prepare step.', which should be ranked lower than the relevant nodes.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by the 4th node in the retrieval context, ensuring complete recall!"
+    },
+    {
+      "question": "What key artifacts are included in an authorization package under SP 800-37r2?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the input without including any irrelevant information.",
+      "context_precision": 0.9167,
+      "context_precision_reason": "The score is 0.92 because most relevant nodes are ranked appropriately, with the first, second, and fourth nodes correctly identified as discussing 'key artifacts in the authorization package, as described in [SP 800-37]', 'security and privacy plans and the plans of action and milestones', and how 'Security and privacy information is presented to the authorizing official in an authorization package'. However, the score is not higher because the third node (focused on 'the authorization decision and evidence generation without listing the specific key artifacts') and the fifth node (discussing 'automation states and footnote details rather than identifying the specific key artifacts') are ranked among the relevant nodes instead of lower.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all elements of the expected output, including security and privacy assessment reports, the plan of action and milestones, and related security and privacy plans, are fully supported across nodes 1, 2, and 4 in the retrieval context."
+    },
+    {
+      "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and accurately addresses the input by listing all four steps of the risk assessment process according to SP 800-30 Revision 1 without including any irrelevant information.",
+      "context_precision": 0.95,
+      "context_precision_reason": "The score is 0.95 because almost all relevant nodes are correctly ranked near the top, such as the first node which states 'It explicitly lists all four steps: 'Step 1: Prepare for Assessment', 'Step 2: Conduct Assessment', 'Step 3: Communicate Results', and 'Step 4: Maintain Assessment'.' However, the score is not 1.0 because the fourth node, which states 'It describes the Risk Management Framework (RMF) under NIST SP 800-37 instead of the risk assessment process from SP 800-30.', is incorrectly ranked above the fifth relevant node.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all parts of the expected output are fully supported by node 1 and node 2 in the retrieval context, ensuring perfect recall!"
+    },
+    {
+      "question": "What are the four components of the overall risk management process in SP 800-30r1?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and accurately addresses the input without including any irrelevant statements.",
+      "context_precision": 0.75,
+      "context_precision_reason": "The score is 0.75 because while the first node in the retrieval contexts is correctly ranked high by stating 'It explicitly lists the four components of the risk management process: '(i) framing risk; (ii) assessing risk; (iii) responding to risk; and (iv) monitoring risk'', the score is not higher due to irrelevant nodes like the second node which 'only discusses NIST SP 800-37 and references other publications, which is irrelevant to the four components requested', the third node which 'discusses authorization boundaries and RMF Prepare Tasks, lacking any information about the four risk management components', and the fifth node which 'describes Risk Models and risk factors within SP 800-30, but does not list the four components of the overall risk management process' being ranked ahead of the relevant fourth node which 'explicitly mentions 'Risk monitoring, the fourth step in the risk management process', which supports part of the expected output'.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by the 1st node in the retrieval context."
+    },
+    {
+      "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses all parts of the input question without any irrelevant statements.",
+      "context_precision": 0.8042,
+      "context_precision_reason": "The score is 0.80 because the first node in the retrieval contexts is relevant, as it directly answers the question by identifying 'Tier 1 (organization level), Tier 2 (mission/business process level), and Tier 3 (information system level)'. However, the score is not higher because the second node is irrelevant, as it discusses other inputs and risks at each tier rather than listing the three organizational tiers themselves, and it should have been ranked lower than the subsequent relevant nodes like the third, fourth, and fifth nodes.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully and accurately supported by node 1 in the retrieval context."
+    },
+    {
+      "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the specific risk factors considered in a risk assessment per SP 800-30 without any irrelevant statements.",
+      "context_precision": 0.5,
+      "context_precision_reason": "The score is 0.50 because the relevant node discussing the risk factors like 'Impact of loss', 'threats', 'vulnerabilities', and 'likelihood of occurrence' is ranked second, while several irrelevant nodes are placed ahead of or among the relevant information. Specifically, the first node, which discusses how 'combinations of risk factors are identified and analyzed, but does not explicitly name the specific risk factors requested', should be ranked lower than the second node to achieve a higher score.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by node 2 in the retrieval context."
+    },
+    {
+      "question": "What is the purpose of the risk framing component of the risk management process?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response directly and accurately addresses the purpose of the risk framing component without including any irrelevant information.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node in the retrieval contexts correctly states that 'The purpose of the risk framing component is to produce a risk management strategy that addresses how organizations intend to assess risk, respond to risk, and monitor risk', and it is perfectly ranked above all irrelevant nodes, such as the second node which only discusses risk assessment methodologies and components in organizational risk frames, and the third node which lists the four steps of the risk management process including framing risk, but does not provide the specific purpose of the risk framing component.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the expected output is fully supported by the 1st node in the retrieval context, which accurately details the risk management strategy."
+    },
+    {
+      "question": "What is the primary purpose of NIST SP 800-53A Revision 5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the input without including any irrelevant statements. Excellent work!",
+      "context_precision": 0.0,
+      "context_precision_reason": "The score is 0.00 because all retrieved nodes are irrelevant. Specifically, the first node was deemed irrelevant because 'This document lists historical contributors to NIST SP 800-37 and is not related to the purpose of NIST SP 800-53A Revision 5.', the second node because 'This document discusses the Implement step of NIST SP 800-37 and does not mention NIST SP 800-53A Revision 5.', the third node because 'This document provides definitions for NIST SP 800-37 and contains no information about NIST SP 800-53A Revision 5.', the fourth node because 'This document covers authorization boundaries within NIST SP 800-37 and is unrelated to the purpose of SP 800-53A Revision 5.', and the fifth node because 'This document discusses historical contributions to NIST Special Publication 800-53A but does not state the primary purpose of Revision 5.'. There were no relevant nodes to rank above these irrelevant ones.",
+      "context_recall": 0.0,
+      "context_recall_reason": "The score is 0.00 because the expected output's sentence regarding the methodology for assessing security and privacy controls is not present in any of the nodes in retrieval context (nodes 1 to 5)."
+    },
+    {
+      "question": "Name the three primary assessment methods defined in SP 800-53A.",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 0.6667,
+      "answer_relevancy_reason": "The score is 0.67 because while the output attempts to answer the question about assessment methods, it includes an irrelevant and incorrect claim that the context does not name them.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node in the retrieval contexts successfully identifies the primary assessment methods with the reason 'It explicitly mentions the processes of 'examination, interview, and testing' which correspond to the expected output.', and it is perfectly ranked above all the irrelevant nodes.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by the 1st node in the retrieval context."
+    },
+    {
+      "question": "What does the Examine assessment method involve?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response directly and accurately addresses the input without containing any irrelevant information. Great job!",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because all the relevant nodes are perfectly ranked at the top, such as the first node which states that 'The examine method is the process of reviewing, studying, inspecting, or analyzing assessment objects.', and the irrelevant node discussing assessment attributes is correctly placed at the bottom.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all parts of the expected output are fully supported by the 2nd and 3rd nodes in retrieval context."
+    },
+    {
+      "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the input without including any irrelevant statements.",
+      "context_precision": 0.8333,
+      "context_precision_reason": "The score is 0.83 because the first node in the retrieval contexts is appropriately ranked, as 'It explicitly defines both methods, stating that 'The examine method is the process of reviewing, studying, inspecting, or analyzing assessment objects' and 'The test method is the process of exercising assessment objects (i.e., activities, mechanisms) under specified conditions'.' However, the score is not higher because the second node, which explains that 'This document discusses semi-quantitative assessments, bins, and scales, which is completely unrelated to the definitions of Examine and Test methods.', is ranked too high ahead of other relevant information.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all sentences in the expected output are fully supported by node 3 in the retrieval context, successfully explaining both the examine and test processes with perfect accuracy!"
+    },
+    {
+      "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response directly and accurately addresses all parts of the input without any irrelevant statements.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because all retrieved nodes are relevant and perfectly ranked! The first node establishes that 'Assessment methods have a set of associated attributes – depth and coverage – which help define the level of effort for the assessment' and that 'depth attribute addresses the rigor and level of detail', while subsequent nodes like the second, third, fourth, and fifth nodes consistently build upon this by discussing how 'each assessment method... is associated with the depth and coverage attributes' identifying 'the rigor (depth) and scope (coverage) of the assessment procedures', reinforcing these definitions, explaining how 'The depth and coverage of security and privacy evidence can affect the level of assurance', and directly providing the exact definitions where 'The depth attribute addresses the rigor and level of detail...' and 'The coverage attribute addresses the scope or breadth...'.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all sentences in the expected output are fully supported by the nodes in retrieval context, specifically nodes 1, 2, and 5 which accurately detail the depth and coverage attributes."
+    },
+    {
+      "question": "What is the purpose of NIST SP 800-171A Revision 3?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and accurately addresses the purpose of NIST SP 800-171A Revision 3 without any irrelevant information.",
+      "context_precision": 0.0,
+      "context_precision_reason": "The score is 0.00 because all nodes in the retrieval contexts are irrelevant to the input, as the first node discusses 'contributors to Special Publication 800-37 and is not related to NIST SP 800-171A Revision 3', the second node focuses on 'NIST SP 800-37 Revision 2 regarding assessment reports', the third node provides 'definitions like non-repudiation, low-impact system, and media for NIST SP 800-37 Revision 2', the fourth node continues the 'discussion on assessment reports for NIST SP 800-37 Revision 2', and the fifth node talks about 'methods and techniques to manage security and privacy risks under NIST SP 800-37 Revision 2'.",
+      "context_recall": 0.0,
+      "context_recall_reason": "The score is 0.00 because the sentence in the expected output regarding NIST SP 800-171 cannot be attributed to any node(s) in retrieval context, which exclusively focus on NIST SP 800-37."
+    },
+    {
+      "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 0.6667,
+      "answer_relevancy_reason": "The score is 0.67 because while it correctly identifies what CUI stands for, parts of the response discuss the importance of defining information types and security categorization instead of focusing directly on why protecting CUI itself is important.",
+      "context_precision": 0.2,
+      "context_precision_reason": "The score is 0.20 because the only relevant node is ranked fifth, while the first node, which states 'This context only provides document title and administrative details about 'NIST SP 800-171Ar3 Assessing CUI Security Requirements' and does not explain what CUI stands for or why its protection is important.', the second node, which states 'This context discusses procedures for the removal of system maintenance equipment containing CUI and sanitization records, which is irrelevant to defining CUI and its importance.', the third node, which states 'This context contains submission comments and contact information for NIST, which is not useful for answering the input question.', and the fourth node, which states 'This context talks about assessing objectives for publicly accessible content ensuring it does not contain CUI, which does not provide the definition or importance of CUI.', are all irrelevant and should have been ranked lower than the fifth node, which states 'This context mentions 'Controlled Unclassified Information (CUI)' and relates information types to supporting 'organizational missions, business functions', which aligns with the expected output concerning the importance of its protection.'.",
+      "context_recall": 0.5,
+      "context_recall_reason": "The score is 0.50 because sentence 1 is supported by the 5th node in the retrieval context, but sentence 2 cannot be found in any of the provided retrieval contexts."
+    },
+    {
+      "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and comprehensively addresses the question about the flexibility SP 800-171A Rev. 3 provides to assessors regarding rigor without including any extraneous or irrelevant information. Great job!",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node in the retrieval contexts is relevant, as 'It explicitly states that organizations \"have flexibility in defining the level of rigor and detail associated w\" which addresses the query about flexibility and rigor.' while the irrelevant nodes are appropriately ranked lower.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by the 1st and 2nd nodes in the retrieval context."
+    },
+    {
+      "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 0.1667,
+      "answer_relevancy_reason": "The score is 0.17 because the output mostly focuses on describing the contents of SP 800-53A rather than directly explaining how SP 800-171Ar3 relates its assessment procedures to it, though it does maintain some topical context.",
+      "context_precision": 0.5,
+      "context_precision_reason": "The score is 0.50 because the relevant node is not ranked at the very top. Specifically, the second node in the retrieval contexts is relevant as it directly mentions 'assessment procedures in SP 800-53A [5]', which relates to the derivation of the procedures, and should have been ranked higher than the irrelevant nodes. The first node in the retrieval contexts is irrelevant because 'This context discusses SP 800-53A addressing the Assess and Monitor steps, but does not mention how SP 800-171Ar3 derives its assessment procedures from SP 800-53A.'. Additionally, the third node in the retrieval contexts is irrelevant because 'This context lists related publications and roles, but does not explain how SP 800-171Ar3 relates its assessment procedures to SP 800-53A.', the fourth node in the retrieval contexts is irrelevant because 'This context only provides introductory and administrative publication information regarding NIST SP 800-171Ar3.', and the fifth node in the retrieval contexts is irrelevant because 'This context discusses analyzing, documenting, and reporting assessment results, and mentions SP 800-53A Appendix E, but does not explain the derivation of the assessment procedures.'.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the sentence in the expected output is fully supported by node 2 in the retrieval context."
+    },
+    {
+      "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the input without including any irrelevant statements.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node correctly states that 'The security requirements in SP 800-171 are organized into 17 families' and lists them under 'Table 1. Security Requirement Families', and all irrelevant nodes such as the second node discussing 'determination statements, assessment procedures, and least privileges' and the third node containing 'only a table of contents reference' are correctly ranked lower.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all elements in the expected output are fully supported by node(s) in retrieval context, specifically matching the 17 families listed in Table 1."
+    },
+    {
+      "question": "What is the scope of NIST SP 800-78-5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the scope of NIST SP 800-78-5 without including any irrelevant statements.",
+      "context_precision": 0.0,
+      "context_precision_reason": "The score is 0.00 because all retrieved nodes are irrelevant to the input. Specifically, the first node discusses NIST SP 800-171Ar3 and assessment procedures, which is unrelated to NIST SP 800-78-5. The second node discusses identifying the scope of a risk assessment rather than the scope of NIST SP 800-78-5. The third node covers NIST SP 800-53A REV. 5 and assesses security and privacy controls, not NIST SP 800-78-5. The fourth node focuses on the scope of risk assessments and authorization boundaries, which does not answer the question about NIST SP 800-78-5. Finally, the fifth node defines terms like sensitivity and subsystem from various NIST SPs, but does not mention NIST SP 800-78-5. As there are no relevant nodes present, no proper ranking of relevant information above irrelevant nodes could be achieved.",
+      "context_recall": 0.0,
+      "context_recall_reason": "The score is 0.00 because sentence 1 of the expected output, which details cryptographic algorithms and key sizes for PIV credentials, cannot be attributed to any node in retrieval context (nodes 1 to 5)."
+    },
+    {
+      "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and accurately addresses the input without containing any irrelevant information.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node directly answers the question by stating that 'Federal Information Processing Standard 201-3 (FIPS 201-3) defines the requirements for Personal Identity Verification (PIV) life cycle activities', and the second node correctly notes that 'This document, NIST Special Publication (SP) 800-78-5... is a companion document to FIPS 201-3'. Both relevant nodes are positioned perfectly at the top, outranking the irrelevant nodes such as the third node which 'describes Cryptographic Algorithm Validation Testing Requirements', the fourth node which 'discusses certificate status information', and the fifth node which 'focuses on the specification of digital signatures'.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because the single sentence in the expected output is fully and accurately supported by node(s) in retrieval context 1 and 2, which explicitly detail the FIPS 201-3 standard for Personal Identity Verification!"
+    },
+    {
+      "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and accurately answers the input regarding the required public exponent for RSA keys in PIV without any irrelevant information.",
+      "context_precision": 0.8042,
+      "context_precision_reason": "The score is 0.80 because while most relevant nodes are ranked appropriately, the second node in retrieval contexts is irrelevant as 'It discusses secure messaging CVC and OIDs, but does not state the public exponent for RSA keys.', and should be ranked lower than the relevant nodes like the first node which states 'It explicitly states that this specification requires that the RSA public exponent associated with PIV keys be 65537'.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by node(s) in retrieval context."
+    },
+    {
+      "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the output directly and comprehensively addresses the input regarding the permitted algorithms and key-size options for the PIV Authentication key through 2030 without including any irrelevant information.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first node in the retrieval contexts correctly provides the permitted algorithms and key sizes through 2030 by stating that \"It explicitly lists the 'PIV Authentication key' and its permitted algorithms and key sizes through 2030 as 'RSA (2048 or 3072 bits) \nECDSA (Curve P-256 or P-384)'\", while all irrelevant nodes are correctly ranked lower since the second node \"lists the credentials used by the PIV cardholder but does not mention the permitted algorithms and key-size options for the PIV Authentication key through 2030\", the third node \"discusses the PIV Card Application Administration Keys, which is unrelated to the PIV Authentication key\", the fourth node \"discusses digital signatures and specifications for authentication information rather than the PIV Authentication key algorithm options\", and the fifth node \"mentions asymmetric key management keys and other objects, but does not provide the specific algorithm and key-size options for the PIV Authentication key through 2030\".",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully supported by the 1st node in the retrieval context, making for a stellar match!"
+    },
+    {
+      "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the response precisely and directly answers the question about recommended elliptic curves for PIV keys in SP 800-78-5 without any irrelevant information.",
+      "context_precision": 1.0,
+      "context_precision_reason": "The score is 1.00 because the first retrieval context node correctly states that elliptic curve keys must correspond to 'Curve P-256 or • Curve P-384', directly answering the question. It is appropriately ranked above all irrelevant nodes, such as the second node which discusses RSA public exponents and key transport, the third node which provides change log history, the fourth node which focuses on object identifiers (OIDs) rather than directly stating the recommended curves, and the fifth node which discusses algorithm identifiers and cipher suites.",
+      "context_recall": 1.0,
+      "context_recall_reason": "The score is 1.00 because all information in the expected output is fully and accurately supported by the 1st node in the retrieval context. Excellent work!"
+    },
+    {
+      "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?",
+      "faithfulness": 1.0,
+      "faithfulness_reason": "The score is 1.00 because the actual output is completely faithful to the retrieval context with no contradictions found.",
+      "answer_relevancy": 1.0,
+      "answer_relevancy_reason": "The score is 1.00 because the actual output directly and accurately addresses the relationship between the Assess step of the RMF (SP 800-37r2) and the assessment methods in SP 800-53A without including any irrelevant information. Excellent work!",
+      "context_precision": 0.7,
+      "context_precision_reason": "The score is 0.70 because the first node in the retrieval contexts is correctly placed, noting that 'SP 800-53A addresses the Assess and Monitor steps of the RMF and provides guidance on the security and privacy control assessment processes'. However, the score is not higher because three irrelevant nodes are incorrectly ranked above the second relevant node. Specifically, the second node in the retrieval contexts should be ranked lower because 'It only briefly references the RMF Assess step and [SP 800-53A] for information on assessments and reuse of assessment results without detailing specific methods.' Similarly, the third node should be lower because 'It discusses SDLC phases and reuse of initial control assessments rather than how the Assess step relates to SP 800-53A methods.' Finally, the fourth node should be lower since 'It merely lists the steps in the RMF and illustrates the framework, providing no information on assessment methods.' Placing these before the fifth node, which correctly 'outlines the RMF Assess step tasks and outcomes which relate to determining whether controls are implemented correctly', reduces the overall precision.",
+      "context_recall": 0.0,
+      "context_recall_reason": "The score is 0.00 because the nodes in the retrieval context fail to provide the definition of the Assess step and the specific assessment methods supplied by SP 800-53A as mentioned in the expected output."
+    }
+  ]
+}
