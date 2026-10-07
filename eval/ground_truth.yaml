@@ -495,3 +495,322 @@
   page: null
   topic_in_corpus: true   # "identity proofing" 2x in SP 800-78-5, "FIPS 201" 34x - named, never specified
   # verified: FIPS 201-3 is not among the five source PDFs
+
+# ---------------------------------------------------------------------------
+# Paraphrases (26, added 2026-10-07)
+# One per answerable question above; answer and contexts copied from the
+# original named in paraphrase_of. A paraphrase and its original are one
+# family: correlated, so resample by family, not by question, for intervals.
+# Drafted by Claude, reviewed by hand: #1 asks for the order explicitly, #26
+# reworded to keep the original's meaning, document ids kept in #11/#16/#21.
+# ---------------------------------------------------------------------------
+- question: List the RMF steps in the order an organization goes through them.
+  paraphrase_of: What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision
+    2?
+  answer: Prepare, Categorize, Select, Implement, Assess, Authorize, and Monitor.
+  contexts:
+  - 'There are seven steps in the RMF; a preparatory step to ensure that organizations are ready to execute the
+    process and six main steps. All seven steps are essential for the successful execution of the RMF. The steps
+    are:'
+  - Prepare to execute the RMF from an organization- and a system-level perspective by establishing a context and
+    priorities for managing security and privacy risk.
+  - Categorize the system and the information processed, stored, and transmitted by the system based on an analysis
+    of the impact of loss.
+  - Select an initial set of controls for the system and tailor the controls as needed to reduce risk to an acceptable
+    level based on an assessment of risk.
+  - Implement the controls and describe how the controls are employed within the system and its environment of operation.
+  - Assess the controls to determine if the controls are implemented correctly, operating as intended, and producing
+    the desired outcomes with respect to satisfying the security and privacy requirements.
+  - Authorize the system or common controls based on a determination that the risk to organizational operations
+    and assets, individuals, other organizations, and the Nation is acceptable.
+  - Monitor the system and the associated controls on an ongoing basis to include assessing control effectiveness,
+    documenting changes to the system and environment of operation, conducting risk assessments and impact analyses,
+    and reporting the security and privacy posture of the system.
+  answerable: true
+  source: NIST.SP.800-37r2
+  page: 2.2 / ~p.12-13
+- question: In the risk management framework, what makes a control 'common' rather than system-specific?
+  paraphrase_of: What is a common control according to SP 800-37 Revision 2?
+  answer: Common controls are controls that can be inherited by one or more information systems and are allocated
+    to organizational entities designated as common control providers.
+  contexts:
+  - Common controls are controls that can be inherited by one or more information systems.
+  - Organizations identify and select the set of common controls and allocate those controls to the organizational
+    entities designated as common control providers.
+  answerable: true
+  source: NIST.SP.800-37r2
+  page: 3.1 / ~p.32
+- question: When is a control treated as hybrid instead of common?
+  paraphrase_of: What is the difference between a common control and a hybrid control in the RMF?
+  answer: A common control is fully inherited from a common-control provider. A hybrid control occurs when a requirement
+    is only partially met by a common control; the remaining portion must be provided at the system level, and the
+    control is noted as hybrid.
+  contexts:
+  - Common controls are controls that can be inherited by one or more information systems.
+  - A requirement may not be fully met by a common control. In such cases, the control is considered a hybrid control
+    and is noted as such by the organization, including specifying which parts of the control requirement are provided
+    for inheritance by the common control and which parts are to be provided at the system level.
+  answerable: true
+  source: NIST.SP.800-37r2
+  page: 3.1 / ~p.32
+- question: Why does the RMF begin with a preparation step?
+  paraphrase_of: What is the purpose of the Prepare step in the RMF?
+  answer: To establish a context and priorities for managing security and privacy risk from both an organization-level
+    and a system-level perspective so that organizations are ready to execute the remainder of the RMF.
+  contexts:
+  - Prepare to execute the RMF from an organization- and a system-level perspective by establishing a context and
+    priorities for managing security and privacy risk.
+  answerable: true
+  source: NIST.SP.800-37r2
+  page: 2.2 / ~p.12
+- question: What documents does an authorizing official receive in the authorization package?
+  paraphrase_of: What key artifacts are included in an authorization package under SP 800-37r2?
+  answer: Security and privacy assessment reports, the plan of action and milestones, and related security and privacy
+    plans that form the authorization package.
+  contexts:
+  - The plan of action and milestones is included as part of the authorization package.
+  - Completed security and privacy assessment reports detailing the assessor findings
+  - The unified and collaborative approach to bring security and privacy evidence t ogether in a single authorization
+    package will support authorizing officials with critical information from security and privacy professionals
+    to help inform the authorization decision.
+  answerable: true
+  source: NIST.SP.800-37r2
+  page: 3.5 / ~p.57+
+- question: What phases make up the risk assessment process in the NIST guide for conducting risk assessments?
+  paraphrase_of: According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?
+  answer: Prepare for the assessment; conduct the assessment; communicate assessment results; and maintain the assessment.
+  contexts:
+  - 'The risk assessment process43 is composed of four steps: (i) prepare for the assessment; (ii) conduct the assessment;
+    (iii) communicate assessment results; and (iv) maintain the assessment.44'
+  answerable: true
+  source: nistspecialpublication800-30r1
+  page: Chapter 3 / ~p.23
+- question: Which four activities make up the overall risk management process?
+  paraphrase_of: What are the four components of the overall risk management process in SP 800-30r1?
+  answer: Frame risk, assess risk, respond to risk, and monitor risk.
+  contexts:
+  - assessing risk; (iii) responding to risk; and (iv) monitoring risk. Figure 1 illustrates the four steps in the
+    risk management process—including the risk assessment step
+  - The first component of risk management addresses how organizations frame risk or establish a risk context
+  answerable: true
+  source: nistspecialpublication800-30r1
+  page: Chapter 2 / ~p.6
+- question: At what levels of an organization can a risk assessment be carried out?
+  paraphrase_of: At which three organizational tiers can risk assessments be applied according to SP 800-30r1?
+  answer: Organization level (Tier 1), mission/business process level (Tier 2), and information system level (Tier
+    3).
+  contexts:
+  - how risk assessments can be applied across the organization’s risk management tiers (i.e., organization level,
+    mission/business process level, and information system level).
+  answerable: true
+  source: nistspecialpublication800-30r1
+  page: Chapter 2
+- question: Which factors determine risk in a risk assessment?
+  paraphrase_of: What risk factors are considered when conducting a risk assessment per SP 800-30?
+  answer: Threats, vulnerabilities, impact (of loss), and likelihood of occurrence.
+  contexts:
+  - Impact of loss is one of four risk factors considered during risk assessment activities—the other three factors
+    being threats, vulnerabilities, and likelihood of occurrence [SP 800-30].
+  answerable: true
+  source: nistspecialpublication800-30r1
+  page: cross-ref / Chapter 2
+- question: What is the output of framing risk, and what must it address?
+  paraphrase_of: What is the purpose of the risk framing component of the risk management process?
+  answer: To produce a risk management strategy that addresses how the organization intends to assess risk, respond
+    to risk, and monitor risk.
+  contexts:
+  - The purpose of the risk framing component is to produce a risk management strategy that addresses how organizations
+    intend to assess risk, respond to risk, and monitor risk
+  answerable: true
+  source: nistspecialpublication800-30r1
+  page: Chapter 2
+- question: What does NIST SP 800-53A Revision 5 set out to provide?
+  paraphrase_of: What is the primary purpose of NIST SP 800-53A Revision 5?
+  answer: To provide a methodology and a set of procedures for conducting assessments of security and privacy controls
+    employed within systems and organizations, consistent with the controls in SP 800-53 Revision 5.
+  contexts:
+  - This publication provides a methodology and set of procedures for conducting assessments of security and privacy
+    controls employed within systems and organizations within an effective risk management framework. The assessment
+    procedures, executed at various phases of the system development life cycle, are consistent with the security
+    and privacy controls in NIST Special Publication 800-53, Revision 5.
+  answerable: true
+  source: NIST.SP.800-53Ar5
+  page: Abstract / ~p.iii
+- question: What three methods do assessors use to evaluate controls?
+  paraphrase_of: Name the three primary assessment methods defined in SP 800-53A.
+  answer: Examine, Interview, and Test.
+  contexts:
+  - Assessment methods define the nature of the assessor actions and include examine, interview, and test.
+  answerable: true
+  source: NIST.SP.800-53Ar5
+  page: 2.4.2 / ~p.11
+- question: What does an assessor do when using the examine method?
+  paraphrase_of: What does the Examine assessment method involve?
+  answer: The process of reviewing, inspecting, observing, studying, or analyzing one or more assessment objects
+    (specifications, mechanisms, or activities) to facilitate assessor understanding, achieve clarification, or
+    obtain evidence.
+  contexts:
+  - The examine method is the process of reviewing, inspecting, observing, studying, or analyzing one or more assessment
+    objects (i.e., specifications, mechanisms, or activities) to facilitate assessor understanding, achieve clarification,
+    or obtain evidence.
+  answerable: true
+  source: NIST.SP.800-53Ar5
+  page: 2.4.2 / ~p.11
+- question: How does testing a control differ from examining it?
+  paraphrase_of: What is the difference between the Examine and Test assessment methods in SP 800-53A?
+  answer: Examine is the process of reviewing, inspecting, observing, studying, or analyzing assessment objects
+    to obtain evidence. Test is the process of exercising one or more assessment objects (activities or mechanisms)
+    under specified conditions to compare the actual state of the object to the desired state or expected behavior.
+  contexts:
+  - The examine method is the process of reviewing, inspecting, observing, studying, or analyzing one or more assessment
+    objects (i.e., specifications, mechanisms, or activities) to facilitate assessor understanding, achieve clarification,
+    or obtain evidence.
+  - The test method is the process of exercising one or more assessment objects (i.e., activities or mechanisms)
+    under specified conditions to compare the actual state of the object to the desired state or expected behavior
+    of the object.
+  answerable: true
+  source: NIST.SP.800-53Ar5
+  page: 2.4.2 / ~p.11
+- question: What do the depth and coverage attributes control in an assessment?
+  paraphrase_of: How do the depth and coverage attributes of assessment methods affect the assessment?
+  answer: Depth addresses the rigor and level of detail in the examination, interview, and testing activities. Coverage
+    addresses the scope or breadth of the assessment. Both attributes are hierarchical and help define the level
+    of effort for the assessment.
+  contexts:
+  - Assessment methods have a set of associated attributes – depth and coverage – which help define the level of
+    effort for the assessment. The attributes are hierarchical in nature, providing the means to define the rigor
+    and scope of the assessment for the increased assurances that may be needed for some systems.
+  - The depth attribute addresses the rigor and level of detail in the examination, interview, and
+  answerable: true
+  source: NIST.SP.800-53Ar5
+  page: 2.4.2 / ~p.11
+- question: Why was NIST SP 800-171A Revision 3 written?
+  paraphrase_of: What is the purpose of NIST SP 800-171A Revision 3?
+  answer: To provide organizations with assessment procedures and a methodology that can be used to conduct assessments
+    of the security requirements in NIST SP 800-171 (Protecting Controlled Unclassified Information in Nonfederal
+    Systems and Organizations).
+  contexts:
+  - This publication provides organizations with assessment procedures and a methodology that can be used to conduct
+    assessments of the security requirements in NIST Special Publication 800-171, Protecting Controlled Unclassified
+    Information in Nonfederal Systems and Organizations.
+  answerable: true
+  source: NIST.SP.800-171Ar3
+  page: Abstract
+- question: What is CUI, and why does its protection matter to the federal government?
+  paraphrase_of: What does CUI stand for and why is its protection important according to SP 800-171Ar3?
+  answer: Controlled Unclassified Information. Its protection is of paramount importance to federal agencies and
+    can directly impact the ability of the Federal Government to successfully conduct its essential missions and
+    functions.
+  contexts:
+  - T he protection of Controlled Unclassified Information (CUI) is of paramount importance to federal agencies
+    and can directly impact the ability of the Federal Government to successfully conduct its essential missions
+    and functions.
+  answerable: true
+  source: NIST.SP.800-171Ar3
+  page: Abstract
+- question: Can an organization adjust how rigorous a CUI security assessment is?
+  paraphrase_of: What flexibility does SP 800-171Ar3 give to assessors regarding rigor?
+  answer: The assessment procedures are flexible and can be customized; assessments can be applied with various
+    degrees of rigor based on customer-defined depth and coverage attributes, and may be independent third-party
+    or government-sponsored.
+  contexts:
+  - The assessment procedures are flexible and can be customized to the needs of organizations and assessors. Assessments
+    can be conducted as independent, third-party assessments or as government-sponsored assessments. The assessments
+    can be applied with various degrees of rigor based on customer-defined depth and coverage attributes.
+  answerable: true
+  source: NIST.SP.800-171Ar3
+  page: Abstract
+- question: Where do the CUI assessment procedures come from?
+  paraphrase_of: How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?
+  answer: The procedures have been derived from the assessment procedures in SP 800-53A.
+  contexts:
+  - The procedures have been derived from the assessment procedures in SP 800-53A [5].
+  answerable: true
+  source: NIST.SP.800-171Ar3
+  page: ~p.6
+- question: How many families of CUI security requirements are there, and what are they?
+  paraphrase_of: How many security requirement families are defined in SP 800-171Ar3, and name them?
+  answer: '17 families: Access Control; Awareness and Training; Audit and Accountability; Configuration Management;
+    Identification and Authentication; Incident Response; Maintenance; Media Protection; Personnel Security; Physical
+    Protection; Risk Assessment; Security Assessment and Monitoring; System and Communications Protection; System
+    and Information Integrity; Planning; System and Services Acquisition; Supply Chain Risk Management.'
+  contexts:
+  - The security requirements in SP 800-171 are organized into 17 families, as illustrated in Table 1.
+  - Table 1. Security Requirement Families
+  - Access Control                                 Maintenance                              Security Assessment
+    and Monitoring
+  - Awareness and Training                         Media Protection                         System and Communications
+    Protection
+  - Audit and Accountability                       Personnel Security                       System and Information
+    Integrity
+  - Configuration Management                       Physical Protection                      Planning
+  - Identification and Authentication              Risk Assessment                          System and Services
+    Acquisition
+  - Incident Response                                                                       Supply Chain Risk Management
+  answerable: true
+  source: NIST.SP.800-171Ar3
+  page: 2.1 / Table 1
+- question: What does SP 800-78-5 cover?
+  paraphrase_of: What is the scope of NIST SP 800-78-5?
+  answer: It specifies the cryptographic algorithms and key sizes for the mandatory and optional cryptographic keys
+    used in Personal Identity Verification (PIV) credentials as defined by FIPS 201-3, as well as supporting infrastructure
+    requirements that rely on cryptographic functions.
+  contexts:
+  - This document contains the technical specifications needed for the mandatory and optional cryptographic keys
+    specified in FIPS 201-3, as well as the supporting infrastructure specified in FIPS 201-3 and the related NIST
+    Special Publication (SP) 800-73, Interfaces for Personal Identity Verification, and SP 800-76, Biometric Specifications
+    for Personal Identity Verification, which rely on cryptographic functions.
+  answerable: true
+  source: NIST.SP.800-78-5
+  page: Abstract / 1.1
+- question: Which standard sets the requirements for issuing and using PIV cards?
+  paraphrase_of: Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?
+  answer: FIPS 201-3 (Personal Identity Verification of Federal Employees and Contractors).
+  contexts:
+  - Federal Information Processing Standard 201-3 (FIPS 201-3) defines the requirements for Personal Identity Verification
+    (PIV) life cycle activities, including identity proofing, registration, PIV Card issuance, and PIV Card usage.
+  answerable: true
+  source: NIST.SP.800-78-5
+  page: Abstract / 1.1
+- question: What RSA public exponent is required for PIV keys?
+  paraphrase_of: What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?
+  answer: '65537'
+  contexts:
+  - Rivest-Shamir- Adleman (RSA) keys must be generated using a public exponent of 65537.
+  answerable: true
+  source: NIST.SP.800-78-5
+  page: 3.1 / p.6
+- question: Until 2030, which algorithms and key sizes may be used for the PIV Authentication key?
+  paraphrase_of: What algorithm and key-size options are permitted for the PIV Authentication key through 2030?
+  answer: RSA (2048 or 3072 bits) or ECDSA (Curve P-256 or P-384).
+  contexts:
+  - PIV Authentication key RSA (2048 or 3072 bits) ECDSA (Curve P-256 or P-384) RSA 3072 bits ECDSA (Curve P-256
+    or P-384)
+  answerable: true
+  source: NIST.SP.800-78-5
+  page: Table 1 / p.6
+- question: Which elliptic curves can PIV keys use?
+  paraphrase_of: What elliptic curves are recommended for PIV keys in SP 800-78-5?
+  answer: Curve P-256 or Curve P-384 (from FIPS 186).
+  contexts:
+  - 'Elliptic curve keys must correspond to one of the following recommended curves from [FIPS186]:'
+  - •     Curve P-256 or
+  - •     Curve P-384.
+  answerable: true
+  source: NIST.SP.800-78-5
+  page: 3.1 / p.6
+- question: How do the assessment methods of SP 800-53A support the RMF Assess step?
+  paraphrase_of: How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP
+    800-53A?
+  answer: The Assess step determines whether controls are implemented correctly, operating as intended, and producing
+    the desired outcomes. SP 800-53A supplies the concrete assessment methods (Examine, Interview, Test) and procedures
+    used to obtain that determination.
+  contexts:
+  - Assess the controls to determine if the controls are implemented correctly, operating as intended, and producing
+    the desired outcomes with respect to satisfying the security and privacy requirements.
+  - Assessment methods define the nature of the assessor actions and include examine, interview, and test.
+  - The assessment procedures, executed at various phases of the system development life cycle, are consistent with
+    the security and privacy controls in NIST Special Publication 800-53, Revision 5.
+  answerable: true
+  source: NIST.SP.800-37r2 + NIST.SP.800-53Ar5
+  page: RMF 2.2 + 53A 2.4.2

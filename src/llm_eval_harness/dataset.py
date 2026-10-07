@@ -67,7 +67,16 @@ def _normalize(record: dict[str, Any]) -> dict[str, Any]:
         "answer": record["answer"],
         "contexts": list(record["contexts"]),
     }
-    for extra in ("answerable", "source", "refusal_type", "page", "topic_in_corpus"):
+    for extra in (
+        "answerable",
+        "source",
+        "refusal_type",
+        "page",
+        "topic_in_corpus",
+        # A paraphrase names its original: the two are one family, and a
+        # resampling interval has to treat them as one draw, not two.
+        "paraphrase_of",
+    ):
         if extra in record:
             out[extra] = record[extra]
     return out
