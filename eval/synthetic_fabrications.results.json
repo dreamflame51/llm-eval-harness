@@ -1,0 +1,128 @@
+{
+  "judge_versions": {
+    "local": "qwen3:8b",
+    "hosted": [
+      "groq/openai/gpt-oss-120b",
+      "gemini/gemini-3.5-flash-lite"
+    ]
+  },
+  "per_record": {
+    "What is the difference between a common control and a hybrid control in the RMF?": {
+      "kind": "entity",
+      "source_record": 3,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.833
+    },
+    "What is the purpose of the Prepare step in the RMF?": {
+      "kind": "number",
+      "source_record": 4,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.857
+    },
+    "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?": {
+      "kind": "hedge",
+      "source_record": 6,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.667
+    },
+    "What are the four components of the overall risk management process in SP 800-30r1?": {
+      "kind": "number",
+      "source_record": 7,
+      "qwen3:8b": false,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.8
+    },
+    "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?": {
+      "kind": "entity",
+      "source_record": 8,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.8
+    },
+    "What risk factors are considered when conducting a risk assessment per SP 800-30?": {
+      "kind": "hedge",
+      "source_record": 9,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.833
+    },
+    "What does the Examine assessment method involve?": {
+      "kind": "number",
+      "source_record": 13,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.75
+    },
+    "What is the difference between the Examine and Test assessment methods in SP 800-53A?": {
+      "kind": "entity",
+      "source_record": 14,
+      "qwen3:8b": false,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 0.8,
+      "RAGAS faithfulness": 0.833
+    },
+    "How do the depth and coverage attributes of assessment methods affect the assessment?": {
+      "kind": "hedge",
+      "source_record": 15,
+      "qwen3:8b": false,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.846
+    },
+    "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?": {
+      "kind": "number",
+      "source_record": 22,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.833
+    },
+    "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?": {
+      "kind": "hedge",
+      "source_record": 23,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.667
+    },
+    "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?": {
+      "kind": "number",
+      "source_record": 24,
+      "qwen3:8b": false,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 0.5,
+      "RAGAS faithfulness": 0.667
+    },
+    "What elliptic curves are recommended for PIV keys in SP 800-78-5?": {
+      "kind": "entity",
+      "source_record": 25,
+      "qwen3:8b": true,
+      "groq/openai/gpt-oss-120b": true,
+      "gemini/gemini-3.5-flash-lite": true,
+      "DeepEval faithfulness": 1.0,
+      "RAGAS faithfulness": 0.5
+    }
+  }
+}

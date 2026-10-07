@@ -1,4 +1,20 @@
 {
+  "06f2aa83a704f1d7": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:34+00:00",
+    "latency_s": 4.83,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What is the difference between a common control and a hybrid control in the RMF?",
+    "raw": "{\"unsupported_claim\":\"Common controls must also be re-certified under NIST SP 800-219 before they can be inherited.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "Common controls must also be re-certified under NIST SP 800-219 before they can be inherited."
+    }
+  },
   "0fd2c42b6f832a0e": {
     "axis": "fabricated",
     "judged": "2026-10-03T07:24:00+00:00",
@@ -13,6 +29,22 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "16801567c2609b77": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:32:05+00:00",
+    "latency_s": 16.97,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
+    "raw": "{\"unsupported_claim\":\"FIPS 201-3 superseded FIPS 201-2 in 2019\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "FIPS 201-3 superseded FIPS 201-2 in 2019"
     }
   },
   "1ca217dcea864844": {
@@ -114,6 +146,22 @@
       "refused": false
     }
   },
+  "2ecf4affa165e091": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:32:22+00:00",
+    "latency_s": 17.17,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
+    "raw": "{\"unsupported_claim\":\"PIV certificates typically expire after 6 years\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "PIV certificates typically expire after 6 years"
+    }
+  },
   "312b87ab69a1087f": {
     "axis": "refused",
     "judged": "2026-10-03T07:26:14+00:00",
@@ -129,6 +177,22 @@
       "evidence": "Answer is missing",
       "ok": true,
       "refused": true
+    }
+  },
+  "36f52fd74b032bf4": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:32:59+00:00",
+    "latency_s": 19.2,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
+    "raw": "{\"unsupported_claim\":\"Curve P-521 is also permitted for Card Authentication keys.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "Curve P-521 is also permitted for Card Authentication keys."
     }
   },
   "3ca78f9e8c83b51a": {
@@ -161,6 +225,22 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "55b5cf743f3be591": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:31:08+00:00",
+    "latency_s": 10.66,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
+    "raw": "{\"unsupported_claim\":\"likelihood is usually weighted at 40 percent\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "likelihood is usually weighted at 40 percent"
     }
   },
   "583b31eb3991a5ee": {
@@ -212,6 +292,22 @@
       "unsupported_claim": ""
     }
   },
+  "76d2fc9ad0cbaada": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:31:17+00:00",
+    "latency_s": 9.35,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What does the Examine assessment method involve?",
+    "raw": "{\"unsupported_claim\":\"An examine activity typically takes 2 to 4 hours per assessment object.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "An examine activity typically takes 2 to 4 hours per assessment object."
+    }
+  },
   "7c64b6ffd95c7566": {
     "axis": "fabricated",
     "judged": "2026-10-03T07:24:35+00:00",
@@ -245,6 +341,22 @@
       "refused": true
     }
   },
+  "a6374f3f807fca7f": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:46+00:00",
+    "latency_s": 8.3,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What are the four components of the overall risk management process in SP 800-30r1?",
+    "raw": "{\"unsupported_claim\":\"Organizations are expected to repeat this cycle at least every 12 months.\", \"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "Organizations are expected to repeat this cycle at least every 12 months."
+    }
+  },
   "aa32dbb22804493e": {
     "axis": "fabricated",
     "judged": "2026-10-03T07:24:02+00:00",
@@ -276,6 +388,22 @@
       "evidence": "Answer is missing",
       "ok": true,
       "refused": true
+    }
+  },
+  "b2c30839265398b7": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:31:48+00:00",
+    "latency_s": 16.48,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
+    "raw": "{\"unsupported_claim\":\"The document does not define a default depth value, but most agencies use the focused level.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "The document does not define a default depth value, but most agencies use the focused level."
     }
   },
   "b676cc5da6d2ca6f": {
@@ -329,6 +457,54 @@
       "refused": true
     }
   },
+  "d0dbc27471eadabe": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:57+00:00",
+    "latency_s": 11.43,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
+    "raw": "{\"unsupported_claim\":\"A fourth tier, Tier 0 (supply chain level), was added in Revision 2.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "A fourth tier, Tier 0 (supply chain level), was added in Revision 2."
+    }
+  },
+  "d3997b4f21678c3b": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:32:40+00:00",
+    "latency_s": 17.45,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
+    "raw": "{\"unsupported_claim\":\"After 2030, RSA 2048 remains permitted for an additional 5-year transition period.\", \"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "After 2030, RSA 2048 remains permitted for an additional 5-year transition period."
+    }
+  },
+  "d709e70899e2e094": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:31:32+00:00",
+    "latency_s": 14.16,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
+    "raw": "{\"unsupported_claim\":\"A third method, Simulate, is defined in Appendix F.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "A third method, Simulate, is defined in Appendix F."
+    }
+  },
   "e09d10538548ce96": {
     "axis": "refused",
     "judged": "2026-10-03T07:24:01+00:00",
@@ -363,6 +539,22 @@
       "refused": true
     }
   },
+  "ecd742ad7afde0cf": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:36+00:00",
+    "latency_s": 1.71,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "What is the purpose of the Prepare step in the RMF?",
+    "raw": "{\"unsupported_claim\":\"The Prepare step must be completed within 30 days of system initiation.\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "The Prepare step must be completed within 30 days of system initiation."
+    }
+  },
   "eed43b385173093e": {
     "axis": "fabricated",
     "judged": "2026-10-03T07:24:28+00:00",
@@ -393,6 +585,22 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "fdaf410ccefaed38": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:38+00:00",
+    "latency_s": 1.88,
+    "mode": "default/schema",
+    "model": "groq/openai/gpt-oss-120b",
+    "prompt_version": "1",
+    "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
+    "raw": "{\"unsupported_claim\":\"it is typically three years\",\"fabricated\":true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "it is typically three years"
     }
   }
 }

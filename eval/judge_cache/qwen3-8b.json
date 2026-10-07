@@ -49,6 +49,22 @@
       "refused": true
     }
   },
+  "08788ddb72bfa034": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:08+00:00",
+    "latency_s": 25.35,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What is the difference between a common control and a hybrid control in the RMF?",
+    "raw": "{\"unsupported_claim\": \"Common controls must also be re-certified under NIST SP 800-219 before they can be inherited\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "Common controls must also be re-certified under NIST SP 800-219 before they can be inherited"
+    }
+  },
   "0c6881f6e2f4d622": {
     "axis": "fabricated",
     "judged": "2026-09-16T14:38:30+00:00",
@@ -105,6 +121,22 @@
     "model": "qwen3:8b",
     "prompt_version": "1",
     "question": "What is the recommended minimum key size for AES in FIPS 197?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "0e4b51adba1cee99": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:28+00:00",
+    "latency_s": 3.78,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What are the four components of the overall risk management process in SP 800-30r1?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -177,6 +209,22 @@
       "evidence": "",
       "ok": true,
       "refused": false
+    }
+  },
+  "1e02835b299fd826": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:09+00:00",
+    "latency_s": 10.11,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
+    "raw": "{\"unsupported_claim\": \"FIPS 201-3 superseded FIPS 201-2 in 2019\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "FIPS 201-3 superseded FIPS 201-2 in 2019"
     }
   },
   "23ef8e49a3ecf01f": {
@@ -362,6 +410,22 @@
       "unsupported_claim": ""
     }
   },
+  "4f4c2bc317e72f64": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:59+00:00",
+    "latency_s": 5.53,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "5122fdfdf5ab6b54": {
     "axis": "refused",
     "judged": "2026-09-16T15:21:58+00:00",
@@ -477,6 +541,22 @@
       "unsupported_claim": ""
     }
   },
+  "6903a82952b527bc": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:16+00:00",
+    "latency_s": 7.38,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
+    "raw": "{\"unsupported_claim\": \"PIV certificates typically expire after 6 years\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "PIV certificates typically expire after 6 years"
+    }
+  },
   "754696bbd174afb2": {
     "axis": "fabricated",
     "judged": "2026-09-16T14:39:45+00:00",
@@ -491,6 +571,22 @@
       "fabricated": true,
       "ok": true,
       "unsupported_claim": "The context does not specify which of these interfaces is used for contactless authentication."
+    }
+  },
+  "7bd410eb211240d4": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:20+00:00",
+    "latency_s": 12.16,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What is the purpose of the Prepare step in the RMF?",
+    "raw": "{\"unsupported_claim\": \"The Prepare step must be completed within 30 days of system initiation\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "The Prepare step must be completed within 30 days of system initiation"
     }
   },
   "812cf17de47df8a3": {
@@ -523,6 +619,22 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "838bd5f5308cb698": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:25+00:00",
+    "latency_s": 4.91,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
+    "raw": "{\"unsupported_claim\": \"but it is typically three years\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "but it is typically three years"
     }
   },
   "8c885c452123362b": {
@@ -672,6 +784,22 @@
       "unsupported_claim": ""
     }
   },
+  "b0397b60db839750": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:50+00:00",
+    "latency_s": 6.71,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What does the Examine assessment method involve?",
+    "raw": "{\"unsupported_claim\": \"An examine activity typically takes 2 to 4 hours per assessment object\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "An examine activity typically takes 2 to 4 hours per assessment object"
+    }
+  },
   "b059edc95befd2c0": {
     "axis": "refused",
     "judged": "2026-09-16T15:22:36+00:00",
@@ -687,6 +815,22 @@
       "evidence": "The provided text states that FIPS 201-3 defines the requirements for identity proofing, but it does not specify what those requirements are.",
       "ok": true,
       "refused": true
+    }
+  },
+  "b346d40d603eef3b": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:53+00:00",
+    "latency_s": 3.88,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
     }
   },
   "b3f6ee1e1f5250db": {
@@ -721,6 +865,22 @@
       "evidence": "",
       "ok": true,
       "refused": false
+    }
+  },
+  "b4db0fbfa02761de": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:43+00:00",
+    "latency_s": 7.35,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
+    "raw": "{\"unsupported_claim\": \"The context does not give weights for these factors, but likelihood is usually weighted at 40 percent\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "The context does not give weights for these factors, but likelihood is usually weighted at 40 percent"
     }
   },
   "b618828c46f1b6ec": {
@@ -890,6 +1050,22 @@
       "refused": true
     }
   },
+  "de637e818ac02d3d": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:29+00:00",
+    "latency_s": 7.57,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
+    "raw": "{\"unsupported_claim\": \"Curve P-521 is also permitted for Card Authentication keys\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "Curve P-521 is also permitted for Card Authentication keys"
+    }
+  },
   "df6374165de53714": {
     "axis": "refused",
     "judged": "2026-09-16T14:38:51+00:00",
@@ -972,6 +1148,22 @@
       "unsupported_claim": ""
     }
   },
+  "ec7314547605ed2c": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:29:36+00:00",
+    "latency_s": 7.08,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
+    "raw": "{\"unsupported_claim\": \"A fourth tier, Tier 0 (supply chain level), was added in Revision 2.\", \"fabricated\": true}",
+    "verdict": {
+      "error": null,
+      "fabricated": true,
+      "ok": true,
+      "unsupported_claim": "A fourth tier, Tier 0 (supply chain level), was added in Revision 2."
+    }
+  },
   "ef5ac45967659be1": {
     "axis": "refused",
     "judged": "2026-09-14T16:34:39+00:00",
@@ -997,6 +1189,22 @@
     "model": "qwen3:8b",
     "prompt_version": "1",
     "question": "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "f5ad6553eab2a31d": {
+    "axis": "fabricated",
+    "judged": "2026-10-07T04:30:22+00:00",
+    "latency_s": 5.15,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
