@@ -165,9 +165,11 @@ here and the comparison they share lives in `llm_eval_harness/pins.py`:
 
 ## The reference set
 
-`eval/ground_truth.yaml` - 38 records:
+`eval/ground_truth.yaml` - 64 records:
 
 - **26 answerable**: question, gold answer, and the exact spans that support it.
+- **26 paraphrases** of those, one each (`paraphrase_of`), same answer and spans
+  - see the retrieval table below for what they changed.
 - **12 refusal tests**: the corpus cannot answer, so declining is the only
   correct response. Two classes of six, scored separately: `in_corpus_gap`
   (document present, fact absent) and `out_of_corpus` (document absent). The
@@ -235,17 +237,29 @@ arrives, not what arrives beside it
 | `MISSING` | the quote is nowhere in the corpus | the fixture is wrong |
 | `SPLIT` | present, but no single chunk holds it whole | chunk size / overlap |
 
-Current: 48 of 51 contexts clean, 0 missing, 3 split.
+Current: 96 of 102 contexts clean, 0 missing, 6 split (the same three spans,
+each quoted by a question and its paraphrase).
 
 **`evaluator`** - retrieval. Four numbers over the same top 5, because "did the
 retriever serve the evidence?" has more than one honest answer.
 
-| metric | reads as | now |
-|---|---|---|
-| `hit@5` | one chunk held a gold span whole | **0.538** |
-| `covered@5` | the five chunks *together* held it | **0.577** |
-| `coverage@5` | mean share of a gold span the five chunks held | **0.606** |
-| `MRR` | average of 1/rank; miss counts 0 | **0.362** |
+| metric | reads as | original 26 | paraphrased 26 | all 52 |
+|---|---|---|---|---|
+| `hit@5` | one chunk held a gold span whole | 0.538 | **0.308** | 0.423 |
+| `covered@5` | the five chunks *together* held it | 0.577 | **0.346** | 0.462 |
+| `coverage@5` | mean share of a gold span the five chunks held | 0.606 | **0.387** | 0.496 |
+| `MRR` | average of 1/rank; miss counts 0 | 0.362 | **0.206** | 0.284 |
+
+**The original questions were easier than a user's.** They were drafted while
+reading the gold passage, and borrow its words. Each was paraphrased once
+(2026-10-07) with the same answer and the same gold spans: hit@5 falls from
+14/26 to 8/26 - seven families lose the hit, one gains it, exact McNemar
+p = 0.07. The questions share 41% of their longer words with the gold span on
+average, the paraphrases 35%: a modest difference, so wording leakage is part
+of the explanation and not proven to be all of it. The paraphrases were
+written by Claude, not by users. Intervals on n=26 are wide (hit@5 95% CI
+0.35-0.71 and 0.17-0.50); a paraphrase and its original are one family, so
+resample families, not questions.
 
 These score the retriever `pipeline.py` actually answers with - dense and BM25
 fused. Until 16.09 they scored dense retrieval alone, a day after the product
