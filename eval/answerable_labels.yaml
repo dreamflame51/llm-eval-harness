@@ -25,142 +25,163 @@
 #       apart from a wrong answer (a generator defect) (record 11).
 #   R5  a compound question is "yes" only when every part is right, else
 #       "partial" (record 17: CUI expansion right, the "why" half off-target).
+#   R6  faithful asks whether a claim is in the chunks, not whether it is true:
+#       a claim copied verbatim from a chunk counts as supported even when the
+#       chunk text is a PDF extraction artifact. The error then shows on the
+#       correct axis, which is where it belongs (record 1).
+#   R7  faithful checks that every span of the answer is present in the
+#       chunks (lexical grounding), not that the links between spans are
+#       right: a sentence welded from two chunk sentences, or a real quote
+#       attached to the wrong subject, is still "yes". The broken link
+#       shows on the correct axis. RAGAS and DeepEval judge claims by
+#       meaning, so on records flagged definitional: true a disagreement
+#       with them is a difference of definition, not a judge error
+#       (records 10 and 17; first labelled "no" on 10, revised for
+#       consistency).
+#   R8  a refusal that invents nothing is faithful: "yes". It still gets
+#       correct: "no" and declined: true, so honesty earns no correctness
+#       credit (records 11, 12, 16, 21).
 
 - question: "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?"
   correct: partial
-  faithful: null
-  note: all seven named, numbered in the wrong order with PREPARE last (R1)
+  faithful: "yes"
+  note: "all seven named, numbered in the wrong order with PREPARE last (R1). The order is copied verbatim from chunk 1, where pypdf flattened the RMF circle diagram into one line; chunk 2 says Prepare comes first (R6)"
 
 - question: "What is a common control according to SP 800-37 Revision 2?"
   correct: partial
-  faithful: null
-  note: core idea (inherited by systems) right, providers missing; then says the definition is missing (R2)
+  faithful: "yes"
+  note: "core idea (inherited by systems) right, providers missing; then says the definition is missing (R2). Faithful: both claims check out; the definition sentence is in none of the five chunks"
 
 
 - question: "What is the difference between a common control and a hybrid control in the RMF?"
   correct: "yes"
-  faithful: null
-  note: both halves of the reference present, hybrid as partially inherited
+  faithful: "yes"
+  note: "both halves of the reference present, hybrid as partially inherited. Faithful: every claim near-verbatim in chunks 3-4"
 
 - question: "What is the purpose of the Prepare step in the RMF?"
   correct: "yes"
-  faithful: null
-  note: context and priorities, organization and system level - matches the reference
+  faithful: "yes"
+  note: "context and priorities, organization and system level - matches the reference. Faithful: both claims verbatim in chunks 4-5"
 
 - question: "What key artifacts are included in an authorization package under SP 800-37r2?"
   correct: "no"
-  faithful: null
-  note: names none of the three reference artifacts; answers the format of the package, not its contents (R3)
+  faithful: "yes"
+  note: "names none of the three reference artifacts; answers the format of the package, not its contents (R3). Faithful: the one claim verbatim in chunk 4 - wrong answer, faithful answer"
 
 
 - question: "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?"
   correct: "yes"
-  faithful: null
-  note: all four, in order
+  faithful: "yes"
+  note: "all four, in order. Faithful: all four step labels in chunk 1, in order"
 
 - question: "What are the four components of the overall risk management process in SP 800-30r1?"
   correct: "yes"
-  faithful: null
-  note: all four, in order
+  faithful: "yes"
+  note: "all four, in order. Faithful: verbatim list in chunk 1"
 
 - question: "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?"
   correct: "yes"
-  faithful: null
-  note: all three tiers, correctly numbered
+  faithful: "yes"
+  note: "all three tiers, correctly numbered. Faithful: one sentence in chunk 1 covers it"
 
 - question: "What risk factors are considered when conducting a risk assessment per SP 800-30?"
   correct: "yes"
-  faithful: null
-  note: all four factors; order irrelevant for a list of factors (R1 is about process steps). Both libraries scored faithfulness 0.00 - check in pass 2
+  faithful: "yes"
+  note: "all four factors; order irrelevant for a list of factors (R1 is about process steps). Both libraries scored faithfulness 0.00 - check in pass 2. Faithful: footnote in chunk 2 lists all four factors, impact first - both libraries scored 0.00, both wrong"
 
 - question: "What is the purpose of the risk framing component of the risk management process?"
   correct: "yes"
-  faithful: null
-  note: reference nearly verbatim, plus one extra clause. DeepEval faithfulness 0.00, RAGAS 1.00 - check in pass 2
+  faithful: "yes"
+  definitional: true
+  note: "reference nearly verbatim, plus one extra clause. DeepEval faithfulness 0.00, RAGAS 1.00 - check in pass 2. Faithful: main claim verbatim in chunk 1; the tail is welded on from an unrelated sentence opening chunk 2 (risk-model coverage), so it is attributed to risk framing (R7)"
 
 - question: "What is the primary purpose of NIST SP 800-53A Revision 5?"
   correct: "no"
   declined: true
-  faithful: null
-  note: pure refusal; retrieval served none of the gold span (coverage@5 0), so declining was the right behaviour (R4)
+  faithful: "yes"
+  note: "pure refusal; retrieval served none of the gold span (coverage@5 0), so declining was the right behaviour (R4). Faithful - refusal invents nothing (R8)"
 
 
 - question: "Name the three primary assessment methods defined in SP 800-53A."
   correct: "no"
   declined: true
-  faithful: null
-  note: says the context does not name the three methods; honest refusal, names none (R4)
+  faithful: "yes"
+  note: "says the context does not name the three methods; honest refusal, names none (R4). Faithful - refusal; its side claims (three methods, Appendix C) are in the chunks, the names appear only as table labels (R8)"
 
 - question: "What does the Examine assessment method involve?"
   correct: "yes"
-  faithful: null
-  note: reference nearly verbatim
+  faithful: "yes"
+  note: "reference nearly verbatim. Faithful: verbatim in chunk 3"
 
 - question: "What is the difference between the Examine and Test assessment methods in SP 800-53A?"
   correct: "yes"
-  faithful: null
-  note: both definitions nearly verbatim
+  faithful: "yes"
+  note: "both definitions nearly verbatim. Faithful: both definitions verbatim in chunk 3"
 
 - question: "How do the depth and coverage attributes of assessment methods affect the assessment?"
   correct: "yes"
-  faithful: null
-  note: covers the reference and adds detail (basic/focused/comprehensive, assurance) - extra detail checked in pass 2
+  faithful: "yes"
+  note: "covers the reference and adds detail (basic/focused/comprehensive, assurance) - extra detail checked in pass 2. Faithful: all ten claims in chunks 1, 2, 4, 5, coverage values included"
 
 - question: "What is the purpose of NIST SP 800-171A Revision 3?"
   correct: "no"
   declined: true
-  faithful: null
-  note: pure refusal (R4)
+  faithful: "yes"
+  note: "pure refusal (R4). Faithful - refusal invents nothing (R8)"
 
 - question: "What does CUI stand for and why is its protection important according to SP 800-171Ar3?"
   correct: partial
-  faithful: null
-  note: expansion right; "why important" answers why defining information types matters, not why protecting CUI does (R5)
+  faithful: "yes"
+  definitional: true
+  note: "expansion right; \"why important\" answers why defining information types matters, not why protecting CUI does (R5). Faithful: the quote is verbatim (chunk 5) but its subject is the NARA registry, not CUI protection; yes under R7 (lexical grounding)"
 
 
 - question: "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?"
   correct: partial
-  faithful: null
-  note: the core (organizations set the level of rigor) present; depth/coverage and who assesses missing. First labelled "no", changed for consistency with R2/R3
+  faithful: "yes"
+  note: "the core (organizations set the level of rigor) present; depth/coverage and who assesses missing. First labelled \"no\", changed for consistency with R2/R3. Faithful - one claim, near-verbatim in chunk 1"
 
 - question: "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?"
   correct: partial
-  faithful: null
+  faithful: "yes"
   borderline: true
-  note: reference says the procedures are derived from 800-53A; the answer says 800-53A is a source of further guidance - a related but different relation. Could be "no" under R3; re-label in a week
+  note: "reference says the procedures are derived from 800-53A; the answer says 800-53A is a source of further guidance - a related but different relation. Could be \"no\" under R3; re-label in a week. Faithful - both parts in chunks 2 and 5, near-verbatim"
 
 - question: "How many security requirement families are defined in SP 800-171Ar3, and name them?"
   correct: partial
-  faithful: null
-  note: count 17 right; list stops at 13 items mid-word ("Identity") - the answer is truncated in the frozen file itself, a generation defect (token or context limit) (R5)
+  faithful: "yes"
+  note: "count 17 right; list stops at 13 items on 'Identity'. Not a token limit, as first written here: chunk 1 holds the same 13 family names in the same order and is itself cut at 'Identi' by the chunk boundary - the model copied the list as far as the chunk went (R5). Faithful - number and all 13 names in chunk 1"
 
 - question: "What is the scope of NIST SP 800-78-5?"
   correct: "no"
   declined: true
-  faithful: null
-  note: pure refusal; one of the two questions no retriever configuration finds (lessons #29) (R4)
+  faithful: "yes"
+  note: "pure refusal; one of the two questions no retriever configuration finds (lessons #29) (R4). Faithful - refusal invents nothing (R8)"
 
 - question: "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?"
   correct: "yes"
-  faithful: null
-  note: FIPS 201-3, plus life-cycle detail
+  faithful: "yes"
+  note: "FIPS 201-3, plus life-cycle detail. Faithful - verbatim in the abstract, chunk 1"
 
 - question: "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?"
   correct: "yes"
-  faithful: null
-  note: 65537
+  faithful: "yes"
+  note: "65537. Faithful - verbatim in chunk 1"
 
 - question: "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?"
   correct: "yes"
-  faithful: null
-  note: matches the reference exactly
+  faithful: "yes"
+  note: "matches the reference exactly. Faithful - the through-2030 column of a flattened table in chunk 1, read correctly"
 
 - question: "What elliptic curves are recommended for PIV keys in SP 800-78-5?"
   correct: "yes"
-  faithful: null
-  note: P-256 and P-384
+  faithful: "yes"
+  note: "P-256 and P-384. Faithful - verbatim list in chunk 1"
 
 - question: "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
   correct: partial
-  faithful: null
-  note: the link (800-53A guides the Assess step) is there; what Assess determines and the three methods are missing
+  faithful: "yes"
+  note: "the link (800-53A guides the Assess step) is there; what Assess determines and the three methods are missing. Faithful - all three claims near-verbatim in chunks 1-2"
+
+
+
