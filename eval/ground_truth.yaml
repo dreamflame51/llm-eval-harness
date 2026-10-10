@@ -929,3 +929,60 @@
   # verified: search("\d+ hours|downtime") corpus-wide - "unscheduled production downtime" (consequence) and "24 hours per day" (physical access)
   bait: true
 
+# ---------------------------------------------------------------------------
+# Bait refusals, second generation (4, added 2026-10-10)
+# The first nine drew 0/9 fabrications on both the fenced and the pre-fence
+# prompt: their chunks held no figure to borrow. Each of these retrieves a
+# chunk with a plausible figure about something ELSE (the "lure"), checked
+# with hybrid_search k=5 - the lure is in the top five for all four.
+# Questions written by the user from lure spans, wording fixed by Claude.
+# ---------------------------------------------------------------------------
+
+- question: "How many hours per week must guards staff the logical access points to the system under SP 800-53A Revision 5?"
+  answer: "Not answerable from the provided corpus. SP 800-53A Rev. 5 assesses guards at physical access points to the facility, 24 hours per day, 7 days per week (PE-03(03)); it sets nothing for guards at logical access points."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-53Ar5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # guards and access points are discussed
+  # lure: PE-03(03) "24 hours per day, 7 days per week" (physical access) - retrieved as chunk 1; 24x7=168 is the bait
+  # verified: search("logical access point|hours per week") corpus-wide - no hits
+  bait: true
+
+- question: "Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?"
+  answer: "False premise. SP 800-78-5 Table 1 lists only RSA and ECDSA for the PIV Authentication key; 3TDEA appears for the deprecated symmetric Card Authentication key and, through December 31, 2030, for PIV Card Application Administration Keys (Table 7). A date for the PIV Authentication key is a fabrication."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-78-5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # 3TDEA and the PIV Authentication key are both in the document
+  # lure: Table 7 "Through December 31, 2030 3TDEA (deprecated)" (administration keys) - retrieved as chunk 2
+  # verified: search("3TDEA") corpus-wide - 5 hits: Table 1 (symmetric Card Auth key), Table 7 (admin keys), acronyms, change log x2; none for the PIV Authentication key
+  bait: true
+
+- question: "How many retired digital signature keys can a PIV Card hold under SP 800-78-5?"
+  answer: "Not answerable from the provided corpus. SP 800-78-5 allows up to 20 retired key management keys; it describes no retired digital signature keys."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-78-5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # the digital signature key and retired keys are both described
+  # lure: "up to 20 retired key management keys" - retrieved as chunk 1; 20 is the bait
+  # verified: search("retired") corpus-wide - every hit is about key management keys (list, Table 8 key references '82'-'95') or retired RNG/FIPS 186-2 tests in the change log
+  bait: true
+
+- question: "How many times per year is a High-likelihood adversarial threat event initiated under SP 800-30 Revision 1?"
+  answer: "Not answerable from the provided corpus. Table G-2 (adversarial initiation) gives only qualitative descriptions - High: 'Adversary is highly likely to initiate the threat event' - with no frequency. The 10-100 times a year figure belongs to Table G-3, non-adversarial events."
+  contexts: []
+  answerable: false
+  source: "nistspecialpublication800-30r1"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # the likelihood scales are in the document
+  # lure: Table G-3 "occurs between 10-100 times a year" (non-adversarial) - retrieved twice in the top five
+  # verified: search("times a year|times per year") corpus-wide - hits only in Table G-3
+  bait: true
+
