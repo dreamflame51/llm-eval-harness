@@ -477,7 +477,7 @@
   # verified: search("minutiae|iris|facial image") — zero hits corpus-wide; "fingerprint" appears once, in passing
 
 - question: "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?"
-  answer: "Not answerable from the provided corpus. SP 800-73 is not among the source documents, although SP 800-78-5 cites it as the interface specification."
+  answer: "Only the first half is answerable. SP 800-78-5 (sec. 6) states that SP 800-73 defines the PIV Client Application Programming Interface (Part 3) and the PIV Card Application Card Command Interface (Part 2). Which interface is used for contactless authentication is not in the corpus: SP 800-73 is not among the source documents. A correct answer names both interfaces and declines the second half."
   contexts: []
   answerable: false
   source: "out-of-corpus"
@@ -485,6 +485,11 @@
   page: null
   topic_in_corpus: true   # "800-73" cited 23x in SP 800-78-5; "contactless" appears there once
   # verified: SP 800-73 is not among the five source PDFs
+  # verified 2026-10-10: the one "contactless" hit (SP 800-78-5) says CMVP scope covers "both contact and
+  #   contactless interfaces" - physical interfaces, not which SP 800-73 interface serves contactless auth.
+  # corrected 2026-10-10: the gold answer called the whole question unanswerable, but the first half is
+  #   answered by SP 800-78-5 sec. 6. Kept as a refusal record so recorded answer sets still join on the
+  #   question; the second half is what it tests (docs/lessons.md #16, #31).
 
 - question: "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?"
   answer: "Not answerable from the provided corpus. FIPS 201-3 is not among the source documents. SP 800-78-5 names identity proofing as one of the life-cycle activities FIPS 201-3 governs, but does not state its requirements."
