@@ -5,6 +5,7 @@ import pytest
 from llm_eval_harness.dataset import (
     REFUSAL_TYPES,
     answerable_records,
+    hand_clean,
     library_scores,
     load_ground_truth,
     refusal_answers,
@@ -140,6 +141,31 @@ def test_rejects_a_label_that_is_not_a_boolean(tmp_path):
     )
     with pytest.raises(TypeError):
         refusal_answers(answers(tmp_path, body))
+
+
+def test_rejects_a_misdirected_label_that_is_not_a_boolean(tmp_path):
+    body = (
+        '- question: "a"\n  answer: "b"\n  retrieved: [{text: "c"}]\n'
+        '  labels: {refused: true, fabricated: false, misdirected: "yes"}\n'
+    )
+    with pytest.raises(TypeError):
+        refusal_answers(answers(tmp_path, body))
+
+
+def test_the_current_set_is_labelled_on_all_three_axes():
+    # The archives under eval/ predate the third axis and may omit it; the set
+    # the numbers are reported from may not, or a misdirected answer would be
+    # counted clean by default.
+    for rec in refusal_answers():
+        assert rec["labels"].get("misdirected") in (True, False), rec["question"]
+
+
+def test_a_misdirected_answer_is_not_clean_even_when_it_passes_both_other_axes():
+    assert hand_clean({"refused": True, "fabricated": False, "misdirected": True}) is False
+    assert hand_clean({"refused": True, "fabricated": False, "misdirected": False}) is True
+    # sets recorded before the axis existed are read on two axes
+    assert hand_clean({"refused": True, "fabricated": False}) is True
+    assert hand_clean({"refused": None, "fabricated": False}) is None
 
 
 def test_rejects_a_recorded_answer_without_labels(tmp_path):

@@ -27,7 +27,7 @@ from xml.etree import ElementTree
 
 import yaml
 
-from llm_eval_harness.dataset import library_scores, refusal_answers
+from llm_eval_harness.dataset import hand_clean, library_scores, refusal_answers
 from llm_eval_harness.judge import decided_records
 from llm_eval_harness.refusal import looks_like_refusal
 
@@ -81,8 +81,7 @@ def recordings(model="qwen3:8b"):
                     "clean": None if refused is None or fabricated is None
                     else (refused and not fabricated),
                     "phrase": looks_like_refusal(record["answer"]),
-                    "hand": None if record["labels"]["refused"] is None
-                    else (record["labels"]["refused"] and not record["labels"]["fabricated"]),
+                    "hand": hand_clean(record["labels"]),
                 }
                 for record, refused, fabricated in rows
             },

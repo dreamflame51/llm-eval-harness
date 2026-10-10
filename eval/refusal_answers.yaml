@@ -35,6 +35,18 @@
 # refused=true with fabricated=true: declined, then invented anyway. The phrase
 # list in refusal.py cannot see that case at all, which is why this set exists.
 #
+#   misdirected (added 10.10, docs/lessons.md #32) does the answer present a
+#               fact about a neighbouring object as the answer to the one
+#               asked, without saying the asked one is not covered? Naming the
+#               mismatch ("20 retired key management keys, nothing on digital
+#               signature keys") is not misdirected.
+#
+#               Labelled by Claude on 10.10, not by the rater: the rule and the
+#               four boundary records (10, 11, 23, 24) were agreed with the
+#               rater, the other 21 were applied by Claude. True on 10 and 23.
+#               A record is clean only if refused, not fabricated and not
+#               misdirected.
+#
 # Leave note free-form; it is where a case that resists both flags gets
 # described.
 
@@ -50,6 +62,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
     distance: 0.4412
@@ -125,6 +138,7 @@
     refused: true
     fabricated: false
     note: "Rater disagreement: the 2026-09-16 label was fabricated=true for an answer whose extra clause (volatile or critical controls assessed more often) is verbatim in chunk 4 - most likely a labelling error then, not a model change. Retrieval identical in both sets."
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
     distance: 0.3924
@@ -196,6 +210,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-171Ar3
     distance: 0.515
@@ -267,6 +282,7 @@
     refused: true
     fabricated: false
     note: "The chunks list AES-128/192/256 for PIV keys (SP 800-78-5), but nothing ties them to FIPS 197, so declining is the right call rather than a missed answer."
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.3904
@@ -342,6 +358,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
     distance: 0.409
@@ -415,6 +432,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.4046
@@ -488,6 +506,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-171Ar3
     distance: 0.3232
@@ -559,6 +578,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.4409
@@ -631,6 +651,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.3777
@@ -701,6 +722,7 @@
     refused: false
     fabricated: false
     note: "No explicit refusal: answers with CBEFF from chunk 4, which lists signed biometrics among objects specified in FIPS 201-3, SP 800-73 and SP 800-76. Partial, and the attribution to SP 800-76 is only by implication, but supported. Rater disagreement: the 2026-09-16 label for a near-identical answer was fabricated=true (signature packaging, not a data format); relabelled 2026-10-10 as a supported partial answer."
+    misdirected: true
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.2677
@@ -778,6 +800,7 @@
     refused: true
     fabricated: false
     note: "Partial refusal: first half answered from chunk 1 (SP 800-78-5 sec. 6 names both interfaces), second half (contactless) correctly declined. Labelled refused=true because the part the corpus lacks was declined. The gold answer calls the whole question unanswerable; the first half is answerable, so the record is half-defective (cf. lesson #16)."
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.3666
@@ -852,6 +875,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.2065
@@ -925,6 +949,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
     distance: 0.4255
@@ -997,6 +1022,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.3981
@@ -1072,6 +1098,7 @@
     refused: true
     fabricated: false
     note: "'must retain' strengthens the chunk's descriptive 'retain'; judged not fabricated - the modal shift does not add a fact the question asked about."
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.4188
@@ -1144,6 +1171,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
     distance: 0.4689
@@ -1215,6 +1243,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.4347
@@ -1285,6 +1314,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.4066
@@ -1357,6 +1387,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.4629
@@ -1430,6 +1461,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.4312
@@ -1501,6 +1533,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
     distance: 0.3798
@@ -1571,6 +1604,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-53Ar5
     distance: 0.4025
@@ -1643,6 +1677,7 @@
     refused: false
     fabricated: false
     note: "Misdirection: answers with a true, correctly attributed fact about a different key (Table 7, administration key) instead of rejecting the false premise. Not fabricated under the rubric (cf. record 10); a third failure shape the two axes do not capture."
+    misdirected: true
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.4059
@@ -1713,6 +1748,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.3257
@@ -1788,6 +1824,7 @@
     refused: true
     fabricated: false
     note: ''
+    misdirected: false
   retrieved:
   - source: nistspecialpublication800-30r1
     distance: 0.3471

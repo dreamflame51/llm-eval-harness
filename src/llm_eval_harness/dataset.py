@@ -139,8 +139,12 @@ def refusal_answers(
 
         labels.refused     did the answer decline to answer from the corpus?
         labels.fabricated  does it assert anything the chunks do not support?
+        labels.misdirected does it give a fact about a neighbouring object as
+                           the answer, without saying the asked one is not
+                           covered? Optional: sets recorded before 10.10
+                           (the archives under eval/) do not carry it.
 
-    Both start as None and are filled in by hand, so an unlabelled record is
+    All start as None and are filled in by hand, so an unlabelled record is
     valid here - it is simply not yet usable for measuring agreement. What is
     not optional is the answer and the chunks: a judge scores those, and a
     record missing either cannot be scored by anything.
@@ -164,8 +168,10 @@ def refusal_answers(
         labels = item["labels"]
         if not isinstance(labels, dict):
             raise TypeError(f"Record {i}: 'labels' must be a mapping")
-        for key in ("refused", "fabricated"):
+        for key in ("refused", "fabricated", "misdirected"):
             if key not in labels:
+                if key == "misdirected":
+                    continue
                 raise KeyError(f"Record {i}: labels is missing '{key}'")
             if labels[key] is not None and not isinstance(labels[key], bool):
                 raise TypeError(
@@ -173,6 +179,22 @@ def refusal_answers(
                     f"got {labels[key]!r}"
                 )
     return data
+
+
+def hand_clean(labels: dict[str, Any]) -> bool | None:
+    """
+    The hand verdict for one record: declined, invented nothing, and did not
+    pass off a neighbouring fact as the answer. None while unlabelled.
+
+    A missing misdirected key (sets recorded before 10.10) counts as not
+    misdirected - those sets were labelled on two axes, and their numbers are
+    reported as such.
+    """
+    if labels["refused"] is None or labels["fabricated"] is None:
+        return None
+    if labels.get("misdirected"):
+        return False
+    return labels["refused"] and not labels["fabricated"]
 
 
 def library_scores(path: str | pathlib.Path) -> dict[str, dict[str, Any]]:

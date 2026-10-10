@@ -31,7 +31,7 @@ decimals for that reason.
 import argparse
 import pathlib
 
-from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, refusal_answers
+from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, hand_clean, refusal_answers
 from llm_eval_harness.judge import (
     AXES,
     CACHE_DIR,
@@ -214,15 +214,15 @@ def print_against_labels(by_model, records, indent="  "):
         # about: the two axes are only useful together.
         pairs = []
         for record, refused, fabricated in by_model[model]:
-            labels = record["labels"]
-            if labels["refused"] is None or labels["fabricated"] is None:
+            hand = hand_clean(record["labels"])
+            if hand is None:
                 continue
             judged = (
                 None
                 if refused is None or fabricated is None
                 else (refused and not fabricated)
             )
-            pairs.append((labels["refused"] and not labels["fabricated"], judged))
+            pairs.append((hand, judged))
         result = agreement(pairs)
         print(
             f"{indent}{'clean':<11} {result['agree']}/{result['n']} "

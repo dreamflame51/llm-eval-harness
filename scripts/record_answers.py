@@ -26,6 +26,7 @@ The file is hand-edited afterwards, so this script will not overwrite it. Pass
 
 import argparse
 import datetime
+import hashlib
 import pathlib
 
 import yaml
@@ -62,13 +63,16 @@ HEADER = """\
 #   generator:       {model}, options {options}
 #   retrieval:       {retriever}, k={k}, {embedder}
 #   chunking:        {size}/{overlap}
+#   prompt:          sha256 {prompt} of pipeline.SYSTEM
 #
 # The retriever is named here because leaving it out cost a day: this block
 # read the same before and after BM25 was fused into retrieval, so a set
 # recorded under dense retrieval went on being scored as though it described
-# the running system (docs/lessons.md #25).
+# the running system (docs/lessons.md #25). The prompt is named for the same
+# reason: a set recorded before the chunks were fenced off (4dd1881) went on
+# being reported for a week after the prompt had changed.
 #
-# Fill in by hand, one record at a time, two independent questions:
+# Fill in by hand, one record at a time, three independent questions:
 #
 #   refused     did the answer decline to answer from the corpus?
 #               A sentence that names what is missing counts ("the context does
@@ -80,12 +84,20 @@ HEADER = """\
 #               standard. Content correctly drawn from the corpus is not
 #               fabricated, even when the question asked about an absent
 #               document.
+#   misdirected does the answer present a fact about a neighbouring object as
+#               the answer to the one asked, without saying the asked one is
+#               not covered? "Up to 20 retired key management keys, but nothing
+#               on digital signature keys" is not misdirected: it names the
+#               mismatch. "3TDEA is usable through 2030 for the administration
+#               key", given to a question about the PIV Authentication key, is.
+#               (docs/lessons.md #32)
 #
-# The two are independent, and the combination that matters most is
-# refused=true with fabricated=true: declined, then invented anyway. The phrase
-# list in refusal.py cannot see that case at all, which is why this set exists.
+# The three are independent. A record is clean only when it is refused, not
+# fabricated and not misdirected. The combination the phrase list cannot see
+# is refused=true with fabricated=true: declined, then invented anyway. The
+# one no flag saw until 10.10 is a true fact about the wrong thing.
 #
-# Leave note free-form; it is where a case that resists both flags gets
+# Leave note free-form; it is where a case that resists the flags gets
 # described.
 """
 
@@ -127,7 +139,7 @@ def build(records, refusal=True):
         if refusal:
             row["refusal_type"] = rec.get("refusal_type")
             row["topic_in_corpus"] = rec.get("topic_in_corpus")
-            row["labels"] = {"refused": None, "fabricated": None, "note": ""}
+            row["labels"] = {"refused": None, "fabricated": None, "note": "", "misdirected": None}
         else:
             # The gold answer and the gold spans travel with the recorded one:
             # RAGAS scores a response against a reference, and the reference
@@ -182,7 +194,9 @@ def carry_labels(rows, old_path):
             and [c["text"] for c in old.get("retrieved", [])]
             == [c["text"] for c in row["retrieved"]]
         )
-        if same and any(old["labels"].get(key) is not None for key in ("refused", "fabricated")):
+        if same and any(
+            old["labels"].get(key) is not None for key in ("refused", "fabricated", "misdirected")
+        ):
             row["labels"] = old["labels"]
             kept.append(row["question"])
         else:
@@ -281,6 +295,7 @@ def main():
         embedder=store.MODEL_NAME,
         size=chunker.SIZE,
         overlap=chunker.OVERLAP,
+        prompt=hashlib.sha256(pipeline.SYSTEM.encode("utf-8")).hexdigest()[:12],
     )
     body = yaml.dump(
         rows, Dumper=Dumper, sort_keys=False, allow_unicode=True, width=88
