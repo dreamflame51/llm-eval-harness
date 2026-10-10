@@ -65,7 +65,7 @@ anything.**
 | A fixture that stopped describing the system | [25](#25), [26](#26) |
 | The comparison that was not a comparison | [27](#27) |
 | The number moved, the explanation was invented | [29](#29) |
-| What a metric cannot see by construction | [30](#30) |
+| What a metric cannot see by construction | [30](#30), [32](#32) |
 
 ---
 
@@ -1625,3 +1625,60 @@ moved on the same axis the judges failed on, and by as much. When the positive
 class is two records, ground truth is two opinions. Before quoting a judge's
 agreement with hand labels, re-label a sample after a gap, without looking at
 the old labels, and report the self-agreement next to the judge's.
+
+---
+
+<a id="32"></a>
+
+## 32. Thirteen provocations, and the failure was not the one they provoked
+
+**Symptom.** After [#31](#31) the `fabricated` axis had no real positives, so
+bait questions were written to produce some: the topic in the corpus, the
+figure not. Nine of them, predicted to draw four or five inventions, drew
+none. Recorded again on the prompt from before the fence (`4dd1881`), with the
+same chunks: none again, against a prediction of two. The fence was not why.
+
+**Diagnosis.** Read as a population, the nine had one thing in common: the
+retrieved chunks carried no figure at all. Declining is the easiest thing a
+model can do when there is nothing to borrow.
+
+So four more were written from spans that do carry a figure - about something
+else. Each lure was checked to be in the top five chunks for its question:
+
+| question asks | lure in the chunks | answer |
+|---|---|---|
+| guard hours at *logical* access points | 24 hours, 7 days - *physical* access | declined |
+| 3TDEA end date for the PIV Authentication key | 3TDEA through 31.12.2030 - *administration* keys | **the date, attributed to administration keys** |
+| retired *digital signature* keys | up to 20 retired *key management* keys | quoted 20 for key management, declined the rest |
+| frequency of *adversarial* High events | 10-100 times a year - *non-adversarial* table | quoted the qualitative scale, declined |
+
+None borrowed a figure: 0/13 across both generations. The one that went wrong
+did not invent anything. It answered a false-premise question with a true,
+correctly attributed fact about a neighbouring object, and never said the
+premise was false. By the rubric that is `refused=false, fabricated=false` -
+the same call as the CBEFF record ([#31](#31)), and for the same reason.
+
+That shape is not new here. The only refusal failure ever recorded on the
+dense set was AES: asked about FIPS 197, absent from the corpus, the model
+answered from SP 800-78-5's list of AES key sizes. CBEFF for SP 800-76, AES for
+FIPS 197, the administration-key date for the PIV Authentication key - three
+answers, each true, each about the wrong thing.
+
+**What it says about the instrument.** The rubric has two axes because two
+failures were feared when it was written: a model that answers when it should
+decline, and one that invents. The model on this corpus does neither under
+provocation. What it does is substitute the question. Both local judges agree
+with the human on the 3TDEA answer on both axes - not refused, not fabricated -
+and neither axis says what is wrong with it. An axis that does not exist cannot
+disagree.
+
+**Treatment.** None yet. The candidate is a third axis, `misdirected` - the
+answer is about a different object than the one asked - and baits built on
+false premises, which is the shape that drew it.
+
+**Lesson.** **A rubric names the failures someone expected; the model's own
+failure may be a third one.** Two axes and five judges were built and validated
+around invention, and the model under test does not invent. Thirteen
+provocations aimed at the feared failure surfaced the actual one by accident.
+Before designing the axes, collect the failures the system really produces -
+including the ones that score as passes.
