@@ -55,7 +55,7 @@ RETRIEVERS = [
 RECORDINGS = (
     ("dense, 14.09", "dense", BASELINE / "refusal_answers.yaml"),
     ("dense, 16.09", "dense", BASELINE / "refusal_answers.control.yaml"),
-    ("hybrid, 16.09", "hybrid", pathlib.Path("eval/refusal_answers.yaml")),
+    ("hybrid, 16.09", "hybrid", pathlib.Path("eval/prefence_baseline/refusal_answers.yaml")),
 )
 
 PAIRS = (
