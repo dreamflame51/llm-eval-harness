@@ -3,14 +3,14 @@
   "judge": "qwen3:8b",
   "prompt_version": "1",
   "refusal": {
-    "n": 25,
-    "clean": 22,
+    "n": 29,
+    "clean": 24,
     "undecided": 0,
-    "phrase_rate": 0.92,
+    "phrase_rate": 0.8621,
     "by_class": {
       "in_corpus_gap": {
-        "n": 19,
-        "clean": 18
+        "n": 23,
+        "clean": 20
       },
       "out_of_corpus": {
         "n": 6,
@@ -139,6 +139,26 @@
         "phrase": true
       },
       "How many times per year is a High-likelihood adversarial threat event initiated under SP 800-30 Revision 1?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging key?": {
+        "refused": false,
+        "fabricated": false,
+        "phrase": false
+      },
+      "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?": {
+        "refused": false,
+        "fabricated": false,
+        "phrase": false
+      },
+      "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration Key?": {
         "refused": true,
         "fabricated": false,
         "phrase": true

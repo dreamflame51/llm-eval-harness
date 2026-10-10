@@ -194,6 +194,23 @@
       "unsupported_claim": ""
     }
   },
+  "0eccc5936c013a20": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:18:21+00:00",
+    "latency_s": 3.73,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?",
+    "raw": "{\"evidence\": \"no elliptic curve is specified for this key\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "no elliptic curve is specified for this key",
+      "ok": true,
+      "refused": false
+    }
+  },
   "10b39653aa941cf9": {
     "axis": "fabricated",
     "judged": "2026-09-16T14:39:13+00:00",
@@ -243,6 +260,22 @@
       "refused": false
     }
   },
+  "122205fd78fc06b7": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:18:43+00:00",
+    "latency_s": 3.5,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration Key?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "14b4048a62a0cbaa": {
     "axis": "refused",
     "judged": "2026-09-16T15:21:45+00:00",
@@ -275,6 +308,23 @@
       "evidence": "The provided documents do not specify how many hours per week guards must staff the logical access points to the system under SP 800-53 Revision 5.",
       "ok": true,
       "refused": true
+    }
+  },
+  "1cad461ecc940568": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:18:13+00:00",
+    "latency_s": 14.05,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging key?",
+    "raw": "{\"evidence\": \"\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "",
+      "ok": true,
+      "refused": false
     }
   },
   "1e02835b299fd826": {
@@ -492,6 +542,22 @@
       "refused": true
     }
   },
+  "39064db421ef23a4": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:18:17+00:00",
+    "latency_s": 4.3,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging key?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "3f46bf7006983d5f": {
     "axis": "refused",
     "judged": "2026-09-16T14:38:17+00:00",
@@ -507,6 +573,22 @@
       "evidence": "The required minimum assessment frequency for continuous monitoring of common controls is missing.",
       "ok": true,
       "refused": true
+    }
+  },
+  "3faeb5fcad69ef10": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:18:25+00:00",
+    "latency_s": 3.82,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
     }
   },
   "400f3f3405b7b293": {
@@ -1197,6 +1279,22 @@
       "refused": true
     }
   },
+  "a87a0efc2d1d6b67": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:18:34+00:00",
+    "latency_s": 3.83,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "adfebb769069a953": {
     "axis": "refused",
     "judged": "2026-09-14T16:15:26+00:00",
@@ -1443,6 +1541,23 @@
       "answered_anyway": false,
       "error": null,
       "evidence": "Answer is missing",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "c5f27646a2c7731a": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:18:30+00:00",
+    "latency_s": 5.55,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?",
+    "raw": "{\"evidence\": \"The semi-quantitative value range for a \\\"Critical likelihood level\\\" is not provided in the context.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The semi-quantitative value range for a \"Critical likelihood level\" is not provided in the context.",
       "ok": true,
       "refused": true
     }
@@ -1972,6 +2087,23 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "f34e848490d86d41": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:18:39+00:00",
+    "latency_s": 5.11,
+    "mode": "nothink/schema",
+    "model": "qwen3:8b",
+    "prompt_version": "1",
+    "question": "Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration Key?",
+    "raw": "{\"evidence\": \"The provided documents do not specify which elliptic curve is required for the PIV Card Application Administration Key.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not specify which elliptic curve is required for the PIV Card Application Administration Key.",
+      "ok": true,
+      "refused": true
     }
   },
   "f5ad6553eab2a31d": {

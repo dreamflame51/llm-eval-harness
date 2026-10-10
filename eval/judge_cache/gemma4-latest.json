@@ -1,4 +1,21 @@
 {
+  "00ace2c0535c8caf": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:19:03+00:00",
+    "latency_s": 19.83,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging key?",
+    "raw": "{\"evidence\": \"\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "",
+      "ok": true,
+      "refused": false
+    }
+  },
   "01fd365a34d1e90d": {
     "axis": "refused",
     "judged": "2026-10-10T08:17:41+00:00",
@@ -364,6 +381,22 @@
       "unsupported_claim": ""
     }
   },
+  "44ead7d68f84c380": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:21:49+00:00",
+    "latency_s": 43.55,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "48a3f03eeabb4c82": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:23:33+00:00",
@@ -378,6 +411,23 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "48f16bdf85db9a6e": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:21:53+00:00",
+    "latency_s": 3.99,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration Key?",
+    "raw": "{\"evidence\": \"The provided documents do not specify which elliptic curve is required for the PIV Card Application Administration Key.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not specify which elliptic curve is required for the PIV Card Application Administration Key.",
+      "ok": true,
+      "refused": true
     }
   },
   "4cac4db85f9e18f1": {
@@ -544,6 +594,23 @@
       "unsupported_claim": ""
     }
   },
+  "629c9ee2550552cc": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:21:05+00:00",
+    "latency_s": 3.85,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?",
+    "raw": "{\"evidence\": \"The semi-quantitative value range for a \\\"Critical likelihood level\\\" is not provided in the context.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The semi-quantitative value range for a \"Critical likelihood level\" is not provided in the context.",
+      "ok": true,
+      "refused": true
+    }
+  },
   "640a9d6f00b66abc": {
     "axis": "refused",
     "judged": "2026-09-16T14:43:23+00:00",
@@ -586,6 +653,22 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What percentage of controls must be tested every year under SP 800-53A Revision 5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "68e34de46897beb4": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:21:01+00:00",
+    "latency_s": 45.04,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -675,6 +758,23 @@
       "evidence": "The provided documents do not state how many days an organization has to remediate a high-severity assessment finding under SP 800-37r2.",
       "ok": true,
       "refused": true
+    }
+  },
+  "739b6dd6883f8776": {
+    "axis": "refused",
+    "judged": "2026-10-10T12:20:16+00:00",
+    "latency_s": 3.15,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?",
+    "raw": "{\"evidence\": \"no elliptic curve is specified for this key.\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "no elliptic curve is specified for this key.",
+      "ok": true,
+      "refused": false
     }
   },
   "778d96324237c382": {
@@ -1102,6 +1202,22 @@
       "unsupported_claim": ""
     }
   },
+  "b4c9d079b494e6b7": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:22:44+00:00",
+    "latency_s": 51.09,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration Key?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "b4e8defb370aca4b": {
     "axis": "refused",
     "judged": "2026-10-10T08:27:05+00:00",
@@ -1375,6 +1491,22 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "d63921665b9d3413": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T12:20:13+00:00",
+    "latency_s": 69.98,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging key?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,

@@ -205,7 +205,7 @@ carried exactly 0).
 | `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
 | `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | 11/12 |
 | `eval/prefence_baseline/refusal_answers.yaml` | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
-| `eval/refusal_answers.yaml` (current, fenced prompt, 25 questions) | hybrid | 07.10 + 10.10 | 22/25 | 23/25 | 23/25 |
+| `eval/refusal_answers.yaml` (current, fenced prompt, 29 questions) | hybrid | 07.10 + 10.10 | 24/29 | 25/29 | 26/29 |
 
 The middle row is a control, and it is there because a comparison between two
 recordings is not a comparison between two systems: the generator rewrites most
@@ -303,38 +303,43 @@ when the model **declined and invented nothing**. Those are two separate
 questions, decided separately by an LLM judge: `refused` from the answer alone,
 `fabricated` against the five chunks the generator actually saw.
 
-| | declined, invented nothing |
+| | declined, invented nothing, not misdirected |
 |---|---|
-| hand labels | **23/25** |
-| judge, `qwen3:8b` | 22/25 |
-| phrase list (tripwire) | 23/25 |
+| hand labels | **26/29** |
+| judge, `qwen3:8b` | 24/29 |
+| phrase list (tripwire) | 25/29 |
 
-by class, by the labels: `in_corpus_gap` 18/19, `out_of_corpus` 5/6. Thirteen
-of the 25 are bait questions written to provoke an invented figure; gemma4
-invented none. The two that are not clean did not fabricate either - one
-answers SP 800-76 with CBEFF from a neighbouring document, one answers a
-false-premise 3TDEA question with a true date about a different key. That
-shape, misdirection, is on neither axis ([lessons #31](docs/lessons.md#31)).
+by class, by the labels: `in_corpus_gap` 21/23, `out_of_corpus` 5/6.
+Seventeen of the 29 are bait questions: thirteen written to provoke an
+invented figure, which gemma4 never produced, and four built on false premises.
+None of the three that are not clean fabricated. All three are **misdirected**
+- a true fact about a neighbouring object given as the answer: CBEFF for SP
+800-76, the administration-key 3TDEA date for the PIV Authentication key, and
+the RSA exponent 65537 for the Secure Messaging key, which is ECDH. The third
+axis exists for them ([lessons #32](docs/lessons.md#32)); neither judge has it
+yet.
 
-**These numbers do not move between runs.** The 25 answers are frozen in
+**These numbers do not move between runs.** The 29 answers are frozen in
 `eval/refusal_answers.yaml`, hand-labelled, and the judge's verdicts are
 committed under `eval/judge_cache/`, so `refusal` reads them back without
 loading a model. Earlier refusal numbers in this README were samples of a
 drifting generator; these are not.
 
 **The judge is measured on one axis only.** Against the hand labels of 10.10,
-on the current 25:
+on the current 29:
 
 | axis | `qwen3:8b` | `gemma4` |
 |---|---|---|
-| `refused` | 24/25, kappa **0.78** | 18/25, kappa 0.27 |
-| `fabricated` | 24/25, kappa undefined | 25/25, kappa undefined |
+| `refused` | 27/29, kappa **0.71** | 21/29, kappa 0.32 |
+| `fabricated` | 28/29, kappa undefined | 29/29, kappa undefined |
 
 The `fabricated` row cannot be read: the hand labels hold no fabrication, so
-there is nothing for a judge to catch and kappa has no variance. `qwen3`'s one
-disagreement is a false alarm on the SP 800-73 answer, which names two
-interfaces from the corpus and declines the rest. `gemma4` misreads seven
-refusals that quote the context before declining as answers.
+there is nothing for a judge to catch and kappa has no variance. `qwen3`'s
+disagreements are the SP 800-73 answer (a false alarm on fabricated, and a
+partial refusal read as an answer) and the symmetric-key answer, which rejects
+the false premise - the human counted that as declining, the judge did not.
+`gemma4` misreads eight refusals that quote the context before declining as
+answers.
 
 Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
 against two hand-labelled fabrications, and called one of them the case the

@@ -9,6 +9,9 @@
 #   recorded:        2026-10-07 for the first 21 records, 2026-10-10 for the last 4
 #                    (second-generation baits, from refusal_answers.bait2.yaml).
 #                    Same generator, prompt (fenced, 4dd1881) and retriever.
+#                    Records 26-29 (false-premise baits) recorded 2026-10-10
+#                    into refusal_answers.bait3.yaml, prompt sha256 fc4458b5c1a7;
+#                    labelled by Claude, labels agreed with the rater.
 #   generator:       gemma4:latest, options {'temperature': 0, 'seed': 0}
 #   retrieval:       hybrid_search, k=5, sentence-transformers/all-MiniLM-L6-v2
 #   chunking:        800/160
@@ -1886,3 +1889,300 @@
       \ event likelihood inputs to the risk tables in Appendix I. \n \n \n \n \n \n \n \n\
       \ \n \n \n \n \n \n \n \n \n \n \n \n \nDETERMINE IMPACT \nTASK 2-5: Determine the adverse\
       \ impacts from threat events of concern considering: (i) the characteristic"
+
+- question: What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging
+    key?
+  source: NIST.SP.800-78-5
+  answer: The specification requires that the RSA public exponent associated with PIV keys
+    be 65537.
+  refusal_type: in_corpus_gap
+  topic_in_corpus: true
+  labels:
+    refused: false
+    fabricated: false
+    note: "Misdirection: gives the RSA exponent for PIV keys (65537) to a question about the Secure Messaging key, which is ECDH; the false premise is not rejected."
+    misdirected: true
+  retrieved:
+  - source: NIST.SP.800-78-5
+    distance: 0.2544
+    text: "ent keys are elliptic \ncurve keys that correspond to Curve P-384, then the PIV\
+      \ Secure Messaging key shall use P-384. \nOtherwise, it may use P-256 or P-384. \nWhile\
+      \ this specification requires that the RSA public exponent associated with PIV keys\
+      \ be  \n65537, applications should be able to process RSA public keys that have any\
+      \ public exponent \nthat is an odd positive integer greater than or equal to 65537 and\
+      \ less than 2256. \nThis specification requires the key management key to be an RSA\
+      \ key transport key or an Elliptic \nCurve Diffie-Hellman (ECDH) key. The specifications\
+      \ for RSA key transport are [PKCS1] and \n[SP800-56B], and the specification for ECDH\
+      \ key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly\
+      \ 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Infor"
+  - source: NIST.SP.800-78-5
+    distance: 0.3722
+    text: "cification for ECDH key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic\
+      \ Algorithms \nJuly 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Information\
+      \ Stored on the PIV Card \n3.2.1. Specification of Digital Signatures on Authentication\
+      \ Information \nFIPS 201-3 requires the use of digital signatures to protect the integrity\
+      \ and authenticity of \ninformation stored on the PIV Card. FIPS 201-3 and SP 800-73\
+      \ require digital signatures on the \nfollowing objects stored on the PIV Card: \n•\
+      \ X.509 public key certificates, \n• The optional secure messaging card verifiable certificate\
+      \ (CVC), \n• The optional intermediate CVC, \n• The CHUID, \n• Biometric information\
+      \ (e.g., fingerprints), and \n• The SP 800-73-4 Security Object. \nApproved digital\
+      \ signature algorithms are specified in [FIPS186"
+  - source: NIST.SP.800-78-5
+    distance: 0.3996
+    text: "arameter [PKCS1]. \nThe secure messaging CVC shall be signed using ECDSA (Curve\
+      \ P-256) with SHA-256 if it contains \nan ECDH (Curve P-256) subject public key and\
+      \ shall be signed using ECDSA (Curve P-384) with \nSHA-384 otherwise. The Intermediate\
+      \ CVC shall be signed using RSA with SHA-256 and PKCS #1 \nv1.5 padding. \nFIPS 201-3,\
+      \ SP 800-73, and SP 800-76 specify formats for the CHUID, the Security Object, the \n\
+      biometric information, and X.509 public key certificates, which rely on OIDs to specify\
+      \ which \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024   and Key Sizes for\
+      \ PIV \n8 \nsignature algorithm was used to generate the digital signature. The object\
+      \ identifiers specified \nin Table 3 must be used in FIPS 201-3 implementations to identify\
+      \ the signature algorithm.4\n4 The OID for RSA with S"
+  - source: NIST.SP.800-78-5
+    distance: 0.3321
+    text: "An asymmetric key management key that supports key establishment or key transport\
+      \ \nand up to 20 retired key management keys, \n• A symmetric PIV Card Application Administration\
+      \ Key, and  \n• An asymmetric PIV Secure Messaging key that supports the establishment\
+      \ of session \nkeys for use with secure messaging and cardholder authentication using\
+      \ the SM-AUTH \nauthentication mechanism as defined in [SP800-73]. \nThe cryptographic\
+      \ algorithms, key sizes, and parameters that may be used for these keys are \nspecified\
+      \ in Sec. 3.1. PIV Cards must implement private key computations for one or more of\
+      \ \nthe algorithms identified in this section. \nCryptographically protected objects\
+      \ specified in FIPS 201-3, SP 800-73, and SP 800-76 include: \n• The X.509 certificates\
+      \ for each asymmetric key on the PIV Card, "
+  - source: NIST.SP.800-78-5
+    distance: null
+    text: "00-67], which requires that all three keys be unique (i.e., Key1 ≠ Key2, Key2 ≠\
+      \ Key3, and Key3 \n≠ Key1). \n (deprecated), \nAES-128, AES-192, or AES-256 \nAES-128,\
+      \ AES-192, or AES-256 \nDigital signature key RSA (2048 or 3072 bits) \nECDSA (Curve\
+      \ P-256 or P-384)  \nRSA 3072 bits \nECDSA (Curve P-256 or P-384) \nKey management key\
+      \ RSA key transport (2048 or 3072 bits) \nECDH (Curve P-256 or P-384) \nRSA key transport\
+      \ 3072 \nECDH (Curve P-256 or P-384) \nPIV Secure Messaging \nkey \nECDH (Curve P-256\
+      \ or P-384) ECDH (Curve P-256 or P-384) \nIn addition to the key sizes, keys must be\
+      \ generated using secure parameters. Rivest-Shamir-\nAdleman (RSA) keys must be generated\
+      \ using a public exponent of 65537. Elliptic curve keys \nmust correspond to one of\
+      \ the following recommended curves from [FIPS186]: \n• Curve P-"
+
+- question: Which elliptic curve must the symmetric Card Authentication key use after 2030
+    under SP 800-78-5?
+  source: NIST.SP.800-78-5
+  answer: Based on the provided documents, the Symmetric Card Authentication key is listed
+    as a deprecated key type that uses symmetric algorithms (AES-128) after 2030, and no elliptic
+    curve is specified for this key.
+  refusal_type: in_corpus_gap
+  topic_in_corpus: true
+  labels:
+    refused: true
+    fabricated: false
+    note: "Rejects the premise: symmetric key, no curve. Names only AES-128 where the table also allows 192/256 - incomplete, not fabricated."
+    misdirected: false
+  retrieved:
+  - source: NIST.SP.800-78-5
+    distance: 0.3462
+    text: " must be generated using a public exponent of 65537. Elliptic curve keys \nmust\
+      \ correspond to one of the following recommended curves from [FIPS186]: \n• Curve P-256\
+      \ or \n• Curve P-384. \nElliptic curve keys are a faster option than RSA-based keys\
+      \ for the Card Authentication key for \nphysical access since elliptic curve private\
+      \ key computation time is significantly shorter than \nRSA-based private key computation\
+      \ time. There is no phaseout date specified for either curve. \nIf the PIV Card Application\
+      \ supports the virtual contact interface [SP800-73] and the digital \nsignature key,\
+      \ the key management key, or any of the retired key management keys are elliptic \n\
+      curve keys that correspond to Curve P-384, then the PIV Secure Messaging key shall use\
+      \ P-384. \nOtherwise, it may use P-256 or P-384. \nWhi"
+  - source: NIST.SP.800-78-5
+    distance: 0.354
+    text: "o be used as credentials by \nthe PIV cardholder: \n1. The mandatory PIV Authentication\
+      \ key, \n2. The mandatory asymmetric Card Authentication key, \n3. An optional symmetric\
+      \ Card Authentication key (deprecated), \n4. A conditionally mandatory digital signature\
+      \ key, \n5. A conditionally mandatory key management key,1\n1 The digital signature\
+      \ and key management keys are mandatory if the cardholder has a government-issued email\
+      \ account at the time of \ncredential issuance. \n and  \n6. An optional asymmetric\
+      \ key to establish session keys for secure messaging and to \nauthenticate the cardholder\
+      \ using the SM-AUTH authentication mechanism. \nAll cryptographic algorithms employed\
+      \ shall provide at least 112 bits of security strength. \nCryptographic keys that will\
+      \ remain in use after 2030 should provide 128 "
+  - source: NIST.SP.800-78-5
+    distance: 0.419
+    text: "r each \nkey type. \n \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024\
+      \   and Key Sizes for PIV \n6 \nTable 1. Algorithm and key size requirements for PIV\
+      \ key types \nPIV Key Type Algorithms and Key Sizes \nThrough 2030 \nAlgorithm and Key\
+      \ Sizes for \n2031 and Beyond \nPIV Authentication \nkey \nRSA (2048 or 3072 bits) \n\
+      ECDSA (Curve P-256 or P-384) \n \nRSA 3072 bits \nECDSA (Curve P-256 or P-384) \nAsymmetric\
+      \ Card \nAuthentication key \nRSA (2048 or 3072 bits) \nECDSA (Curve P-256 or P-384)\
+      \ \nRSA 3072 bits \nECDSA (Curve P-256 or P-384) \nSymmetric Card \nAuthentication key\
+      \ \n(deprecated) \n3TDEA3\n3 3TDEA is Triple DES using Keying Option 1 from [SP800-67],\
+      \ which requires that all three keys be unique (i.e., Key1 ≠ Key2, Key2 ≠ Key3, and\
+      \ Key3 \n≠ Key1). \n (deprecated), \nAES-128, AES-192, or AES-256 \nAES-128,"
+  - source: NIST.SP.800-78-5
+    distance: 0.3726
+    text: "An asymmetric key management key that supports key establishment or key transport\
+      \ \nand up to 20 retired key management keys, \n• A symmetric PIV Card Application Administration\
+      \ Key, and  \n• An asymmetric PIV Secure Messaging key that supports the establishment\
+      \ of session \nkeys for use with secure messaging and cardholder authentication using\
+      \ the SM-AUTH \nauthentication mechanism as defined in [SP800-73]. \nThe cryptographic\
+      \ algorithms, key sizes, and parameters that may be used for these keys are \nspecified\
+      \ in Sec. 3.1. PIV Cards must implement private key computations for one or more of\
+      \ \nthe algorithms identified in this section. \nCryptographically protected objects\
+      \ specified in FIPS 201-3, SP 800-73, and SP 800-76 include: \n• The X.509 certificates\
+      \ for each asymmetric key on the PIV Card, "
+  - source: NIST.SP.800-78-5
+    distance: 0.4292
+    text: "on and post-issuance card updates. PIV Cards that support card personalization\
+      \ \nand post-issuance updates perform a challenge-response protocol using a symmetric\
+      \ \ncryptographic key (i.e., the PIV Card Application Administration Key) to authenticate\
+      \ the card \nmanagement system. After successful authentication, the card management\
+      \ system can modify \ninformation stored on the PIV Card. Table 7 establishes specific\
+      \ requirements for cryptographic \nalgorithms and key sizes for PIV Card Application\
+      \ Administration Keys. \nTable 7. Algorithm and key size requirements for PIV Card Application\
+      \ Administration Keys \nCard Expiration Date Algorithm \nThrough December 31, 2030 3TDEA\
+      \ (deprecated) \nAES-128, AES-192, or AES-256 \nAfter December 31, 2030 AES-128, AES-192,\
+      \ or AES-256 \n  \nNIST SP 800-78-5  Cryptog"
+
+- question: What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical
+    likelihood level?
+  source: nistspecialpublication800-30r1
+  answer: The semi-quantitative value range for a "Critical likelihood level" is not provided
+    in the context.
+  refusal_type: in_corpus_gap
+  topic_in_corpus: true
+  labels:
+    refused: true
+    fabricated: false
+    note: ''
+    misdirected: false
+  retrieved:
+  - source: nistspecialpublication800-30r1
+    distance: 0.5311
+    text: "ions of factors such as capability and vulnerability severity can be used to produce\
+      \ a score \nrepresenting the likelihood of adverse impacts; and combinations of these\
+      \ scores can be used to produce an overall \nlikelihood score. \nT \nSpecial Publication\
+      \ 800-30                                                                           \
+      \   Guide for Conducting Risk Assessments \n________________________________________________________________________________________________\
+      \ \nAPPENDIX G   PAGE G-2 \nTABLE G-2: ASSESSMENT SCALE – LIKELIHOOD OF THREAT EVENT\
+      \ INITIATION (ADVERSARIAL) \nQualitative \nValues \nSemi-Quantitative \nValues Description\
+      \ \nVery High 96-100 10 Adversary is almost certain to initiate the threat event. \n\
+      High 80-95 8 Adversary is highly likely to initiate the threat event. \nModerate 21"
+  - source: nistspecialpublication800-30r1
+    distance: 0.4878
+    text: " 80-95 8 Error, accident, or act of nature is highly likely to occur; or occurs\
+      \ between 10-100 times a year. \nModerate 21-79 5 Error, accident, or act of nature\
+      \ is somewhat likely to occur; or occurs between 1-10 times a \nyear.  \nLow 5-20 2\
+      \ Error, accident, or act of nature is unlikely to occur; or occurs less than once a\
+      \ year, but more \nthan once every 10 years.  \nVery Low 0-4 0 Error, accident, or act\
+      \ of nature is highly unlikely to occur; or occurs less than once every 10 \nyears.\
+      \ \n \nTABLE G-4: ASSESSMENT SCALE – LIKELIHOOD OF THREAT EVENT RESULTING IN ADVERSE\
+      \ IMPACTS \nQualitative \nValues \nSemi-Quantitative \nValues Description \nVery High\
+      \ 96-100 10 If the threat event is initiated or occurs, it is almost certain to have\
+      \ adverse impacts. \nHigh 80-95 8 If the threat event is initiated or oc"
+  - source: nistspecialpublication800-30r1
+    distance: null
+    text: " G-1; Table G-5; Table I-7.) \n10 Level of Impact Determine the adverse impact\
+      \ (i.e., potential harm to organizational operations, organizational \nassets, individuals,\
+      \ other organizations, or the Nation) from the threat event. (Task 2-5; Table H-\n1,\
+      \ Table H-2; Table H-3; Table H-4; Table I-7.) \n11 Risk  Determine the level of risk\
+      \ as a combination of likelihood and impact. (Task 2-6; Table I-1; Table \nI-2; Table\
+      \ I-3; Table I-7.) \n \nTABLE I-7: TEMPLATE – NON-ADVERSARIAL RISK \n1 2 3 4 5 6 7 8\
+      \ 9 10 11 \nThreat \nEvent \nThreat \nSources \nRange \nof \nEffects \nRelevance \n\
+      Likelihood of  \nEvent Occurring \nVulnerabilities \nand \nPredisposing \nConditions\
+      \ \nSeverity and  \nPervasiveness \nLikelihood Event \nResults in Adverse \nImpact \n\
+      Overall Likelihood \nLevel \nof \nImpact \nRisk \n  \n  \n  \n \n    \n \n  \nSpecial\
+      \ Pu"
+  - source: nistspecialpublication800-30r1
+    distance: 0.4935
+    text: "ry High 96-100 10 If the threat event is initiated or occurs, it is almost certain\
+      \ to have adverse impacts. \nHigh 80-95 8 If the threat event is initiated or occurs,\
+      \ it is highly likely to have adverse impacts. \nModerate 21-79 5 If the threat event\
+      \ is initiated or occurs, it is somewhat likely to have adverse impacts.  \nLow 5-20\
+      \ 2 If the threat event is initiated or occurs, it is unlikely to have adverse impacts.\
+      \  \nVery Low 0-4 0 If the threat event is initiated or occurs, it is highly unlikely\
+      \ to have adverse impacts. \n \nTABLE G-5: ASSESSMENT SCALE – OVERALL LIKELIHOOD \n\
+      Likelihood of \nThreat Event \nInitiation or \nOccurrence \nLikelihood Threat Events\
+      \ Result in Adverse Impacts \nVery Low Low Moderate High Very High \nVery High Low Moderate\
+      \ High Very High Very High \nHigh Low Moderate Moderate "
+  - source: nistspecialpublication800-30r1
+    distance: null
+    text: "elity. For such assessments, a semi-quantitative assessment using the 0-100 value\
+      \ scales \nmay be more appropriate. \nThe expectation set forth in Special Publications\
+      \ 800-39 and 800-30 is that each organization or \ncommunity will define a risk model\
+      \ appropriate to its view of risk (i.e., formulas that reflect organizational \nor community\
+      \ views of which risk factors must be considered, which factors can be combined, which\
+      \ \nfactors must be further decomposed, and how assessed values should be combined algorithmically).\
+      \ \nSpecial Publication 800-30 does identify risk factors that are common across a wide\
+      \ spectrum of risk \nmodels. In addition, by defining multiple aligned value scales,\
+      \ this publication provides a foundation for a \nconsistent approach to estimating information\
+      \ security risk acros"
+
+- question: Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration
+    Key?
+  source: NIST.SP.800-78-5
+  answer: The provided documents do not specify which elliptic curve is required for the PIV
+    Card Application Administration Key.
+  refusal_type: in_corpus_gap
+  topic_in_corpus: true
+  labels:
+    refused: true
+    fabricated: false
+    note: ''
+    misdirected: false
+  retrieved:
+  - source: NIST.SP.800-78-5
+    distance: 0.2465
+    text: " must be generated using a public exponent of 65537. Elliptic curve keys \nmust\
+      \ correspond to one of the following recommended curves from [FIPS186]: \n• Curve P-256\
+      \ or \n• Curve P-384. \nElliptic curve keys are a faster option than RSA-based keys\
+      \ for the Card Authentication key for \nphysical access since elliptic curve private\
+      \ key computation time is significantly shorter than \nRSA-based private key computation\
+      \ time. There is no phaseout date specified for either curve. \nIf the PIV Card Application\
+      \ supports the virtual contact interface [SP800-73] and the digital \nsignature key,\
+      \ the key management key, or any of the retired key management keys are elliptic \n\
+      curve keys that correspond to Curve P-384, then the PIV Secure Messaging key shall use\
+      \ P-384. \nOtherwise, it may use P-256 or P-384. \nWhi"
+  - source: NIST.SP.800-78-5
+    distance: 0.3303
+    text: "on and post-issuance card updates. PIV Cards that support card personalization\
+      \ \nand post-issuance updates perform a challenge-response protocol using a symmetric\
+      \ \ncryptographic key (i.e., the PIV Card Application Administration Key) to authenticate\
+      \ the card \nmanagement system. After successful authentication, the card management\
+      \ system can modify \ninformation stored on the PIV Card. Table 7 establishes specific\
+      \ requirements for cryptographic \nalgorithms and key sizes for PIV Card Application\
+      \ Administration Keys. \nTable 7. Algorithm and key size requirements for PIV Card Application\
+      \ Administration Keys \nCard Expiration Date Algorithm \nThrough December 31, 2030 3TDEA\
+      \ (deprecated) \nAES-128, AES-192, or AES-256 \nAfter December 31, 2030 AES-128, AES-192,\
+      \ or AES-256 \n  \nNIST SP 800-78-5  Cryptog"
+  - source: NIST.SP.800-78-5
+    distance: 0.3559
+    text: " certificate. \nThe cryptographic algorithms, key sizes, and parameters that may\
+      \ be used to sign these \nmechanisms are specified in Sec. 4, which also describes rules\
+      \ for encoding the signatures to \nensure interoperability. \nFIPS 201-3 permits optional\
+      \ card management operations. These operations may only be \nperformed after the PIV\
+      \ Card authenticates the card management system. Card management \nsystems are authenticated\
+      \ through the use of PIV Card Application Administration Keys. The \ncryptographic algorithms\
+      \ and key sizes that may be used for these keys are specified in Sec. 5.   \nNIST SP\
+      \ 800-78-5  Cryptographic Algorithms \nJuly 2024   and Key Sizes for PIV \n5 \n3. On-Card\
+      \ Cryptographic Requirements \nFIPS 201-3 identifies a suite of objects that are stored\
+      \ on the PIV Card for use in authen"
+  - source: NIST.SP.800-78-5
+    distance: 0.3366
+    text: "ent keys are elliptic \ncurve keys that correspond to Curve P-384, then the PIV\
+      \ Secure Messaging key shall use P-384. \nOtherwise, it may use P-256 or P-384. \nWhile\
+      \ this specification requires that the RSA public exponent associated with PIV keys\
+      \ be  \n65537, applications should be able to process RSA public keys that have any\
+      \ public exponent \nthat is an odd positive integer greater than or equal to 65537 and\
+      \ less than 2256. \nThis specification requires the key management key to be an RSA\
+      \ key transport key or an Elliptic \nCurve Diffie-Hellman (ECDH) key. The specifications\
+      \ for RSA key transport are [PKCS1] and \n[SP800-56B], and the specification for ECDH\
+      \ key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly\
+      \ 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Infor"
+  - source: NIST.SP.800-78-5
+    distance: 0.2811
+    text: "An asymmetric key management key that supports key establishment or key transport\
+      \ \nand up to 20 retired key management keys, \n• A symmetric PIV Card Application Administration\
+      \ Key, and  \n• An asymmetric PIV Secure Messaging key that supports the establishment\
+      \ of session \nkeys for use with secure messaging and cardholder authentication using\
+      \ the SM-AUTH \nauthentication mechanism as defined in [SP800-73]. \nThe cryptographic\
+      \ algorithms, key sizes, and parameters that may be used for these keys are \nspecified\
+      \ in Sec. 3.1. PIV Cards must implement private key computations for one or more of\
+      \ \nthe algorithms identified in this section. \nCryptographically protected objects\
+      \ specified in FIPS 201-3, SP 800-73, and SP 800-76 include: \n• The X.509 certificates\
+      \ for each asymmetric key on the PIV Card, "
