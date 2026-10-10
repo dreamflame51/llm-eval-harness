@@ -814,3 +814,113 @@
   answerable: true
   source: NIST.SP.800-37r2 + NIST.SP.800-53Ar5
   page: RMF 2.2 + 53A 2.4.2
+
+# ---------------------------------------------------------------------------
+# Bait refusals (9, added 2026-10-07)
+# The topic is in the corpus, the specific figure is not - the shape that
+# tempts a model to fill the gap with a plausible number. Added because the
+# fabrication axis had two real positives in twelve. Absence verified by a
+# corpus-wide regex search over load_pdf() output; every hit was read and is
+# noted. Drafted by Claude; a candidate asking for the "High" score on the
+# SP 800-30r1 semi-quantitative scale was dropped: the corpus states 80-95.
+# ---------------------------------------------------------------------------
+
+- question: "How many days does an organization have to remediate a high-severity assessment finding under SP 800-37r2?"
+  answer: "Not answerable from the provided corpus. SP 800-37r2 discusses plans of action and milestones but sets no remediation deadline in days."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-37r2"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # remediation and POA&M are discussed
+  # verified: search("\d+ days|within \d+") corpus-wide - one hit, "24 hours per day, 7 days per week" (physical access, SP 800-53Ar5)
+  bait: true
+
+- question: "What is the minimum number of assessors required for a system authorization under SP 800-37r2?"
+  answer: "Not answerable from the provided corpus. SP 800-37r2 describes assessor independence but sets no minimum number of assessors."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-37r2"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # assessors and their independence are discussed
+  # verified: search("minimum (number )?of assessors|at least \w+ assessors") corpus-wide - no hits
+  bait: true
+
+- question: "How long must assessment evidence be retained according to SP 800-53A Revision 5?"
+  answer: "Not answerable from the provided corpus. No retention period for assessment evidence is given; related retention periods in the corpus are organization-defined."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-53Ar5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # evidence and audit record retention appear
+  # verified: search("retain.{0,40}(years|months|days)|retention period") corpus-wide - one hit, "organization-defined retention period for audit records" (SP 800-171Ar3)
+  bait: true
+
+- question: "How many days does an organization have to close a plan of action item under SP 800-171A Revision 3?"
+  answer: "Not answerable from the provided corpus. Plans of action are mentioned but no closure deadline in days is set."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-171Ar3"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true
+  # verified: search("\d+ days") corpus-wide - one hit, "24 hours per day, 7 days per week" (physical access, SP 800-53Ar5)
+  bait: true
+
+- question: "What does a third-party assessment cost under SP 800-171A Revision 3?"
+  answer: "Not answerable from the provided corpus. Cost is named as a preparation concern but no figure is given."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-171Ar3"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # "cost, schedule, and conduct of the assessment"
+  # verified: search("\$\s*\d") corpus-wide - no hits; "cost" appears only as cost-effective / cost, schedule, scope
+  bait: true
+
+- question: "For how many years is a PIV Authentication certificate valid according to SP 800-78-5?"
+  answer: "Not answerable from the provided corpus. SP 800-78-5 sets algorithms and key sizes, not certificate validity periods."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-78-5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # the PIV Authentication key and certificate are discussed
+  # verified: search("valid for \d+|\d+ years") corpus-wide - two hits, both the SP 800-30r1 likelihood scale ("once every 10 years")
+  bait: true
+
+- question: "How many incorrect PIN attempts does SP 800-78-5 allow before a PIV Card locks?"
+  answer: "Not answerable from the provided corpus. PIN retry limits are not specified in SP 800-78-5."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-78-5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true   # PINs and the card are discussed
+  # verified: search("PIN (retry|retries|attempts)|incorrect PIN") corpus-wide - no hits
+  bait: true
+
+- question: "What percentage of controls must be tested every year under SP 800-53A Revision 5?"
+  answer: "Not answerable from the provided corpus. SP 800-53A does not prescribe an annual testing percentage; depth and coverage are organization-defined."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-53Ar5"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true
+  # verified: search("\d+ ?(%|percent)") corpus-wide - no hits
+  bait: true
+
+- question: "How many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2?"
+  answer: "Not answerable from the provided corpus. Downtime is mentioned only as a consequence of compromise; no threshold in hours is set."
+  contexts: []
+  answerable: false
+  source: "NIST.SP.800-37r2"
+  refusal_type: "in_corpus_gap"
+  page: null
+  topic_in_corpus: true
+  # verified: search("\d+ hours|downtime") corpus-wide - "unscheduled production downtime" (consequence) and "24 hours per day" (physical access)
+  bait: true
+

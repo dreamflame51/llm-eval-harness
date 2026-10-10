@@ -76,6 +76,9 @@ def _normalize(record: dict[str, Any]) -> dict[str, Any]:
         # A paraphrase names its original: the two are one family, and a
         # resampling interval has to treat them as one draw, not two.
         "paraphrase_of",
+        # Refusal records written to tempt a model into inventing a figure:
+        # the topic is in the corpus, the number is not.
+        "bait",
     ):
         if extra in record:
             out[extra] = record[extra]
