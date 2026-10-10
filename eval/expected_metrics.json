@@ -1,7 +1,7 @@
 {
   "note": "Expected values for tests/eval/test_regression.py. Update with scripts/freeze_metrics.py only when a change to these numbers is intended, and say why in the commit message.",
   "judge": "qwen3:8b",
-  "prompt_version": "1",
+  "prompt_version": "2",
   "refusal": {
     "n": 29,
     "clean": 24,
@@ -69,7 +69,7 @@
         "phrase": false
       },
       "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?": {
-        "refused": false,
+        "refused": true,
         "fabricated": true,
         "phrase": true
       },

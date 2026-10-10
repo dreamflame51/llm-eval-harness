@@ -77,7 +77,9 @@ HEADER = """\
 #   refused     did the answer decline to answer from the corpus?
 #               A sentence that names what is missing counts ("the context does
 #               not state a minimum"). An answer that hedges and then answers
-#               anyway does NOT count as a refusal.
+#               anyway does NOT count as a refusal. An answer that rejects a
+#               false premise ("the key is symmetric, no curve applies") and
+#               gives no value for it DOES count.
 #   fabricated  does the answer assert anything about the question that the
 #               retrieved chunks below do not support? Judge against those
 #               chunks only - not against what you know to be true of the

@@ -330,16 +330,16 @@ on the current 29:
 
 | axis | `qwen3:8b` | `gemma4` |
 |---|---|---|
-| `refused` | 27/29, kappa **0.71** | 21/29, kappa 0.32 |
+| `refused` | 28/29, kappa **0.84** | 22/29, kappa 0.36 |
 | `fabricated` | 28/29, kappa undefined | 29/29, kappa undefined |
 
-The `fabricated` row cannot be read: the hand labels hold no fabrication, so
-there is nothing for a judge to catch and kappa has no variance. `qwen3`'s
-disagreements are the SP 800-73 answer (a false alarm on fabricated, and a
-partial refusal read as an answer) and the symmetric-key answer, which rejects
-the false premise - the human counted that as declining, the judge did not.
-`gemma4` misreads eight refusals that quote the context before declining as
-answers.
+Judge prompt version 2, which says a rejected false premise is a refusal. The
+`fabricated` row cannot be read: the hand labels hold no fabrication, so there
+is nothing for a judge to catch and kappa has no variance. `qwen3` disagrees
+twice: a false alarm on fabricated for the SP 800-73 answer, and the
+symmetric-key answer, which rejects the false premise and which it still reads
+as an answer - the record the new rule was written for. `gemma4` misreads seven
+refusals that quote the context before declining as answers.
 
 Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
 against two hand-labelled fabrications, and called one of them the case the

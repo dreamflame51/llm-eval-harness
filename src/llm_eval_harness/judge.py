@@ -70,7 +70,10 @@ CACHE_DIR = ROOT / "eval" / "judge_cache"
 # Bump on ANY change to the system prompts, the few-shot examples or the user
 # templates below. It is part of the cache key: a changed prompt must produce a
 # miss, because a verdict is only meaningful for the prompt that produced it.
-PROMPT_VERSION = "1"
+#
+# 2 (10.10): the refused prompt says a rejected false premise is a refusal. The
+# human counted it so and both judges did not, because nothing said either way.
+PROMPT_VERSION = "2"
 
 AXES = ("refused", "fabricated")
 
@@ -134,6 +137,10 @@ question about it: did the answer decline to answer from the corpus?
 - An answer that hedges and then answers anyway is NOT a refusal. Set
   answered_anyway to true whenever the answer supplies a substantive answer to
   the question, however it is qualified.
+- An answer that rejects a false premise in the question IS a refusal: it says
+  the thing asked for does not exist or does not apply ("the key is symmetric,
+  no curve is specified for it") and supplies no value for it. Stating related
+  facts while doing so does not make it an answer.
 - Do not judge whether the answer is correct, and do not use your own knowledge
   of the subject. Judge only how the answer behaves.
 
