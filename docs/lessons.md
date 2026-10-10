@@ -59,7 +59,7 @@ anything.**
 | Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21), [27](#27) |
 | Checks that check nothing | [10](#10), [20](#20) |
 | What the system actually gets wrong | [11](#11) |
-| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22), [28](#28) |
+| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22), [28](#28), [31](#31) |
 | A gap between two metrics that nobody owned | [23](#23) |
 | Measuring something nobody could use | [24](#24) |
 | A fixture that stopped describing the system | [25](#25), [26](#26) |
@@ -1399,6 +1399,10 @@ README and in the docstring, which axis is trusted and which is not - and that
 the next useful work is more records of the shape that exercises it, not a
 better prompt.
 
+**Update, 10.10.** The relabelled answer arrived: the record called the case
+the judge exists for did not survive a second reading by the same rater. See
+[#31](#31).
+
 ---
 
 <a id="29"></a>
@@ -1555,3 +1559,69 @@ process in the wrong order.
 And the smaller one, which is [#20](#20) a third time: raw agreement and kappa
 disagreed about which of three judges was best, and the one with the worst
 agreement was the only one that caught what it was built to catch.
+
+---
+
+<a id="31"></a>
+
+## 31. The ruler was one person, and the person moved
+
+**Symptom.** The twelve refusal questions were re-recorded on 07.10, after the
+prompt had changed (retrieved chunks fenced off as data, `4dd1881`), together
+with nine new bait questions: topic in the corpus, figure not. Before labelling,
+the predictions were written down: the text would change on 40-50% of the
+twelve, the verdict on about 5%, and gemma4 would invent a figure on about half
+of the nine baits.
+
+After labelling: the text changed on 12/12, the verdict on 3/12, the baits
+were invented on 0/9.
+
+**Diagnosis.** Retrieval was identical on all twelve - the same five chunks in
+the same order - so whatever moved was the generator or the labels. The text is
+easy: the new prompt calls the chunks documents, and "The context states"
+became "The provided documents state" nearly everywhere; on 16.09, with no
+prompt change, between-process drift alone had changed 8/12. The two causes
+cannot be separated on one recording.
+
+The verdicts are the finding. The three records, read next to their 16.09
+versions:
+
+| record | the two answers | 16.09 | 10.10 | what moved |
+|---|---|---|---|---|
+| SP 800-73 interfaces | same content: both interfaces named, contactless declined | `refused=false` | `refused=true` | a rule - "a partial refusal counts when the declined part is the missing part" - written on 10.10 |
+| SP 800-76 biometrics | near-verbatim: the CBEFF signature block | `fabricated=true` | `fabricated=false` | the reading of one sentence |
+| 800-37r2 monitoring frequency | 16.09 added "volatile or critical controls may require more frequent assessment" | `fabricated=true` | `fabricated=false` | that clause is verbatim in chunk 4; the 16.09 label was wrong |
+
+All three moved on the rater's side. The model's verdicts moved on 0/12, so the
+prediction about the model held. The rater agreed with the same rater three
+weeks earlier on 9/12, and on the `fabricated` axis both positives of the 16.09
+set turned negative. One of the three was also nudged by presentation: the
+argument "the claim is in the chunk" was put to the rater before the label was
+given.
+
+**What it takes with it.** The record [#28](#28) calls "the case the judge
+exists for" is the monitoring-frequency answer. Read again, it states no
+frequency, and its one extra clause is in its chunks. The kappas in #28 and
+GEval's "2 out of 2" in [#30](#30) were computed against two positives that do
+not survive a second reading. The arithmetic is right; it is arithmetic on a
+label. #28 itself said its kappa "would swing on one relabelled answer" - it
+swung on two.
+
+The baits did not replace them. gemma4 declined all nine, so the `fabricated`
+axis has no real positives in 21 records - only the 13 synthetic ones from the
+mutation set. Whether the baits were too transparent or the fenced prompt made
+the model more careful is not separable here; recording the same nine on the
+old prompt would separate it.
+
+**Treatment.** Each borderline call now carries its rule in `note` (partial
+refusal; a modal shift from "retain" to "must retain" is not a fabrication),
+and each of the three disagreements is recorded with both dates. #28 is not
+rewritten - it is what was believed on 16.09 - but points here.
+
+**Lesson.** **A hand label is a measurement, and a measurement has its own
+repeatability.** The judges were measured against the human for weeks; the
+human was never measured against the human. The first time that was done, it
+moved on the same axis the judges failed on, and by as much. When the positive
+class is two records, ground truth is two opinions. Before quoting a judge's
+agreement with hand labels, re-label a sample after a gap, without looking at
+the old labels, and report the self-agreement next to the judge's.
