@@ -3,14 +3,14 @@
   "judge": "qwen3:8b",
   "prompt_version": "1",
   "refusal": {
-    "n": 12,
-    "clean": 10,
+    "n": 25,
+    "clean": 22,
     "undecided": 0,
-    "phrase_rate": 0.9167,
+    "phrase_rate": 0.92,
     "by_class": {
       "in_corpus_gap": {
-        "n": 6,
-        "clean": 6
+        "n": 19,
+        "clean": 18
       },
       "out_of_corpus": {
         "n": 6,
@@ -74,6 +74,71 @@
         "phrase": true
       },
       "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many days does an organization have to remediate a high-severity assessment finding under SP 800-37r2?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What is the minimum number of assessors required for a system authorization under SP 800-37r2?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How long must assessment evidence be retained according to SP 800-53A Revision 5?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many days does an organization have to close a plan of action item under SP 800-171A Revision 3?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What does a third-party assessment cost under SP 800-171A Revision 3?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "For how many years is a PIV Authentication certificate valid according to SP 800-78-5?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many incorrect PIN attempts does SP 800-78-5 allow before a PIV Card locks?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "What percentage of controls must be tested every year under SP 800-53A Revision 5?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many hours per week must guards staff the logical access points to the system under SP 800-53A Revision 5?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?": {
+        "refused": false,
+        "fabricated": false,
+        "phrase": false
+      },
+      "How many retired digital signature keys can a PIV Card hold under SP 800-78-5?": {
+        "refused": true,
+        "fabricated": false,
+        "phrase": true
+      },
+      "How many times per year is a High-likelihood adversarial threat event initiated under SP 800-30 Revision 1?": {
         "refused": true,
         "fabricated": false,
         "phrase": true

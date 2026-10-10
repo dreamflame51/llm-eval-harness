@@ -204,13 +204,20 @@ carried exactly 0).
 |---|---|---|---|---|---|
 | `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
 | `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | 11/12 |
-| `eval/refusal_answers.yaml` (current) | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
+| `eval/prefence_baseline/refusal_answers.yaml` | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
+| `eval/refusal_answers.yaml` (current, fenced prompt, 25 questions) | hybrid | 07.10 + 10.10 | 22/25 | 23/25 | 23/25 |
 
 The middle row is a control, and it is there because a comparison between two
 recordings is not a comparison between two systems: the generator rewrites most
 of its answers between processes, so a difference between 14.09 and 16.09
 carries the day as well as the retriever. Holding the day fixed and swapping
 only the retriever is what the middle row buys.
+
+> **Withdrawn pending re-labelling (10.10).** The two `fabricated` labels this
+> paragraph rests on did not survive a second reading by the same rater: both
+> answers were re-recorded with near-identical content and labelled clean
+> ([lessons #31](docs/lessons.md#31)). Read the paragraph as what was believed
+> on 16.09, not as a measured cost of BM25.
 
 **Fusing BM25 into retrieval cost two records of grounding.** Two dense
 recordings score 11/12 by hand regardless of the day; the hybrid recording from
@@ -298,38 +305,44 @@ questions, decided separately by an LLM judge: `refused` from the answer alone,
 
 | | declined, invented nothing |
 |---|---|
-| hand labels | **9/12** |
-| judge, `qwen3:8b` | 10/12 |
-| phrase list (tripwire) | 11/12 |
+| hand labels | **23/25** |
+| judge, `qwen3:8b` | 22/25 |
+| phrase list (tripwire) | 23/25 |
 
-by class, by the labels: `in_corpus_gap` 5/6, `out_of_corpus` 4/6.
+by class, by the labels: `in_corpus_gap` 18/19, `out_of_corpus` 5/6. Thirteen
+of the 25 are bait questions written to provoke an invented figure; gemma4
+invented none. The two that are not clean did not fabricate either - one
+answers SP 800-76 with CBEFF from a neighbouring document, one answers a
+false-premise 3TDEA question with a true date about a different key. That
+shape, misdirection, is on neither axis ([lessons #31](docs/lessons.md#31)).
 
-**These numbers do not move between runs.** The twelve answers are frozen in
+**These numbers do not move between runs.** The 25 answers are frozen in
 `eval/refusal_answers.yaml`, hand-labelled, and the judge's verdicts are
 committed under `eval/judge_cache/`, so `refusal` reads them back without
 loading a model. Earlier refusal numbers in this README were samples of a
 drifting generator; these are not.
 
-**The judge is settled on one axis and at chance on the other.** Against the
-hand labels, re-made on 16.09 on a set that does carry fabrications:
+**The judge is measured on one axis only.** Against the hand labels of 10.10,
+on the current 25:
 
 | axis | `qwen3:8b` | `gemma4` |
 |---|---|---|
-| `refused` | 12/12, kappa **1.00** | 11/12, kappa 0.75 |
-| `fabricated` | 9/12, kappa **-0.12** | 10/12, kappa 0.00 |
+| `refused` | 24/25, kappa **0.78** | 18/25, kappa 0.27 |
+| `fabricated` | 24/25, kappa undefined | 25/25, kappa undefined |
 
-Raw agreement of 75-83% on the second row hides that it is no better than
-guessing: two of the twelve answers were labelled as fabricating, so a judge
-that always says "no" scores 10/12. The humans found two, `qwen3` found one - a
-different one - and `gemma4` none.
+The `fabricated` row cannot be read: the hand labels hold no fabrication, so
+there is nothing for a judge to catch and kappa has no variance. `qwen3`'s one
+disagreement is a false alarm on the SP 800-73 answer, which names two
+interfaces from the corpus and declines the rest. `gemma4` misreads seven
+refusals that quote the context before declining as answers.
 
-**One of those two is the case the judge was built for.** An answer that
-declines and then states a frequency its chunks do not carry: the phrase list
-passes it by construction, and `qwen3` passes it as well. That cell was empty
-for this fixture's whole life, which is why the claim could never be tested; it
-is occupied now, and nothing caught it. n is twelve and the kappas are brittle;
-the direction is not. See [#20](docs/lessons.md#20) and
-[#28](docs/lessons.md#28).
+Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
+against two hand-labelled fabrications, and called one of them the case the
+judge was built for. Neither label survived a second reading by the same rater
+([#28](docs/lessons.md#28), [#31](docs/lessons.md#31)). How well the judge
+catches a fabrication is measured only on synthetic ones: thirteen inserted
+into correct answers (`eval/synthetic_fabrications.results.json`) and the four
+calibration cases below.
 
 The phrase list is kept beside it: it decides refusal and nothing else, so a
 hedge that declines and then invents is a pass for it, unconditionally. Every

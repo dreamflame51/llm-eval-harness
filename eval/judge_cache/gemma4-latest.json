@@ -1,4 +1,21 @@
 {
+  "01fd365a34d1e90d": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:17:41+00:00",
+    "latency_s": 4.12,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the maximum allowable password length specified in SP 800-63B?",
+    "raw": "{\"evidence\": \"The maximum allowable password length specified in SP 800-63B is not available in the provided documents.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The maximum allowable password length specified in SP 800-63B is not available in the provided documents.",
+      "ok": true,
+      "refused": true
+    }
+  },
   "02af77c7b5f76388": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:26:00+00:00",
@@ -7,6 +24,22 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What are the four security levels defined in FIPS 140-3 for cryptographic modules?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "0926081ac65b337c": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:22:30+00:00",
+    "latency_s": 39.95,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -97,6 +130,23 @@
       "unsupported_claim": ""
     }
   },
+  "16ca82517c510262": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:22:33+00:00",
+    "latency_s": 3.57,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?",
+    "raw": "{\"evidence\": \"The provided documents do not specify which of these interfaces is used for contactless authentication.\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "The provided documents do not specify which of these interfaces is used for contactless authentication.",
+      "ok": true,
+      "refused": false
+    }
+  },
   "20306f53356c8e80": {
     "axis": "fabricated",
     "judged": "2026-09-16T14:45:03+00:00",
@@ -111,6 +161,23 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "22b55b83f692425b": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:26:27+00:00",
+    "latency_s": 4.7,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What does a third-party assessment cost under SP 800-171A Revision 3?",
+    "raw": "{\"evidence\": \"The provided documents do not contain information regarding the cost of a third-party assessment under SP 800-171A Revision 3.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not contain information regarding the cost of a third-party assessment under SP 800-171A Revision 3.",
+      "ok": true,
+      "refused": true
     }
   },
   "23817e4eeb0c96aa": {
@@ -146,6 +213,23 @@
       "unsupported_claim": ""
     }
   },
+  "25921a71d13a19f1": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:21:44+00:00",
+    "latency_s": 4.13,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What are the four security levels defined in FIPS 140-3 for cryptographic modules?",
+    "raw": "{\"evidence\": \"The provided documents do not state the four security levels defined in FIPS 140-3 for cryptographic modules.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state the four security levels defined in FIPS 140-3 for cryptographic modules.",
+      "ok": true,
+      "refused": true
+    }
+  },
   "28124dbb0de84faf": {
     "axis": "refused",
     "judged": "2026-09-16T14:48:29+00:00",
@@ -163,6 +247,39 @@
       "refused": true
     }
   },
+  "291a12a721f35c13": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:32:11+00:00",
+    "latency_s": 3.82,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many times per year is a High-likelihood adversarial threat event initiated under SP 800-30 Revision 1?",
+    "raw": "{\"evidence\": \"they do not specify the frequency (times per year) for a High-likelihood adversarial threat event.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "they do not specify the frequency (times per year) for a High-likelihood adversarial threat event.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "2f0530d7dfe9e5f5": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:20:42+00:00",
+    "latency_s": 29.23,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "361d8565baf5a4c1": {
     "axis": "refused",
     "judged": "2026-09-16T14:47:26+00:00",
@@ -176,6 +293,23 @@
       "answered_anyway": false,
       "error": null,
       "evidence": "Answer is missing",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "37137340b4e93d03": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:16:17+00:00",
+    "latency_s": 18.58,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the maximum time permitted between authorization reviews under SP 800-37r2?",
+    "raw": "{\"evidence\": \"but they do not specify what the maximum time permitted between authorization reviews is.\", \"answered_anyway\": true, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "but they do not specify what the maximum time permitted between authorization reviews is.",
       "ok": true,
       "refused": true
     }
@@ -197,6 +331,39 @@
       "refused": true
     }
   },
+  "3e65620386e15347": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:28:24+00:00",
+    "latency_s": 4.66,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What percentage of controls must be tested every year under SP 800-53A Revision 5?",
+    "raw": "{\"evidence\": \"The provided documents do not state what percentage of controls must be tested every year under SP 800-53A Revision 5.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state what percentage of controls must be tested every year under SP 800-53A Revision 5.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "43cee2859264073d": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:24:08+00:00",
+    "latency_s": 3.01,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many days does an organization have to remediate a high-severity assessment finding under SP 800-37r2?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "48a3f03eeabb4c82": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:23:33+00:00",
@@ -213,6 +380,89 @@
       "unsupported_claim": ""
     }
   },
+  "4cac4db85f9e18f1": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:20:13+00:00",
+    "latency_s": 4.83,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?",
+    "raw": "{\"evidence\": \"The provided documents do not state what specific score an organization must achieve to pass an assessment conducted under SP 800-171A Revision 3.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state what specific score an organization must achieve to pass an assessment conducted under SP 800-171A Revision 3.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "4df459438764fe13": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:30:13+00:00",
+    "latency_s": 2.1,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?",
+    "raw": "{\"evidence\": \"\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "",
+      "ok": true,
+      "refused": false
+    }
+  },
+  "4f310df504c8f367": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:30:10+00:00",
+    "latency_s": 3.66,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many hours per week must guards staff the logical access points to the system under SP 800-53A Revision 5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "537adcc030b0a685": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:25:47+00:00",
+    "latency_s": 49.6,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How long must assessment evidence be retained according to SP 800-53A Revision 5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "54e4b3fc782f38c1": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:20:04+00:00",
+    "latency_s": 4.86,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?",
+    "raw": "{\"evidence\": \"The provided documents do not state how many hours of assessor training SP 800-53A Revision 5 requires before someone can conduct a control assessment.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state how many hours of assessor training SP 800-53A Revision 5 requires before someone can conduct a control assessment.",
+      "ok": true,
+      "refused": true
+    }
+  },
   "5836882469541215": {
     "axis": "fabricated",
     "judged": "2026-09-16T14:42:26+00:00",
@@ -221,6 +471,22 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "592305e894eb742f": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:24:54+00:00",
+    "latency_s": 42.07,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the minimum number of assessors required for a system authorization under SP 800-37r2?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -262,6 +528,22 @@
       "refused": true
     }
   },
+  "5e98a82a6410d1bc": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:20:08+00:00",
+    "latency_s": 3.81,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "640a9d6f00b66abc": {
     "axis": "refused",
     "judged": "2026-09-16T14:43:23+00:00",
@@ -277,6 +559,39 @@
       "evidence": "Answer is missing",
       "ok": true,
       "refused": true
+    }
+  },
+  "658ddcfe16af920f": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:24:12+00:00",
+    "latency_s": 4.39,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the minimum number of assessors required for a system authorization under SP 800-37r2?",
+    "raw": "{\"evidence\": \"The provided documents do not state the minimum number of assessors required for a system authorization under SP 800-37r2.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state the minimum number of assessors required for a system authorization under SP 800-37r2.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "68059358b9a3fbae": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:29:10+00:00",
+    "latency_s": 45.68,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What percentage of controls must be tested every year under SP 800-53A Revision 5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
     }
   },
   "6944b6754e7bb133": {
@@ -296,6 +611,39 @@
       "refused": true
     }
   },
+  "6ca27c69647bad45": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:21:50+00:00",
+    "latency_s": 2.1,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?",
+    "raw": "{\"evidence\": \"\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "",
+      "ok": true,
+      "refused": false
+    }
+  },
+  "6d790483583c9502": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:28:19+00:00",
+    "latency_s": 43.01,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many incorrect PIN attempts does SP 800-78-5 allow before a PIV Card locks?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "709212fa3e7f2d4e": {
     "axis": "fabricated",
     "judged": "2026-09-16T14:41:04+00:00",
@@ -304,6 +652,39 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What is the maximum time permitted between authorization reviews under SP 800-37r2?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "72799024805af580": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:24:05+00:00",
+    "latency_s": 4.94,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many days does an organization have to remediate a high-severity assessment finding under SP 800-37r2?",
+    "raw": "{\"evidence\": \"The provided documents do not state how many days an organization has to remediate a high-severity assessment finding under SP 800-37r2.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state how many days an organization has to remediate a high-severity assessment finding under SP 800-37r2.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "778d96324237c382": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:18:12+00:00",
+    "latency_s": 31.34,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the maximum allowable password length specified in SP 800-63B?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -345,6 +726,71 @@
       "refused": false
     }
   },
+  "7c5a5c30aa8664fb": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:19:59+00:00",
+    "latency_s": 34.66,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "7e4b170cb903181c": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:30:02+00:00",
+    "latency_s": 47.21,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "7fa5cf64b78d29f9": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:27:32+00:00",
+    "latency_s": 26.92,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "For how many years is a PIV Authentication certificate valid according to SP 800-78-5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "83db6952c3f00217": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:29:14+00:00",
+    "latency_s": 4.72,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2?",
+    "raw": "{\"evidence\": \"The provided documents do not specify how many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not specify how many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2.",
+      "ok": true,
+      "refused": true
+    }
+  },
   "8755888671f8132b": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:21:12+00:00",
@@ -353,6 +799,22 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What is the recommended minimum key size for AES in FIPS 197?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "877600b179375c66": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:31:06+00:00",
+    "latency_s": 53.81,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -395,6 +857,55 @@
       "refused": true
     }
   },
+  "8d9fa24137a5ed21": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:19:20+00:00",
+    "latency_s": 63.59,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the recommended minimum key size for AES in FIPS 197?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "9745fd356fa47e9b": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:27:36+00:00",
+    "latency_s": 4.6,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many incorrect PIN attempts does SP 800-78-5 allow before a PIV Card locks?",
+    "raw": "{\"evidence\": \"The provided documents do not state how many incorrect PIN attempts SP 800-78-5 allows before a PIV Card locks.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state how many incorrect PIN attempts SP 800-78-5 allows before a PIV Card locks.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "9b237d4eb090c20a": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:21:48+00:00",
+    "latency_s": 3.51,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What are the four security levels defined in FIPS 140-3 for cryptographic modules?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "9c6e17eb35d6496e": {
     "axis": "refused",
     "judged": "2026-09-14T16:26:09+00:00",
@@ -410,6 +921,39 @@
       "evidence": "it does not specify the biometric data formats that SP 800-76 defines for PIV cardholder authentication.",
       "ok": true,
       "refused": true
+    }
+  },
+  "9cf8eae4da0b38db": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:20:45+00:00",
+    "latency_s": 3.51,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the minimum PIN length required for a PIV Card according to SP 800-78-5?",
+    "raw": "{\"evidence\": \"The provided documents do not specify the minimum PIN length required for a PIV Card.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not specify the minimum PIN length required for a PIV Card.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "9f94d496a91f31d5": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:16:50+00:00",
+    "latency_s": 32.82,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the maximum time permitted between authorization reviews under SP 800-37r2?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
     }
   },
   "a1ca00e060fb0a70": {
@@ -493,6 +1037,55 @@
       "unsupported_claim": ""
     }
   },
+  "a5e71f91ba424ce3": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:30:07+00:00",
+    "latency_s": 5.09,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many hours per week must guards staff the logical access points to the system under SP 800-53A Revision 5?",
+    "raw": "{\"evidence\": \"The provided documents do not specify how many hours per week guards must staff the logical access points to the system under SP 800-53 Revision 5.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not specify how many hours per week guards must staff the logical access points to the system under SP 800-53 Revision 5.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "a779c935a5982631": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:26:22+00:00",
+    "latency_s": 29.82,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many days does an organization have to close a plan of action item under SP 800-171A Revision 3?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "ada1e92d417e78b5": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:33:08+00:00",
+    "latency_s": 57.34,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many times per year is a High-likelihood adversarial threat event initiated under SP 800-30 Revision 1?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "ae1b062b75d83191": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:28:08+00:00",
@@ -507,6 +1100,23 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "b4e8defb370aca4b": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:27:05+00:00",
+    "latency_s": 3.52,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "For how many years is a PIV Authentication certificate valid according to SP 800-78-5?",
+    "raw": "{\"evidence\": \"The provided documents do not state for how many years a PIV Authentication certificate is valid.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not state for how many years a PIV Authentication certificate is valid.",
+      "ok": true,
+      "refused": true
     }
   },
   "b538c42a35e24ecb": {
@@ -526,6 +1136,55 @@
       "refused": true
     }
   },
+  "b5bab9bdf8b2d7eb": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:23:05+00:00",
+    "latency_s": 31.73,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "b79ffc3c9c6a1757": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:16:53+00:00",
+    "latency_s": 3.34,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?",
+    "raw": "{\"evidence\": \"the documents do not specify a required minimum assessment frequency for common controls\", \"answered_anyway\": true, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "the documents do not specify a required minimum assessment frequency for common controls",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "ba30ca62fa0d7063": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:21:40+00:00",
+    "latency_s": 54.6,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the minimum PIN length required for a PIV Card according to SP 800-78-5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "bfaf97871e8bb4dc": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:17:33+00:00",
@@ -534,6 +1193,22 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What is the maximum time permitted between authorization reviews under SP 800-37r2?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "c164eee94a0d30ee": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:17:37+00:00",
+    "latency_s": 43.64,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -576,6 +1251,23 @@
       "refused": true
     }
   },
+  "c8154c76a0399c78": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:19:24+00:00",
+    "latency_s": 4.73,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?",
+    "raw": "{\"evidence\": \"The provided documents do not state what level of residual risk SP 800-30 Revision 1 defines as acceptable for a federal information system.\", \"answered_anyway\": true, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "The provided documents do not state what level of residual risk SP 800-30 Revision 1 defines as acceptable for a federal information system.",
+      "ok": true,
+      "refused": true
+    }
+  },
   "c93f24e96533a52b": {
     "axis": "refused",
     "judged": "2026-09-16T14:44:22+00:00",
@@ -593,6 +1285,23 @@
       "refused": true
     }
   },
+  "c94306417f917e83": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:24:58+00:00",
+    "latency_s": 3.59,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How long must assessment evidence be retained according to SP 800-53A Revision 5?",
+    "raw": "{\"evidence\": \"but they do not specify a required duration for how long this evidence must be retained.\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "but they do not specify a required duration for how long this evidence must be retained.",
+      "ok": true,
+      "refused": false
+    }
+  },
   "ce3c482487255b38": {
     "axis": "fabricated",
     "judged": "2026-09-14T16:22:22+00:00",
@@ -601,6 +1310,39 @@
     "model": "gemma4:latest",
     "prompt_version": "1",
     "question": "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "ce3cd55cf6f3fb8a": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:25:53+00:00",
+    "latency_s": 5.3,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many days does an organization have to close a plan of action item under SP 800-171A Revision 3?",
+    "raw": "{\"evidence\": \"The provided documents do not contain information regarding how many days an organization has to close a plan of action item under SP 800-171A Revision 3.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The provided documents do not contain information regarding how many days an organization has to close a plan of action item under SP 800-171A Revision 3.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "cec5a1f77d6c3beb": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:24:00+00:00",
+    "latency_s": 51.51,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?",
     "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
     "verdict": {
       "error": null,
@@ -691,6 +1433,55 @@
       "unsupported_claim": ""
     }
   },
+  "e76b7dd5bf46d8fe": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:18:16+00:00",
+    "latency_s": 3.82,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What is the recommended minimum key size for AES in FIPS 197?",
+    "raw": "{\"evidence\": \"The recommended minimum key size for AES in FIPS 197 is not provided in the context.\", \"answered_anyway\": false, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": false,
+      "error": null,
+      "evidence": "The recommended minimum key size for AES in FIPS 197 is not provided in the context.",
+      "ok": true,
+      "refused": true
+    }
+  },
+  "e9db98278c7a16f5": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:27:01+00:00",
+    "latency_s": 34.29,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What does a third-party assessment cost under SP 800-171A Revision 3?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
+  "ed34617adb17f3bf": {
+    "axis": "fabricated",
+    "judged": "2026-10-10T08:32:07+00:00",
+    "latency_s": 56.81,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many retired digital signature keys can a PIV Card hold under SP 800-78-5?",
+    "raw": "{\"unsupported_claim\": \"\", \"fabricated\": false}",
+    "verdict": {
+      "error": null,
+      "fabricated": false,
+      "ok": true,
+      "unsupported_claim": ""
+    }
+  },
   "f1e5cba703edb265": {
     "axis": "refused",
     "judged": "2026-09-16T14:46:49+00:00",
@@ -723,6 +1514,23 @@
       "evidence": "Answer is missing",
       "ok": true,
       "refused": true
+    }
+  },
+  "f4679275065d4124": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:31:10+00:00",
+    "latency_s": 3.64,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "How many retired digital signature keys can a PIV Card hold under SP 800-78-5?",
+    "raw": "{\"evidence\": \"but they do not specify how many retired digital signature keys a PIV Card can hold.\", \"answered_anyway\": true, \"refused\": false}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "but they do not specify how many retired digital signature keys a PIV Card can hold.",
+      "ok": true,
+      "refused": false
     }
   },
   "f4c4d7edbdc7a9d1": {
@@ -789,6 +1597,23 @@
       "fabricated": false,
       "ok": true,
       "unsupported_claim": ""
+    }
+  },
+  "ff7ba1ffa311fde2": {
+    "axis": "refused",
+    "judged": "2026-10-10T08:23:08+00:00",
+    "latency_s": 3.15,
+    "mode": "default/schema",
+    "model": "gemma4:latest",
+    "prompt_version": "1",
+    "question": "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?",
+    "raw": "{\"evidence\": \"they do not specify what those identity proofing requirements are\", \"answered_anyway\": true, \"refused\": true}",
+    "verdict": {
+      "answered_anyway": true,
+      "error": null,
+      "evidence": "they do not specify what those identity proofing requirements are",
+      "ok": true,
+      "refused": true
     }
   }
 }
