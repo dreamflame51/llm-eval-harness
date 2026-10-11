@@ -108,8 +108,11 @@ number. Then, in one commit:
    commit message what moved and why.
 
 Do not tune a rule on the records that will report the result. Prompt v2 and
-v3 were both written while looking at all 29 refusal records; until a dev/test
-split exists, the judge agreement on those 29 is an optimistic number.
+v3 were both written while looking at all 29 refusal records; judge agreement
+on test is clean only for changes made after the dev/test split
+(`eval/split.yaml`). Tune on dev.
+
+Russian version for interview preparation: [LABELING_RUBRIC.ru.md](LABELING_RUBRIC.ru.md).
 
 ## Change log
 

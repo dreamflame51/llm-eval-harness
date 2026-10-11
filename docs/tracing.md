@@ -8,6 +8,8 @@ what came out of a run and nothing about the run itself**. Everything else
 Langfuse offers is already done here in git, and moving it would cost the
 property the project is built on.
 
+Russian version: [tracing.ru.md](tracing.ru.md).
+
 ## The rule
 
 > Tracing observes a run. It never holds a number anyone reports.
