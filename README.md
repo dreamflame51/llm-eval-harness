@@ -205,7 +205,7 @@ carried exactly 0).
 | `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
 | `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | 11/12 |
 | `eval/prefence_baseline/refusal_answers.yaml` | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
-| `eval/refusal_answers.yaml` (current, fenced prompt, 29 questions) | hybrid | 07.10 + 10.10 | 24/29 | 25/29 | 26/29 |
+| `eval/refusal_answers.yaml` (current, fenced prompt, 29 questions) | hybrid | 07.10 + 10.10 | 26/29 | 25/29 | 26/29 |
 
 The middle row is a control, and it is there because a comparison between two
 recordings is not a comparison between two systems: the generator rewrites most
@@ -306,7 +306,7 @@ questions, decided separately by an LLM judge: `refused` from the answer alone,
 | | declined, invented nothing, not misdirected |
 |---|---|
 | hand labels | **26/29** |
-| judge, `qwen3:8b` | 24/29 |
+| judge, `qwen3:8b` | 26/29 - the same count from two different records (below) |
 | phrase list (tripwire) | 25/29 |
 
 by class, by the labels: `in_corpus_gap` 21/23, `out_of_corpus` 5/6.
@@ -330,16 +330,24 @@ on the current 29:
 
 | axis | `qwen3:8b` | `gemma4` |
 |---|---|---|
-| `refused` | 28/29, kappa **0.84** | 22/29, kappa 0.36 |
+| `refused` | 28/29, kappa 0.78 | **29/29, kappa 1.00** |
 | `fabricated` | 28/29, kappa undefined | 29/29, kappa undefined |
 
-Judge prompt version 2, which says a rejected false premise is a refusal. The
-`fabricated` row cannot be read: the hand labels hold no fabrication, so there
-is nothing for a judge to catch and kappa has no variance. `qwen3` disagrees
-twice: a false alarm on fabricated for the SP 800-73 answer, and the
-symmetric-key answer, which rejects the false premise and which it still reads
-as an answer - the record the new rule was written for. `gemma4` misreads seven
-refusals that quote the context before declining as answers.
+Judge prompt version 3. Version 2 said a rejected false premise is a refusal and
+moved nothing it was aimed at; reading the cached verdicts showed why. The
+judges were answering `refused: true` and `answered_anyway: true` together on
+five answers that restate context and then decline, and the code combines the
+two as "refused and not answered anyway". Version 3 defines answered_anyway as
+giving the value asked for, not restating context. gemma4 went from kappa 0.36
+to 1.00.
+
+`qwen3` disagrees twice, in opposite directions, and its clean count equals the
+human's for that reason only: it calls the CBEFF answer a refusal - with empty
+evidence, nothing in the answer declines - and raises a false alarm on
+fabricated for the SP 800-73 answer. The CBEFF answer is misdirected, and under
+the new definition a misdirected fact is not "the value asked for", so it no
+longer counts as answering. The `fabricated` row cannot be read: the hand
+labels hold no fabrication.
 
 Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
 against two hand-labelled fabrications, and called one of them the case the

@@ -38,7 +38,9 @@ BRIEF = """\
 refused     Did the answer decline to answer from the corpus? A sentence that
             names what is missing counts ("the context does not state a
             minimum"). An answer that hedges and then answers anyway does NOT
-            count as a refusal. One that rejects a false premise ("the key is
+            count as a refusal - "answers" meaning it gives the value asked
+            for; restating related context and then declining still counts
+            as a refusal. One that rejects a false premise ("the key is
             symmetric, no curve applies") and gives no value for it does.
 fabricated  Does the answer assert anything about the question that the chunks
             below do not support? Judge against those chunks only, not against

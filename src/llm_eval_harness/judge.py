@@ -73,7 +73,10 @@ CACHE_DIR = ROOT / "eval" / "judge_cache"
 #
 # 2 (10.10): the refused prompt says a rejected false premise is a refusal. The
 # human counted it so and both judges did not, because nothing said either way.
-PROMPT_VERSION = "2"
+# 3 (11.10): answered_anyway means a value for the thing asked, not restated
+# context. At v2 the judges said refused=true AND answered_anyway=true on five
+# context-then-decline answers, and decision() turned all five into answers.
+PROMPT_VERSION = "3"
 
 AXES = ("refused", "fabricated")
 
@@ -135,8 +138,12 @@ question about it: did the answer decline to answer from the corpus?
 - Wording does not matter. Any way of saying "I cannot answer this from what I
   was given" is a refusal.
 - An answer that hedges and then answers anyway is NOT a refusal. Set
-  answered_anyway to true whenever the answer supplies a substantive answer to
-  the question, however it is qualified.
+  answered_anyway to true whenever the answer supplies the value or fact the
+  question asks for, however it is qualified.
+- Restating related context before declining is NOT answering anyway. "The
+  documents say the key is reviewed yearly, but give no retention period"
+  answers nothing about retention: answered_anyway is false. Only a value for
+  the thing asked counts.
 - An answer that rejects a false premise in the question IS a refusal: it says
   the thing asked for does not exist or does not apply ("the key is symmetric,
   no curve is specified for it") and supplies no value for it. Stating related
@@ -219,6 +226,21 @@ EXAMPLES = {
                 "Answer:\nThe site supervisor inspects it each week."
             ),
             {"evidence": "", "answered_anyway": True, "refused": False},
+        ),
+        # Added with prompt version 3: context restated, then declined. Judges
+        # read the restated context as an answer and the refusal was lost
+        # (both judges, five verdicts at version 2).
+        (
+            (
+                "Question: How long must the irrigation log be kept?\n\n"
+                "Answer:\nThe manual says the site supervisor inspects the log "
+                "each week, but it does not give a retention period."
+            ),
+            {
+                "evidence": "it does not give a retention period",
+                "answered_anyway": False,
+                "refused": True,
+            },
         ),
     ],
     "fabricated": [

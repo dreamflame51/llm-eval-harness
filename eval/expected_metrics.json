@@ -1,20 +1,20 @@
 {
   "note": "Expected values for tests/eval/test_regression.py. Update with scripts/freeze_metrics.py only when a change to these numbers is intended, and say why in the commit message.",
   "judge": "qwen3:8b",
-  "prompt_version": "2",
+  "prompt_version": "3",
   "refusal": {
     "n": 29,
-    "clean": 24,
+    "clean": 26,
     "undecided": 0,
     "phrase_rate": 0.8621,
     "by_class": {
       "in_corpus_gap": {
         "n": 23,
-        "clean": 20
+        "clean": 21
       },
       "out_of_corpus": {
         "n": 6,
-        "clean": 4
+        "clean": 5
       }
     },
     "per_question": {
@@ -64,7 +64,7 @@
         "phrase": true
       },
       "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?": {
-        "refused": false,
+        "refused": true,
         "fabricated": false,
         "phrase": false
       },
@@ -149,7 +149,7 @@
         "phrase": false
       },
       "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?": {
-        "refused": false,
+        "refused": true,
         "fabricated": false,
         "phrase": false
       },

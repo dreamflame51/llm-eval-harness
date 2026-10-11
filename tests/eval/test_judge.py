@@ -242,7 +242,7 @@ def test_the_examples_come_before_the_record():
     assert messages[0]["role"] == "system"
     assert messages[-1]["role"] == "user"
     assert "the real question" in messages[-1]["content"]
-    assert sum(1 for m in messages if m["role"] == "assistant") == 3
+    assert sum(1 for m in messages if m["role"] == "assistant") == len(judge.EXAMPLES["refused"])
 
 
 def test_the_examples_are_valid_verdicts():
