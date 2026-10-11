@@ -129,6 +129,8 @@ def schema(axis):
     }
 
 
+# The rules in these two prompts mirror docs/LABELING_RUBRIC.md, which is the
+# source: a rule changes there first, then here, with PROMPT_VERSION bumped.
 REFUSED_SYSTEM = """\
 You grade one answer produced by a retrieval-augmented system. You answer ONE \
 question about it: did the answer decline to answer from the corpus?

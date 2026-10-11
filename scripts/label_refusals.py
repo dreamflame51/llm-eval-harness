@@ -34,6 +34,7 @@ import textwrap
 
 from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, refusal_answers
 
+# BRIEF and ASK mirror docs/LABELING_RUBRIC.md, which is the source.
 BRIEF = """\
 refused     Did the answer decline to answer from the corpus? A sentence that
             names what is missing counts ("the context does not state a
