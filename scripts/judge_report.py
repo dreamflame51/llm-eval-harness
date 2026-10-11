@@ -41,7 +41,9 @@ from llm_eval_harness.dataset import (
 from llm_eval_harness.judge import (
     AXES,
     CACHE_DIR,
+    EXTRA_AXES,
     agreement,
+    axis_decisions,
     decided_records,
     load_cache,
     matrix,
@@ -281,6 +283,36 @@ def main():
 
     print("\nagreement with the hand labels")
     print_against_labels(by_model, records)
+
+    print_extra_axes(names, records)
+
+
+def print_extra_axes(names, records, indent="  "):
+    """
+    Axes judged and reported on their own, outside the clean verdict until
+    they are validated on test (judge.EXTRA_AXES). Only records labelled on
+    the axis count; sets recorded before it existed carry no label.
+    """
+    for axis in EXTRA_AXES:
+        labelled = [r for r in records if r["labels"].get(axis) is not None]
+        if not labelled:
+            continue
+        print(f"\n{axis} (extra axis, not in clean) - {len(labelled)} labelled")
+        for model in names:
+            rows = [(r, d) for r, d in axis_decisions(model, axis, labelled) if d is not None]
+            if not rows:
+                continue
+            result = agreement([(r["labels"][axis], d) for r, d in rows])
+            print(
+                f"{indent}{model:<30} {result['agree']}/{result['n']} "
+                f"({result['rate']:.0%}), kappa {fmt_kappa(result['kappa'])}"
+            )
+            for r, d in rows:
+                if r["labels"][axis] != d:
+                    print(
+                        f"{indent}  label={YES_NO[r['labels'][axis]]:<3} "
+                        f"judge={YES_NO[d]:<3} {r['question'][:52]}"
+                    )
 
 
 if __name__ == "__main__":

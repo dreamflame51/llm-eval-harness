@@ -80,6 +80,28 @@ PROMPT_VERSION = "3"
 
 AXES = ("refused", "fabricated")
 
+# Judged and cached like the two above, reported on its own, and NOT part of
+# the clean verdict until its agreement with the hand labels is measured on the
+# test half (docs/lessons.md #32, docs/LABELING_RUBRIC.md MD1-MD3). Folding an
+# unvalidated axis into the headline is the mistake the rest of this module is
+# built to avoid. Its prompt is new, so PROMPT_VERSION is not bumped: the two
+# existing prompts did not change, and the axis is part of the cache key.
+EXTRA_AXES = ("misdirected",)
+JUDGEABLE = AXES + EXTRA_AXES
+
+# An extra axis is versioned on its own: its prompt is still being tuned on
+# dev, and bumping PROMPT_VERSION for that would re-judge the two core axes for
+# nothing. Bump the entry here on any change to that axis's prompt or examples.
+#
+# m1 (11.10): first version. m2 (11.10): mismatch_named means saying the asked
+# object is not covered - at m1 qwen3 read "for the administration key" (naming
+# the other object) as naming the mismatch, and passed the 3TDEA record.
+AXIS_PROMPT_VERSION = {"misdirected": "m2"}
+
+
+def prompt_version_for(axis):
+    return AXIS_PROMPT_VERSION.get(axis, PROMPT_VERSION)
+
 # Greedy decoding, same as the generator (pipeline.py). Nothing here wants
 # variation: two runs of the judge over the same answer disagreeing with each
 # other would make every number below unreadable.
@@ -113,6 +135,15 @@ FIELDS = {
     "fabricated": (
         ("unsupported_claim", str),
         ("fabricated", bool),
+    ),
+    # The two objects are named before anything is decided: a judge that has
+    # to write down what was asked about and what the answer is about cannot
+    # skip the comparison the verdict rests on.
+    "misdirected": (
+        ("asked_about", str),
+        ("answer_is_about", str),
+        ("mismatch_named", bool),
+        ("misdirected", bool),
     ),
 }
 
@@ -180,7 +211,40 @@ empty>", "fabricated": true|false}
 
 unsupported_claim must be copied verbatim from the answer."""
 
-SYSTEM = {"refused": REFUSED_SYSTEM, "fabricated": FABRICATED_SYSTEM}
+MISDIRECTED_SYSTEM = """\
+You grade one answer produced by a retrieval-augmented system. You answer ONE \
+question about it: does the answer give a fact about a DIFFERENT object than the \
+one the question asks about, as if it were the answer?
+
+- First name the object the question asks about, then the object the answer's
+  facts are about. "Object" means the specific thing: a particular key, document,
+  control, table or value - not the general topic.
+- misdirected is true when the answer's facts are about a neighbouring object
+  and the answer presents them as the answer to the question, without saying
+  that the asked object is not covered.
+- mismatch_named is true only when the answer says that the object ASKED
+  ABOUT is not covered, or that its facts are not about that object: "the
+  documents give 20 for key management keys but nothing for signature keys".
+  Then misdirected is false - it tells the reader the truth.
+- Naming the other object is NOT naming the mismatch. "The irrigation log is
+  inspected each week", given to a question about the pump filter, names a
+  different object and still answers as if that were the answer:
+  mismatch_named is false, misdirected is true.
+- A refusal that gives no facts is not misdirected. An answer about the object
+  asked for is not misdirected, even if it is incomplete or partly declines.
+- Whether the facts are true, and whether the chunks support them, are other
+  questions. Judge only which object the answer is about.
+
+Reply with one JSON object and nothing else:
+{"asked_about": "<the object the question asks about>", \
+"answer_is_about": "<the object the answer's facts are about, or empty>", \
+"mismatch_named": true|false, "misdirected": true|false}"""
+
+SYSTEM = {
+    "refused": REFUSED_SYSTEM,
+    "fabricated": FABRICATED_SYSTEM,
+    "misdirected": MISDIRECTED_SYSTEM,
+}
 
 # Synthetic, and none of them is one of the twelve records under test. The
 # three shapes are the ones the phrase list gets wrong plus the plain case:
@@ -277,6 +341,65 @@ EXAMPLES = {
                 "records any deviation from the watering schedule."
             ),
             {"unsupported_claim": "", "fabricated": False},
+        ),
+    ],
+    # Off-domain like the rest, and the four shapes from the rubric: a
+    # neighbour's fact given as the answer (MD1), the same fact with the
+    # mismatch named (MD2), a plain refusal, and an answer about the asked
+    # object.
+    "misdirected": [
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: How often must the pump filter be cleaned?\n\n"
+                "Answer:\nThe irrigation log is inspected each week."
+            ),
+            {
+                "asked_about": "the pump filter",
+                "answer_is_about": "the irrigation log",
+                "mismatch_named": False,
+                "misdirected": True,
+            },
+        ),
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: How often must the pump filter be cleaned?\n\n"
+                "Answer:\nThe manual says the irrigation log is inspected each "
+                "week, but it gives no cleaning interval for the pump filter."
+            ),
+            {
+                "asked_about": "the pump filter",
+                "answer_is_about": "the irrigation log",
+                "mismatch_named": True,
+                "misdirected": False,
+            },
+        ),
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: How often must the pump filter be cleaned?\n\n"
+                "Answer:\nThe cleaning interval is not in the provided context."
+            ),
+            {
+                "asked_about": "the pump filter",
+                "answer_is_about": "",
+                "mismatch_named": False,
+                "misdirected": False,
+            },
+        ),
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: Who inspects the irrigation log?\n\n"
+                "Answer:\nThe site supervisor inspects it each week."
+            ),
+            {
+                "asked_about": "the irrigation log",
+                "answer_is_about": "the irrigation log",
+                "mismatch_named": False,
+                "misdirected": False,
+            },
         ),
     ],
 }
@@ -444,6 +567,11 @@ def decision(axis, verdict):
         return None
     if axis == "refused":
         return bool(verdict["refused"]) and not verdict["answered_anyway"]
+    if axis == "misdirected":
+        # Taken as the judge gave it. mismatch_named is kept for reading the
+        # cache, not combined here: combining two fields in code is what hid
+        # the refused verdicts at prompt v2.
+        return bool(verdict["misdirected"])
     return bool(verdict["fabricated"])
 
 
@@ -458,6 +586,8 @@ def quote_missing(axis, verdict):
         return False
     if axis == "refused":
         return bool(verdict["refused"]) and not verdict["evidence"]
+    if axis == "misdirected":
+        return bool(verdict["misdirected"]) and not verdict["answer_is_about"]
     return bool(verdict["fabricated"]) and not verdict["unsupported_claim"]
 
 
@@ -502,7 +632,7 @@ def cache_key(model, axis, record, mode, prompt_version=None):
     about than two.
     """
     parts = [
-        prompt_version or PROMPT_VERSION,
+        prompt_version or prompt_version_for(axis),
         mode,
         model,
         axis,
@@ -647,7 +777,7 @@ def judge_record(
         "model": model,
         "axis": axis,
         "mode": mode,
-        "prompt_version": PROMPT_VERSION,
+        "prompt_version": prompt_version_for(axis),
         "question": record["question"],
         "verdict": verdict,
         "raw": raw,
@@ -692,7 +822,7 @@ def cache_freshness(model, records=None, axes=AXES, cache_dir=CACHE_DIR):
             }
             if not versions:
                 missing.append((record["question"], axis))
-            elif PROMPT_VERSION in versions:
+            elif prompt_version_for(axis) in versions:
                 current += 1
             else:
                 stale += 1
@@ -759,6 +889,24 @@ def decided_records(model, records=None, cache_dir=CACHE_DIR):
             )
         )
     return rows, conflicts
+
+
+def axis_decisions(model, axis, records=None, cache_dir=CACHE_DIR):
+    """
+    [(record, decision)] for one axis, in fixture order; None where unjudged.
+
+    For the extra axes, which decided_records() leaves out on purpose so that
+    its (record, refused, fabricated) shape - and every caller of it - stays
+    what it was.
+    """
+    if records is None:
+        records = refusal_answers()
+    cache = load_cache(model, cache_dir)
+    rows = []
+    for record in records:
+        entries = entries_for(model, record, axis, cache)
+        rows.append((record, decision(axis, entries[0]["verdict"]) if entries else None))
+    return rows
 
 
 def matrix(decisions):

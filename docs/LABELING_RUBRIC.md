@@ -121,3 +121,4 @@ Russian version for interview preparation: [LABELING_RUBRIC.ru.md](LABELING_RUBR
 | 13-16.09 | `refused` / `fabricated` brief written; answerable R1-R8 written record by record |
 | 10.10 | RF5 partial refusal, FB4 modality, FB5 neighbouring fact; `misdirected` axis (MD1-MD3); RF4 false premise (judge prompt v2) |
 | 11.10 | RF3 "answers anyway" means the value asked for (judge prompt v3) |
+| 11.10 | judge axis `misdirected` (MD1-MD3), versioned on its own (`AXIS_PROMPT_VERSION`, m2), tuned on dev only; not part of clean |

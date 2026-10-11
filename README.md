@@ -349,6 +349,19 @@ the new definition a misdirected fact is not "the value asked for", so it no
 longer counts as answering. The `fabricated` row cannot be read: the hand
 labels hold no fabrication.
 
+**The judge has a third axis, `misdirected`, kept out of the clean verdict.**
+Its prompt was tuned on dev only - two versions; qwen3 named both objects
+correctly and still called a neighbouring fact "the mismatch named" - and then
+read on test once:
+
+| `misdirected` | dev (15, 1 positive) | test (14, 2 positives) |
+|---|---|---|
+| `gemma4` | 15/15, kappa 1.00 | 13/14, kappa 0.63 - caught 65537, missed CBEFF |
+| `qwen3:8b` | 13/15, kappa -0.07 | 12/14, kappa 0.59 - caught both, two false alarms |
+
+Three positives in the whole set: enough to see that gemma4 can do it and qwen3
+is erratic, not enough to put the axis into the headline number.
+
 Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
 against two hand-labelled fabrications, and called one of them the case the
 judge was built for. Neither label survived a second reading by the same rater
