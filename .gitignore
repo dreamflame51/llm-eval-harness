@@ -29,6 +29,7 @@ LEARNING_PLAN.md
 METRICS_CHEATSHEET.md
 METRICS_CHEATSHEET.ru.md
 docs/LEARNING_LOG.md
+docs/LEARNING_LOG.ru.md
 docs/INTERVIEW_QA.md
 
 # Langfuse keys. The project's own numbers never depend on them - tracing is
