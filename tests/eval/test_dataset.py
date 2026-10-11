@@ -6,8 +6,11 @@ from llm_eval_harness.dataset import (
     REFUSAL_TYPES,
     answerable_records,
     hand_clean,
+    in_split,
+    iter_records,
     library_scores,
     load_ground_truth,
+    load_split,
     refusal_answers,
     refusal_records,
 )
@@ -141,6 +144,38 @@ def test_rejects_a_label_that_is_not_a_boolean(tmp_path):
     )
     with pytest.raises(TypeError):
         refusal_answers(answers(tmp_path, body))
+
+
+def test_every_question_has_a_split():
+    # A question added to the fixture after the split was frozen has no half,
+    # and would be dropped from both by in_split without a word.
+    split = load_split()
+    questions = {r["question"] for r in iter_records()}
+    assert questions == set(split)
+
+
+def test_a_paraphrase_is_in_the_same_split_as_its_original():
+    split = load_split()
+    for r in iter_records():
+        if "paraphrase_of" in r:
+            assert split[r["question"]] == split[r["paraphrase_of"]], r["question"]
+
+
+def test_each_kind_of_record_is_split_evenly():
+    split = load_split()
+    counts = {}
+    for r in iter_records():
+        kind = "answerable" if r["answerable"] else ("bait" if r.get("bait") else r["refusal_type"])
+        counts.setdefault(kind, {"dev": 0, "test": 0})[split[r["question"]]] += 1
+    for kind, c in counts.items():
+        assert abs(c["dev"] - c["test"]) <= 1, (kind, c)
+
+
+def test_in_split_partitions_the_recorded_refusal_set():
+    records = refusal_answers()
+    dev, test = in_split(records, "dev"), in_split(records, "test")
+    assert len(dev) + len(test) == len(records)
+    assert not {r["question"] for r in dev} & {r["question"] for r in test}
 
 
 def test_rejects_a_misdirected_label_that_is_not_a_boolean(tmp_path):

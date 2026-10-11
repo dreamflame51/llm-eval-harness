@@ -31,7 +31,13 @@ decimals for that reason.
 import argparse
 import pathlib
 
-from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, hand_clean, refusal_answers
+from llm_eval_harness.dataset import (
+    REFUSAL_ANSWERS_PATH,
+    SPLITS,
+    hand_clean,
+    in_split,
+    refusal_answers,
+)
 from llm_eval_harness.judge import (
     AXES,
     CACHE_DIR,
@@ -240,14 +246,21 @@ def parse_args():
         "eval/dense_baseline/ is the other one worth reading: same questions, "
         "same afternoon, the retriever the product stopped using",
     )
+    parser.add_argument(
+        "--split",
+        choices=SPLITS,
+        help="report on one half of eval/split.yaml. Tune the judge prompt on "
+        "dev; quote agreement from test",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    records = refusal_answers(args.file)
+    records = in_split(refusal_answers(args.file), args.split)
     names = models()
-    print(f"{len(records)} recorded answers from {args.file}")
+    where = f", split {args.split}" if args.split else ""
+    print(f"{len(records)} recorded answers from {args.file}{where}")
     print(f"judges: {', '.join(names) or 'none'}; verdicts from {CACHE_DIR}\n")
 
     by_model = {}

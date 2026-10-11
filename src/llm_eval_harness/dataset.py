@@ -26,6 +26,8 @@ import yaml
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 GROUND_TRUTH_PATH = ROOT / "eval" / "ground_truth.yaml"
 REFUSAL_ANSWERS_PATH = ROOT / "eval" / "refusal_answers.yaml"
+SPLIT_PATH = ROOT / "eval" / "split.yaml"
+SPLITS = ("dev", "test")
 
 REFUSAL_TYPES = ("in_corpus_gap", "out_of_corpus")
 
@@ -179,6 +181,33 @@ def refusal_answers(
                     f"got {labels[key]!r}"
                 )
     return data
+
+
+def load_split(path: str | pathlib.Path = SPLIT_PATH) -> dict[str, str]:
+    """
+    question -> "dev" | "test", frozen by scripts/make_split.py.
+
+    Tune on dev, report on test. A record's split is looked up by its question
+    text, so the same mapping serves the fixture and every recorded set.
+    """
+    with open(path, "r", encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not isinstance(data, dict):
+        raise TypeError(f"Expected a question -> split mapping in {path}")
+    bad = {q: s for q, s in data.items() if s not in SPLITS}
+    if bad:
+        raise ValueError(f"Unknown split values in {path}: {bad}")
+    return data
+
+
+def in_split(records: list[dict[str, Any]], split: str | None) -> list[dict[str, Any]]:
+    """Keep the records of one split; None keeps all of them."""
+    if split is None:
+        return records
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}, got {split!r}")
+    mapping = load_split()
+    return [r for r in records if mapping[r["question"]] == split]
 
 
 def hand_clean(labels: dict[str, Any]) -> bool | None:
