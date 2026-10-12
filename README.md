@@ -277,6 +277,21 @@ question being asked.
 `hit@k` ignores position, `MRR` does not - a system that always ranks the right
 chunk 5th looks perfect to one and poor to the other.
 
+**Two new kinds of answerable question (12.10), reported apart** so the
+columns above stay comparable with everything before them:
+
+| group | n | `hit@5` | `covered@5` | `complete@5` | `MRR` |
+|---|---|---|---|---|---|
+| `multi_hop` - the answer needs two or more passages | 6 | 0.667 | 0.833 | **0.333** | 0.667 |
+| `partial` - the corpus answers only half the question | 6 | 0.500 | 0.500 | 0.500 | 0.333 |
+
+`covered@5` treats a record's gold spans as alternatives - one served is
+enough - which is right for a question supported in two places and wrong for a
+question that needs both. `complete@5` requires every span. On multi-hop
+questions the retriever brings one hop five times in six and all of them twice:
+the gap between the two columns is the multi-hop failure, and the lenient
+metric hides it entirely. n is six; read the direction, not the decimals.
+
 `hit@k` also charges the retriever for chunking. A span cut by a chunk boundary
 is unreachable however good retrieval is, so the metric partly measures how
 lucky the gold spans were with the boundaries. `covered@k` accepts a span

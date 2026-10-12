@@ -81,6 +81,12 @@ def _normalize(record: dict[str, Any]) -> dict[str, Any]:
         # Refusal records written to tempt a model into inventing a figure:
         # the topic is in the corpus, the number is not.
         "bait",
+        # Answerable records that are not the original single-passage kind:
+        # multi_hop needs two or more passages, partial is answerable only in
+        # part (missing names the half the corpus lacks). Reported apart, so
+        # the numbers on the original 26 stay comparable over time.
+        "kind",
+        "missing",
     ):
         if extra in record:
             out[extra] = record[extra]

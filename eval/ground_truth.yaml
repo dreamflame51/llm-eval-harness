@@ -1044,3 +1044,138 @@
   # verified: no "Administration Key ... Curve|P-256|P-384|ECC|ECDH" span anywhere in SP 800-78-5
   bait: true
 
+# ---------------------------------------------------------------------------
+# Multi-hop (6, added 2026-10-12)
+# The answer needs two or more passages - across documents, or across distant
+# sections of one. kind: multi_hop, reported apart from the original 26 so
+# their retrieval numbers stay comparable with everything before. Drafted by
+# Claude; every span searched in the extracted text of load_pdf().
+# ---------------------------------------------------------------------------
+
+- question: "SP 800-37r2 names four security risk factors and points to SP 800-30 for risk assessment. What are the factors, and what are the steps of the risk assessment process in SP 800-30?"
+  answer: "The factors are threat, vulnerability, likelihood and impact. SP 800-30 Revision 1 defines four steps: preparing for the assessment, conducting it, communicating the results, and maintaining the assessment."
+  contexts:
+    - "The four security risk factors are threat, vulnerability, likelihood, and impact."
+    - "each of the steps in the risk assessment process (i.e., preparing for the assessment, conducting the assessment, communicating the results of the assessment, and maintaining the assessment)"
+  answerable: true
+  source: "NIST.SP.800-37r2 + nistspecialpublication800-30r1"
+  kind: multi_hop
+
+- question: "Under SP 800-37r2, who approves the continuous monitoring strategy and its minimum monitoring frequency at the organization level, and who at the system level?"
+  answer: "At the organization level, the senior accountable official for risk management or the risk executive (function); at the system level, the authorizing official or a designated representative."
+  contexts:
+    - "The senior accountable official for risk management or the risk executive (function) approves the continuous monitoring strategy including the minimum frequency with which controls are to be monitored."
+    - "The authorizing official or designated representative approves the continuous monitoring strategy and the minimum frequency with which each control is to be monitored."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  kind: multi_hop
+
+- question: "SP 800-171A Revision 3 bases its assessment process on another NIST publication. What are the phases of that process, and what assessment methods does that publication define?"
+  answer: "The process, based on SP 800-53A, has four phases: preparing for assessments, developing assessment plans, conducting assessments, and analyzing, documenting and reporting results. SP 800-53A defines three assessment methods: examine, interview and test."
+  contexts:
+    - "The four-phase process is based on the methodology in SP 800-53A"
+    - "Preparing for assessments • Developing assessment plans • Conducting assessments • Analyzing, documenting, and reporting assessment results"
+    - "Assessment methods define the nature of the assessor actions and include examine, interview, and test."
+  answerable: true
+  source: "NIST.SP.800-171Ar3 + NIST.SP.800-53Ar5"
+  kind: multi_hop
+
+- question: "After December 31, 2030, which algorithms may the PIV Card Application Administration Key use, and which key reference value identifies that key on the card?"
+  answer: "AES-128, AES-192 or AES-256 (3TDEA is no longer allowed), and the key reference value is '9B'."
+  contexts:
+    - "After December 31, 2030 AES-128, AES-192, or AES-256"
+    - "PIV Card Application Administration Key '9B'"
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "Table 7 + Table 8"
+  kind: multi_hop
+
+- question: "Which elliptic curves may PIV keys use, and when must the PIV Secure Messaging key use P-384?"
+  answer: "Curve P-256 or Curve P-384. The Secure Messaging key must use P-384 when the card supports the virtual contact interface and the digital signature key, the key management key or any retired key management key is a P-384 key; otherwise it may use either."
+  contexts:
+    - "Elliptic curve keys must correspond to one of the following recommended curves from [FIPS186]:"
+    - "are elliptic curve keys that correspond to Curve P-384, then the PIV Secure Messaging key shall use P-384. Otherwise, it may use P-256 or P-384."
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  kind: multi_hop
+
+- question: "According to SP 800-37r2, how do organizations decide how much residual risk is acceptable, and what are the possible risk responses?"
+  answer: "They determine acceptable residual risk based on organizational risk tolerance. Risk responses are accepting, avoiding, mitigating, sharing or transferring risk."
+  contexts:
+    - "Organizations determine acceptable degrees of residual risk based on organizational risk tolerance."
+    - "Accepting, avoiding, mitigating, sharing, or transferring risk to agency operations, agency assets, individuals, other organizations, or the Nation."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  page: "Task R-3 + glossary"
+  kind: multi_hop
+
+# ---------------------------------------------------------------------------
+# Partially answerable (6, added 2026-10-12)
+# The corpus answers one half of the question and not the other. A correct
+# answer gives the first half and says the second is not covered (rubric R2,
+# R5; RF5 on the refusal side). Contexts quote the answerable half only; the
+# missing half is verified absent and the search recorded. kind: partial.
+# ---------------------------------------------------------------------------
+
+- question: "What RSA key sizes may the PIV Authentication key use through 2030, and how long does generating such a key on the card take?"
+  answer: "RSA 2048 or 3072 bits (ECDSA P-256 or P-384 is the alternative). How long on-card key generation takes is not in the corpus."
+  contexts:
+    - "PIV Authentication key RSA (2048 or 3072 bits) ECDSA (Curve P-256 or P-384) RSA 3072 bits ECDSA (Curve P-256 or P-384)"
+  answerable: true
+  source: "NIST.SP.800-78-5"
+  page: "Table 1"
+  kind: partial
+  missing: "key generation time"
+  # verified: search("generat\w+ [^.]{0,60}(seconds?|minutes?|milliseconds?)") corpus-wide - no hits
+
+- question: "What is a common control under SP 800-37r2, and what share of an organization's controls are typically common controls?"
+  answer: "Common controls are controls that can be inherited by one or more information systems, allocated to entities designated as common control providers. No typical share is given in the corpus."
+  contexts:
+    - "Common controls are controls that can be inherited by one or more information systems."
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  kind: partial
+  missing: "a typical share of common controls"
+  # verified: search("percent|\d+ ?%") corpus-wide - 8 hits, all audit-log storage or mean-time-to-failure parameters in SP 800-53Ar5
+
+- question: "Which assessment methods does SP 800-53A Revision 5 define, and how many hours should each method take?"
+  answer: "Examine, interview and test. No duration in hours is given for any method."
+  contexts:
+    - "Assessment methods define the nature of the assessor actions and include examine, interview, and test."
+  answerable: true
+  source: "NIST.SP.800-53Ar5"
+  kind: partial
+  missing: "hours per method"
+  # verified: search("\d+ hours") corpus-wide - one hit, "24 hours per day, 7 days per week" (physical access guards)
+
+- question: "What are the steps of the risk assessment process in SP 800-30 Revision 1, and how many days does each step take?"
+  answer: "Preparing for the assessment, conducting it, communicating the results, and maintaining the assessment. No duration in days is given."
+  contexts:
+    - "each of the steps in the risk assessment process (i.e., preparing for the assessment, conducting the assessment, communicating the results of the assessment, and maintaining the assessment)"
+  answerable: true
+  source: "nistspecialpublication800-30r1"
+  kind: partial
+  missing: "days per step"
+  # verified: search("\d+ days|\d+\s*(weeks?|months?)") corpus-wide - "7 days per week" (guards) and "4 weeks" (a contingency-plan ODP example in SP 800-53Ar5)
+
+- question: "Under SP 800-37r2, who approves the system-level continuous monitoring strategy, and what is the default minimum monitoring frequency?"
+  answer: "The authorizing official or a designated representative. No default frequency is set: the criteria for the minimum frequency are established in collaboration with organizational officials."
+  contexts:
+    - "The authorizing official or designated representative approves the continuous monitoring strategy and the minimum frequency with which each control is to be monitored."
+    - "The criteria for determining the minimum frequency for control monitoring is established in collaboration with organizational officials"
+  answerable: true
+  source: "NIST.SP.800-37r2"
+  kind: partial
+  missing: "a default frequency value"
+  # verified: search("default (monitoring )?frequency|minimum frequency (is|of) (at least|once|\d)") corpus-wide - no hits
+
+- question: "What are the phases of the SP 800-171A Revision 3 assessment process, and how long should each phase last?"
+  answer: "Preparing for assessments, developing assessment plans, conducting assessments, and analyzing, documenting and reporting results. No duration is given for any phase."
+  contexts:
+    - "Preparing for assessments • Developing assessment plans • Conducting assessments • Analyzing, documenting, and reporting assessment results"
+  answerable: true
+  source: "NIST.SP.800-171Ar3"
+  kind: partial
+  missing: "phase durations"
+  # verified: search("\d+\s*(weeks?|months?|business days|calendar days)") corpus-wide - one hit, "4 weeks" (a contingency-plan ODP example in SP 800-53Ar5)
+

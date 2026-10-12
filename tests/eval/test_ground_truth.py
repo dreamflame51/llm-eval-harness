@@ -44,9 +44,15 @@ pytestmark = [
 # does reach them - it accepts a span rebuilt from two retrieved chunks - so
 # its ceiling is 26/26 and the two metrics are not comparable record for
 # record. That gap is the point of reporting both; see evaluator.py.
+#
+# Added 12.10: the system-level continuous monitoring approval in SP 800-37r2,
+# quoted by a multi_hop and a partial record. Neither is reduced to one
+# context by it - each carries a second span that is whole - so hit@k can
+# still reach both.
 KNOWN_SPLIT = {
     "The examine method is the process of reviewing",
     "This publication provides organizations with assessment procedures",
+    "The authorizing official or designated representative approves the continuous monitoring strategy",
 }
 
 

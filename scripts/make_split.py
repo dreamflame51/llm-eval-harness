@@ -45,7 +45,7 @@ HEADER = """\
 
 def stratum(record):
     if record.get("answerable", True):
-        return "answerable"
+        return record.get("kind", "answerable")
     if record.get("bait"):
         return "bait"
     return record["refusal_type"]
@@ -65,10 +65,60 @@ def assign(records):
     return split
 
 
+def extend(records, existing):
+    """
+    Assign only the questions the frozen split does not hold yet, by the same
+    rule, continuing each stratum's alternation where it stopped. Nothing
+    already assigned moves.
+    """
+    counters = {}
+    for r in records:
+        if "paraphrase_of" not in r and r["question"] in existing:
+            counters[stratum(r)] = counters.get(stratum(r), 0) + 1
+    added = {}
+    for r in records:
+        if "paraphrase_of" in r or r["question"] in existing:
+            continue
+        s = stratum(r)
+        n = counters.get(s, 0)
+        added[r["question"]] = "dev" if n % 2 == 0 else "test"
+        counters[s] = n + 1
+    for r in records:
+        if "paraphrase_of" in r and r["question"] not in existing:
+            added[r["question"]] = {**existing, **added}[r["paraphrase_of"]]
+    return added
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force", action="store_true", help="overwrite the frozen split")
+    parser.add_argument(
+        "--extend",
+        action="store_true",
+        help="append questions added to the fixture since the split was frozen; "
+        "existing assignments are not touched",
+    )
     args = parser.parse_args()
+
+    if args.extend:
+        import datetime
+
+        existing = yaml.safe_load(OUT.read_text(encoding="utf-8"))
+        records = load_ground_truth(GROUND_TRUTH_PATH)
+        added = extend(records, existing)
+        if not added:
+            print("nothing to add")
+            return
+        today = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
+        body = yaml.safe_dump(added, sort_keys=False, allow_unicode=True, width=200)
+        with OUT.open("a", encoding="utf-8") as fh:
+            fh.write(f"# extended {today}: {len(added)} questions added to the fixture after the freeze\n")
+            fh.write(body)
+        for q, half in added.items():
+            print(f"  {half:<5} {q[:80]}")
+        print(f"appended {len(added)} to {OUT}")
+        return
+
     if OUT.exists() and not args.force:
         raise SystemExit(f"{OUT} exists and is frozen; see the module docstring.")
 

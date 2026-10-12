@@ -165,7 +165,10 @@ def test_each_kind_of_record_is_split_evenly():
     split = load_split()
     counts = {}
     for r in iter_records():
-        kind = "answerable" if r["answerable"] else ("bait" if r.get("bait") else r["refusal_type"])
+        if r["answerable"]:
+            kind = r.get("kind", "answerable")
+        else:
+            kind = "bait" if r.get("bait") else r["refusal_type"]
         counts.setdefault(kind, {"dev": 0, "test": 0})[split[r["question"]]] += 1
     for kind, c in counts.items():
         assert abs(c["dev"] - c["test"]) <= 1, (kind, c)

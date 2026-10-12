@@ -9,9 +9,12 @@ the real retriever is good. Whether it is good is what running
 import pytest
 
 from llm_eval_harness.evaluator import (
+    by_group,
+    complete_coverage,
     context_coverage,
     covered_fraction,
     evaluate_retrieval,
+    group_of,
     rank_of_first_hit,
 )
 
@@ -267,3 +270,32 @@ def test_k_is_passed_through_to_the_retriever():
 
     evaluate_retrieval(records("q1"), k=3, search_fn=search)
     assert seen["k"] == 3
+
+
+# --- complete coverage and groups ------------------------------------------
+
+OTHER = "the curve is p-384 for that key"
+
+
+def test_complete_coverage_needs_every_span_where_context_coverage_needs_one():
+    # A multi_hop record's spans are all required; serving one of two is half
+    # the evidence, and only the strict metric says so.
+    retrieved = [chunk(f"x {GOLD} y")]
+    assert context_coverage([GOLD, OTHER], retrieved) == 1.0
+    assert complete_coverage([GOLD, OTHER], retrieved) == 0.0
+    both = [chunk(f"x {GOLD} y"), chunk(f"x {OTHER} y")]
+    assert complete_coverage([GOLD, OTHER], both) == 1.0
+
+
+def test_groups_keep_the_original_set_apart_from_new_kinds():
+    records = [
+        {"question": "a", "contexts": [GOLD]},
+        {"question": "b", "contexts": [GOLD], "paraphrase_of": "a"},
+        {"question": "c", "contexts": [GOLD, OTHER], "kind": "multi_hop"},
+    ]
+    assert [group_of(r) for r in records] == ["original", "paraphrase", "multi_hop"]
+    result = evaluate_retrieval(records, k=1, search_fn=lambda q, k: [chunk(f"x {GOLD} y")])
+    groups = by_group(result, records)
+    assert groups["original"]["hit_at_k"] == 1.0
+    assert groups["multi_hop"]["hit_at_k"] == 1.0
+    assert groups["multi_hop"]["complete_at_k"] == 0.0
