@@ -1132,6 +1132,10 @@
   answer: "Common controls are controls that can be inherited by one or more information systems, allocated to entities designated as common control providers. No typical share is given in the corpus."
   contexts:
     - "Common controls are controls that can be inherited by one or more information systems."
+    # alternative, added 12.10: the glossary entry. The first recorded answer
+    # was drawn from it, and without it retrieval scored a served definition
+    # as a miss.
+    - "A security or privacy control that is inherited by multiple information systems or programs."
   answerable: true
   source: "NIST.SP.800-37r2"
   kind: partial
@@ -1142,6 +1146,10 @@
   answer: "Examine, interview and test. No duration in hours is given for any method."
   contexts:
     - "Assessment methods define the nature of the assessor actions and include examine, interview, and test."
+    # alternative, added 12.10: the numbered list in the same document. The
+    # first recorded answer was drawn from it while the span above was not
+    # retrieved - a served answer the metric would have called a miss.
+    - "security and privacy control assessments: 1. Examine 2. Interview 3. Test"
   answerable: true
   source: "NIST.SP.800-53Ar5"
   kind: partial

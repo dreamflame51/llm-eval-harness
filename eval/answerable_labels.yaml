@@ -184,5 +184,69 @@
   faithful: "yes"
   note: "the link (800-53A guides the Assess step) is there; what Assess determines and the three methods are missing. Faithful - all three claims near-verbatim in chunks 1-2"
 
+# --- 12.10: multi_hop and partial records (eval/answerable_answers.c1.yaml) ---
+# Labels proposed by Claude, confirmed by the rater record by record in chat.
+# For a partial record, correct: yes means the answerable half is given AND
+# the missing half is said to be missing (the gold answer states both).
 
+- question: "SP 800-37r2 names four security risk factors and points to SP 800-30 for risk assessment. What are the factors, and what are the steps of the risk assessment process in SP 800-30?"
+  correct: "partial"
+  faithful: "yes"
+  note: "factors right; the SP 800-30 steps declared missing - the 800-30r1 span was not retrieved (complete@5 0) (R2)"
 
+- question: "Under SP 800-37r2, who approves the continuous monitoring strategy and its minimum monitoring frequency at the organization level, and who at the system level?"
+  correct: "partial"
+  faithful: "yes"
+  note: "system level only; the organization level is omitted without saying so - its span came half-retrieved (0.43) (R5)"
+
+- question: "SP 800-171A Revision 3 bases its assessment process on another NIST publication. What are the phases of that process, and what assessment methods does that publication define?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "pure refusal; none of the three spans retrieved (R4, R8)"
+
+- question: "After December 31, 2030, which algorithms may the PIV Card Application Administration Key use, and which key reference value identifies that key on the card?"
+  correct: "yes"
+  faithful: "yes"
+  note: "both hops, both spans retrieved"
+
+- question: "Which elliptic curves may PIV keys use, and when must the PIV Secure Messaging key use P-384?"
+  correct: "yes"
+  faithful: "yes"
+  note: "both hops, near-verbatim"
+
+- question: "According to SP 800-37r2, how do organizations decide how much residual risk is acceptable, and what are the possible risk responses?"
+  correct: "partial"
+  faithful: "yes"
+  note: "acceptable residual risk right; risk responses deferred to SP 800-39 - the glossary span was not retrieved (R2)"
+
+- question: "What RSA key sizes may the PIV Authentication key use through 2030, and how long does generating such a key on the card take?"
+  correct: "yes"
+  faithful: "yes"
+  note: "answerable half given, missing half declared missing"
+
+- question: "What is a common control under SP 800-37r2, and what share of an organization's controls are typically common controls?"
+  correct: "yes"
+  faithful: "yes"
+  note: "definition from the glossary span (added to the fixture as an alternative), missing half declared missing"
+
+- question: "Which assessment methods does SP 800-53A Revision 5 define, and how many hours should each method take?"
+  correct: "yes"
+  faithful: "yes"
+  note: "methods from the numbered list (added as an alternative span), missing half declared missing"
+
+- question: "What are the steps of the risk assessment process in SP 800-30 Revision 1, and how many days does each step take?"
+  correct: "yes"
+  faithful: "yes"
+  note: "four steps, missing half declared missing"
+
+- question: "Under SP 800-37r2, who approves the system-level continuous monitoring strategy, and what is the default minimum monitoring frequency?"
+  correct: "yes"
+  faithful: "yes"
+  note: "approver right, no default frequency stated as such"
+
+- question: "What are the phases of the SP 800-171A Revision 3 assessment process, and how long should each phase last?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "declined both halves; the phases span was not retrieved, so declining the answerable half too was the right behaviour (R4)"

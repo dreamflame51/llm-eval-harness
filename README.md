@@ -283,14 +283,30 @@ columns above stay comparable with everything before them:
 | group | n | `hit@5` | `covered@5` | `complete@5` | `MRR` |
 |---|---|---|---|---|---|
 | `multi_hop` - the answer needs two or more passages | 6 | 0.667 | 0.833 | **0.333** | 0.667 |
-| `partial` - the corpus answers only half the question | 6 | 0.500 | 0.500 | 0.500 | 0.333 |
+| `partial` - the corpus answers only half the question | 6 | 0.833 | 0.833 | n/a | 0.533 |
 
 `covered@5` treats a record's gold spans as alternatives - one served is
 enough - which is right for a question supported in two places and wrong for a
-question that needs both. `complete@5` requires every span. On multi-hop
-questions the retriever brings one hop five times in six and all of them twice:
-the gap between the two columns is the multi-hop failure, and the lenient
-metric hides it entirely. n is six; read the direction, not the decimals.
+question that needs both. `complete@5` requires every span, so it is read on
+`multi_hop` only. On multi-hop questions the retriever brings one hop five
+times in six and all of them twice: the gap between the two columns is the
+multi-hop failure, and the lenient metric hides it entirely. n is six; read
+the direction, not the decimals.
+
+**The generator follows the retriever, hop by hop.** The twelve answers
+(`eval/answerable_answers.c1.yaml`, labelled in `eval/answerable_labels.yaml`)
+invent nothing. The two multi-hop answers that are complete are exactly the two
+records where `complete@5` is 1; where a hop did not arrive, the answer either
+says so (two) or leaves it out without a word (one - the organization-level
+approver). All six partial answers decline the half the corpus lacks; one also
+declines the half it has, because that span was not retrieved.
+
+**And the ruler was short again.** Two partial answers were drawn from passages
+that were not among the gold spans - a glossary definition and a numbered list
+of methods. Retrieval had served the evidence and the metric called it a miss.
+With those two added as alternative spans, `partial` hit@5 went from 0.500 to
+0.833. The original 26 were written the same way and have not been audited for
+it, so their 0.538 is a floor, not an estimate.
 
 `hit@k` also charges the retriever for chunking. A span cut by a chunk boundary
 is unreachable however good retrieval is, so the metric partly measures how

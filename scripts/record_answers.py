@@ -250,6 +250,14 @@ def main():
         "dense records the same questions through the embedding retriever "
         "alone - a control, for measuring what fusing BM25 in actually did",
     )
+    parser.add_argument(
+        "--kind",
+        choices=("multi_hop", "partial"),
+        action="append",
+        help="with --set answerable, record only records of this kind (repeatable). "
+        "The fixture now holds 64 answerable records - originals, paraphrases and "
+        "these - and the 26 frozen answers RAGAS scores are the originals only",
+    )
     args = parser.parse_args()
     if args.keep_labels and args.set != "refusal":
         raise SystemExit("--keep-labels applies to the refusal set; it is the only labelled one")
@@ -273,6 +281,8 @@ def main():
         pipeline.RETRIEVE = store.search
 
     records = refusal_records() if refusal else answerable_records()
+    if args.kind:
+        records = [r for r in records if r.get("kind") in args.kind]
     print(f"recording {len(records)} answers through {pipeline.RETRIEVE.__name__}\n")
     # The run's identity, on the trace: which retriever, which model, which
     # file. Three recordings of the same twelve questions had to be told apart
