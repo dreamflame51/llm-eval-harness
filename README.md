@@ -252,10 +252,20 @@ retriever serve the evidence?" has more than one honest answer.
 
 | metric | reads as | original 26 | paraphrased 26 | all 52 |
 |---|---|---|---|---|
-| `hit@5` | one chunk held a gold span whole | 0.538 | **0.308** | 0.423 |
-| `covered@5` | the five chunks *together* held it | 0.577 | **0.346** | 0.462 |
-| `coverage@5` | mean share of a gold span the five chunks held | 0.606 | **0.387** | 0.496 |
-| `MRR` | average of 1/rank; miss counts 0 | 0.362 | **0.206** | 0.284 |
+| `hit@5` | one chunk held a gold span whole | 0.615 | **0.385** | 0.500 |
+| `covered@5` | the five chunks *together* held it | 0.654 | **0.423** | 0.538 |
+| `coverage@5` | mean share of a gold span the five chunks held | 0.670 | **0.450** | 0.560 |
+| `MRR` | average of 1/rank; miss counts 0 | 0.439 | **0.224** | 0.331 |
+
+**Measured on the audited gold list (13.10).** Until then the original 26
+read 0.538 / 0.577 / 0.606 / 0.362 and the paraphrases 0.308. The audit read
+the retrieved chunks of every hit@5 miss whose answer was right, and found two
+records where retrieval had served a passage that answers the question on its
+own but was not among the gold spans; those passages were added as alternatives
+([#33](docs/lessons.md#33)). Dense retrieval on the same list: 0.423 -> 0.462,
+so the dense -> hybrid gap is 0.462 -> 0.615, the same four records better and
+one worse. Every number in this README dated before 13.10, and the chunk-size
+sweep below, was measured on the shorter list.
 
 **The original questions were easier than a user's.** They were drafted while
 reading the gold passage, and borrow its words. Each was paraphrased once
@@ -305,8 +315,7 @@ declines the half it has, because that span was not retrieved.
 that were not among the gold spans - a glossary definition and a numbered list
 of methods. Retrieval had served the evidence and the metric called it a miss.
 With those two added as alternative spans, `partial` hit@5 went from 0.500 to
-0.833. The original 26 were written the same way and have not been audited for
-it, so their 0.538 is a floor, not an estimate.
+0.833. The original 26 were then audited the same way (above): 0.538 -> 0.615.
 
 `hit@k` also charges the retriever for chunking. A span cut by a chunk boundary
 is unreachable however good retrieval is, so the metric partly measures how
@@ -437,7 +446,10 @@ ceiling of each metric on this fixture - the best it could possibly return
 whatever the retriever does. Every row here scores **dense** retrieval, which
 is what the question needs: the chunk size is being compared, so the retriever
 has to be held still. That is why the 800/160 row reads 0.423 and the table
-above, scoring the same configuration with BM25 fused in, reads 0.538:
+above, scoring the same configuration with BM25 fused in, read 0.538 on the
+same gold list. The sweep predates the 13.10 audit and was not re-run: on the
+audited list the 800/160 dense row reads 0.462, and the ranking between
+configurations is not expected to change, but that is not measured.
 
 | size / overlap | chunks | reach hit / cov | hit@5 | cov@5 | coverage@5 | MRR |
 |---|---|---|---|---|---|---|

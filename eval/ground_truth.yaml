@@ -95,6 +95,11 @@
   answer: "Prepare for the assessment; conduct the assessment; communicate assessment results; and maintain the assessment."
   contexts:
     - "The risk assessment process43 is composed of four steps: (i) prepare for the assessment; (ii) conduct the assessment; (iii) communicate assessment results; and (iv) maintain the assessment.44"
+    # alternatives, added 13.10 (lessons #33): the Figure 5 text, which the
+    # recorded answer was drawn from while the span above was not retrieved,
+    # and the Chapter 1 summary of the same four steps.
+    - "Step 1: Prepare for Assessment Derived from Organizational Risk Frame Step 2: Conduct Assessment Expanded Task View Determine Likelihood of Occurrence Identify Threat Sources and Events Identify Vulnerabilities and Predisposing Conditions Determine Magnitude of Impact Determine Risk Step 3: Communicate Results Step 4: Maintain Assessment"
+    - "each of the steps in the risk assessment process (i.e., preparing for the assessment, conducting the assessment, communicating the results of the assessment, and maintaining the assessment)"
   answerable: true
   source: "nistspecialpublication800-30r1"
   page: "Chapter 3 / ~p.23"
@@ -112,6 +117,11 @@
   answer: "Organization level (Tier 1), mission/business process level (Tier 2), and information system level (Tier 3)."
   contexts:
     - "how risk assessments can be applied across the organization’s risk management tiers (i.e., organization level, mission/business process level, and information system level)."
+    # alternatives, added 13.10 (lessons #33): two more sentences naming the
+    # same three tiers; the first was retrieved and the recorded answer drawn
+    # from it while the span above was not. "in cluding" is the extraction.
+    - "Risk assessments can be conducted at all three tiers in the risk management hierarchy—in cluding Tier 1 (organization level), Tier 2 (mission/business process level), and Tier 3 (information system level)."
+    - "risk assessments can be conducted at all three tiers in the risk management hierarchy—organization level, mission/business process level, and information system level."
   answerable: true
   source: "nistspecialpublication800-30r1"
   page: "Chapter 2"
@@ -587,6 +597,9 @@
   contexts:
   - 'The risk assessment process43 is composed of four steps: (i) prepare for the assessment; (ii) conduct the assessment;
     (iii) communicate assessment results; and (iv) maintain the assessment.44'
+  # alternatives, added 13.10 with the original's (lessons #33)
+  - "Step 1: Prepare for Assessment Derived from Organizational Risk Frame Step 2: Conduct Assessment Expanded Task View Determine Likelihood of Occurrence Identify Threat Sources and Events Identify Vulnerabilities and Predisposing Conditions Determine Magnitude of Impact Determine Risk Step 3: Communicate Results Step 4: Maintain Assessment"
+  - "each of the steps in the risk assessment process (i.e., preparing for the assessment, conducting the assessment, communicating the results of the assessment, and maintaining the assessment)"
   answerable: true
   source: nistspecialpublication800-30r1
   page: Chapter 3 / ~p.23
@@ -607,6 +620,9 @@
   contexts:
   - how risk assessments can be applied across the organization’s risk management tiers (i.e., organization level,
     mission/business process level, and information system level).
+  # alternatives, added 13.10 with the original's (lessons #33)
+  - "Risk assessments can be conducted at all three tiers in the risk management hierarchy—in cluding Tier 1 (organization level), Tier 2 (mission/business process level), and Tier 3 (information system level)."
+  - "risk assessments can be conducted at all three tiers in the risk management hierarchy—organization level, mission/business process level, and information system level."
   answerable: true
   source: nistspecialpublication800-30r1
   page: Chapter 2
