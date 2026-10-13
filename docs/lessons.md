@@ -53,7 +53,7 @@ anything.**
 
 | theme | entries |
 |---|---|
-| The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16) |
+| The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16), [33](#33) |
 | The ruler has a limit, and the limit moves | [5](#5), [6](#6), [14](#14) |
 | What measuring changed | [7](#7), [8](#8), [15](#15) |
 | Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21), [27](#27) |
@@ -1017,6 +1017,13 @@ word matching does better.
 > either of the two questions this paragraph names as its motivation. The fix
 > below is real; the story told about why is not.
 
+> **Corrected 13.10.** "Answered anyway, from chunks that did not support the
+> answer" was never checked against the chunks - it was read off zero gold
+> coverage. Checked: all four answers are in their own retrieved chunks, near
+> verbatim. They were answered from passages the gold spans did not list, and
+> answered partly or beside the point (one names a different relation between
+> the documents), not invented. See [#33](#33).
+
 **Fix.** BM25 alongside the embeddings, the two rankings fused by reciprocal
 rank (`lexical.py`). Measured on the same fixture, with the metrics that were
 already there:
@@ -1682,3 +1689,35 @@ around invention, and the model under test does not invent. Thirteen
 provocations aimed at the feared failure surfaced the actual one by accident.
 Before designing the axes, collect the failures the system really produces -
 including the ones that score as passes.
+
+---
+
+<a id="33"></a>
+
+## 33. Zero coverage is a fact about the gold, not about the answer
+
+**Symptom.** Twelve new questions were added on 12.10 and their answers read
+against the chunks. Two partial answers were right, and drawn from passages
+that were not among the gold spans - a glossary definition, a numbered list of
+methods. Retrieval had served the evidence; the metric called both misses.
+
+**Diagnosis.** If the gold list could be short there, it could be short
+anywhere, and one claim in this project rested on it directly: [#23](#23)'s
+"four records answered anyway, from chunks that did not support the answer".
+That was read off zero gold coverage, not off the chunks. Read off the chunks,
+on the dense recording it was about: all four answers are in their own
+retrieved text, near verbatim - one even through an extraction artifact,
+"p reparing". Partial or beside the point, yes; unsupported, no. The hand
+labels on the hybrid set had already said so (26/26 faithful) and nobody joined
+the two.
+
+**Treatment.** The two missing spans were added as alternatives (partial hit@5
+0.500 -> 0.833). #23 and the comment in `pipeline.py` carry the correction. The
+original 26 have not been audited for missing alternatives; until they are,
+their hit@5 0.538 is a floor.
+
+**Lesson.** **A coverage metric measures the gold list, not the evidence.**
+Zero coverage says the passages someone wrote down were not retrieved; whether
+the answer is supported is a different question, answered only by reading the
+chunks. Two numbers that disagree - "unsupported" from coverage, "faithful"
+from the labels - are a finding; left unjoined, each just looked complete.

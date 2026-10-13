@@ -9,15 +9,13 @@ MODEL = "gemma4:latest"
 K = 5
 
 # Dense retrieval alone served no part of the gold span in the top five for ten
-# of the twenty-six answerable questions. The generator then did the only two
-# things it could: it declined on six of them, correctly, and answered four
-# from chunks that did not support the answer. Fusing BM25 into the ranking
-# fixes four of the ten and costs two (scripts/compare_retrievers.py).
-#
-# The misses were not spread evenly. They collected on questions that name a
-# document - "the scope of NIST SP 800-78-5" - where an embedding blurs the
-# identifier into every neighbouring document number and exact word matching
-# does not.
+# of the twenty-six answerable questions. The generator declined on six of
+# them, correctly, and answered four from passages the gold spans did not list
+# - grounded in the chunks it was given, but partial or beside the point
+# (docs/lessons.md #23, corrected 13.10). Fusing BM25 into the ranking fixes
+# four of the ten and costs two (scripts/compare_retrievers.py). Why it helps
+# is not known: the "exact document identifiers" explanation first written
+# here did not survive measurement (docs/lessons.md #29).
 RETRIEVE = hybrid_search
 # Whoever can put text into the corpus can put instructions in front of the
 # model. A note planted in one retrieved chunk, dressed as NIST policy and
