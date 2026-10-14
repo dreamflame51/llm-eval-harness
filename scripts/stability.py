@@ -20,6 +20,11 @@ consecutive runs of untouched code (docs/lessons.md #17). A check that cannot
 see the variable it was written to measure is worse than no check, so
 `--in-process` keeps the old behaviour and says what it is.
 
+**A cold model, too.** A fresh process turned out not to be enough: Ollama
+keeps the model resident between calls, so only the first of the runs loaded
+it, and runs 2-5 came back byte-identical (14.10). Each run now starts by
+unloading every resident model; `--warm` skips that, for comparison.
+
 Two numbers come out, and the second is the more telling:
 
     spread      max minus min of the metric across runs. What a threshold
@@ -74,6 +79,24 @@ print("@@" + json.dumps({
     ],
 }))
 """
+
+
+def unload_models():
+    """
+    Evict every model Ollama holds, so the next run loads from cold.
+
+    A fresh interpreter is not a fresh model: Ollama keeps a model resident for
+    a few minutes after the last call, so of five back-to-back child processes
+    only the first loaded it. The 14.10 measurement showed exactly that - every
+    rewording was run 1 against the rest, and runs 2-5 were byte-identical.
+    keep_alive=0 on an empty request is Ollama's documented way to unload.
+    """
+    import ollama
+
+    loaded = [m.model for m in ollama.ps().models if m.model]
+    for name in loaded:
+        ollama.generate(model=name, keep_alive=0)
+    return loaded
 
 
 def run_once(limit, in_process, index=1):
@@ -153,12 +176,23 @@ def parse_args():
         action="store_true",
         help="repeat in one process - the condition where the model does not move",
     )
+    parser.add_argument(
+        "--warm",
+        action="store_true",
+        help="do not unload the model between runs - only the first run loads it",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    mode = "one process" if args.in_process else "a fresh process each time"
+    cold = not (args.in_process or args.warm)
+    if args.in_process:
+        mode = "one process"
+    elif cold:
+        mode = "a fresh process and a cold model each time"
+    else:
+        mode = "a fresh process each time, model left loaded"
     print(f"{args.runs} runs, {mode}\n", flush=True)
 
     rates, verdicts, answers = [], {}, {}
@@ -169,6 +203,9 @@ def main():
     group = f"drift {datetime.datetime.now(tz=datetime.UTC):%Y-%m-%d %H:%M}"
     with tracing.run(group, runs=args.runs, mode=mode):
         for run in range(1, args.runs + 1):
+            if cold:
+                unloaded = unload_models()
+                print(f"run {run}: unloaded {', '.join(unloaded) or 'nothing'}", flush=True)
             began = time.perf_counter()
             result = run_once(args.limit, args.in_process, index=run)
             rates.append(result["rate"])
@@ -201,7 +238,7 @@ def main():
     against_pinned = compare_to_pinned(verdicts)
 
     payload = {
-        "mode": "in_process" if args.in_process else "across_processes",
+        "mode": "in_process" if args.in_process else ("cold" if cold else "warm"),
         "runs": args.runs,
         "records": len(verdicts),
         "rates": rates,
