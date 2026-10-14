@@ -180,12 +180,12 @@
     }
   },
   "drift": {
-    "mode": "across_processes",
+    "mode": "cold",
     "runs": 5,
-    "records": 12,
+    "records": 29,
     "spread": 0.0,
     "questions_that_flipped": 0,
-    "questions_reworded": 2
+    "questions_reworded": 0
   },
   "ragas": {
     "faithfulness": 0.854,
