@@ -1721,3 +1721,59 @@ Zero coverage says the passages someone wrote down were not retrieved; whether
 the answer is supported is a different question, answered only by reading the
 chunks. Two numbers that disagree - "unsupported" from coverage, "faithful"
 from the labels - are a finding; left unjoined, each just looked complete.
+
+---
+
+<a id="34"></a>
+
+## 34. A fresh process is not a fresh model
+
+**Symptom.** C2 was meant to give every live check a tolerance: how far does a
+number move when nothing changed? Two measurements, each with a prediction
+written down first.
+
+- Judges, same 58 verdicts re-asked in new processes: qwen3 ×5, gemma4 ×3.
+  Predicted 3-4 flips; got 0 of 290 and 0 of 174 (rule of three: at most 1-2%).
+- Generator, 29 refusal questions, 5 runs in new processes. Predicted 0 flips;
+  got refusal rates 0.862, 0.897, 0.897, 0.897, 0.897 - one question flipped,
+  in run 1 only, and 13 of 29 were worded differently at least once.
+
+The obvious reading was "spread 0.034, one record: set the bar at ±1".
+
+**Diagnosis.** The script kept a count of distinct texts and threw the texts
+away, so the flip could not be put down to wording or to behaviour. Once it
+kept them, the re-run repeated the pattern exactly, and the texts said two
+things.
+
+The flip was the phrase list. Run 1 said "no elliptic curve is specified",
+runs 2-5 "the provided documents do not specify an elliptic curve". Both reject
+the false premise - a refusal by RF4 - but "not specified" does not match when
+the noun sits between "no" and "specified". The pin had recorded run 1's
+wording, so it pinned the wrong verdict.
+
+And all 12 rewordings were run 1 against the rest; runs 2-5 were byte-identical
+on all 29. Ollama keeps a model resident between calls. The children were new
+interpreters talking to the same loaded model, so only run 1 loaded it. With
+the model unloaded before each run, five runs gave five identical sets of 29
+texts, 0.862 every time.
+
+**Treatment.** `stability.py` keeps texts per run and unloads every resident
+model before each one (`--warm` keeps the old behaviour; that measurement is in
+`eval/drift_warm.json`). The phrase list gained a pattern - "no", up to three
+words, "is/are specified" - checked first on all 38 stored answerable answers
+(0 hits) so it is a fix and not a fit; bare "is specified" would match "P-256
+is specified". Re-pinned. The README states the tolerance: run cold; a
+per-question verdict against the pin is a signal; wording alone is not, yet.
+
+**What is not known.** Why a resident model answers differently from a freshly
+loaded one. The earlier explanation, the GPU/CPU layer split re-decided on each
+load ([#17](#17)), predicts cold loads that differ from each other, and five in a
+row did not. Two cold loads three hours apart did differ, in 1 text of 29, both
+refusals - so equality between sittings is not established either.
+
+**Lesson.** **Before measuring noise, check what the repetition actually
+repeats.** "Fresh process" was chosen to reload the model and did not: the
+variable lived in a server the script never restarted. Five samples were two
+states, and the 0.034 between them would have become a tolerance band for
+noise that does not exist. Keeping the raw texts is what turned a count into a
+diagnosis - a script that records only "how many differed" cannot say why.
