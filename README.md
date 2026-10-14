@@ -160,7 +160,7 @@ here and the comparison they share lives in `llm_eval_harness/pins.py`:
 | command | asks | fails a release? |
 |---|---|---|
 | `refusal.py --live` | what does it say right now? Phrase-matched, answers printed in full | no - a diagnostic |
-| `stability.py` | how much does the number move when nothing changes? N runs, fresh process each | yes, if a question flips against the pin |
+| `stability.py` | how much does the number move when nothing changes? N runs, fresh process and cold model each | yes, if a question flips against the pin |
 | `live_check.py` | does the live system still behave as the frozen set says? One run, judged on both axes | yes |
 
 ## The reference set
@@ -423,18 +423,33 @@ fabricated" to everything scores 92% against a set with one fabrication in it.
 Four synthetic answers with the verdicts fixed in advance; both judges pass, so
 a clean verdict is a verdict and not a stuck axis - [#20](docs/lessons.md#20).
 
-`pipeline.py` decodes greedily with a fixed seed, which removed the variation
-between repeated runs **inside one process** - `uv run python
-scripts/stability.py` re-checks that, and it is the only thing that check can
-see, because it repeats in a loop rather than in a new process. Across processes
-the model still drifts: same question, same five retrieved chunks, same
-distances to four decimals, different answer. The likely cause is the GPU/CPU
-layer split, which is re-decided on every model load - 4 GB of VRAM cannot hold
-this model - and greedy decoding then diverges from the first flipped argmax. A
-fixed seed does not help, because nothing is being sampled.
+`pipeline.py` decodes greedily with a fixed seed. What that buys depends on
+whether the model was just loaded, which `scripts/stability.py` measured on the
+29 refusal questions, five runs each, on 2026-10-14:
 
-So a generation-side number here is reproducible within a session and not
-between sessions. See [docs/lessons.md](docs/lessons.md) #17.
+| mode | refusal rate (phrase list) | texts per question |
+|---|---|---|
+| new process, model left loaded (`--warm`, `eval/drift_warm.json`) | 0.862, 0.897, 0.897, 0.897, 0.897 | 2 on 12 questions: run 1 against runs 2-5 |
+| new process, model unloaded first (default, `eval/drift.json`) | 0.862 ×5 | 1 |
+
+A new process is not a new model: Ollama keeps the model resident between
+calls, so in the warm measurement only run 1 loaded it, and runs 2-5 were
+byte-identical to each other. Five consecutive cold loads gave five identical
+sets of 29 texts. Why a resident model answers differently from a freshly
+loaded one is not established. The earlier explanation - the GPU/CPU layer
+split re-decided on every load, 4 GB of VRAM not holding the model ([#17](docs/lessons.md#17))
+- predicts that cold loads differ from each other, and five in a row did not.
+Two cold loads three hours apart did differ, in 1 text of 29, with both
+versions refusing.
+
+The rates above are on the phrase list as it was then; the one verdict that
+flipped was the list missing "no elliptic curve is specified", fixed since.
+
+**Tolerance for a live run.** Run cold. A per-question verdict that differs
+from the pin is a signal; `stability.py` exits non-zero on it. Changed wording
+with the same verdict is not, until loads hours apart have been measured on
+more than one sitting. A warm run is not compared against a cold pin: they are
+two states of the model, and the 0.034 between them was that, not noise.
 
 ## Configuration is measured, not guessed
 
