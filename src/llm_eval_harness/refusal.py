@@ -145,10 +145,22 @@ REFUSAL_MARKERS = (
 _NUMBER = re.compile(r"(?<![\d-])\d{2,}(?![\d-])")
 
 
+# Fifth widening (2026-10-14), and the first that is not a substring: gemma
+# rejected the symmetric-key curve premise with "no elliptic curve is
+# specified", which "not specified" misses because the noun sits in between.
+# Bare "is specified" would also match "curve P-256 is specified", an answer;
+# up to three words between "no" and the verb keeps the negation attached.
+# Zero hits on the 38 stored answerable answers (both sets), one on the refusal
+# sets - that lure.
+_NONE_SPECIFIED = re.compile(r"\bno\s+(?:\S+\s+){0,3}?(?:is|are)\s+specified\b")
+
+
 def looks_like_refusal(answer):
     """True when the answer contains one of the known refusal phrasings."""
     lowered = answer.lower()
-    return any(marker in lowered for marker in REFUSAL_MARKERS)
+    return any(marker in lowered for marker in REFUSAL_MARKERS) or bool(
+        _NONE_SPECIFIED.search(lowered)
+    )
 
 
 def evaluate_refusals(records=None, answer_fn=None):
