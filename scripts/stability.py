@@ -174,7 +174,10 @@ def main():
             rates.append(result["rate"])
             for row in result["answers"]:
                 verdicts.setdefault(row["q"], []).append(row["refused"])
-                answers.setdefault(row["q"], set()).add(row["answer"])
+                # A list, in run order: a set would say how many wordings there
+                # were but not which run produced which, and a flip cannot be
+                # read without the text that flipped.
+                answers.setdefault(row["q"], []).append(row["answer"])
             print(
                 f"run {run}: refusal_rate={result['rate']:.3f}  "
                 f"{time.perf_counter() - began:.0f}s",
@@ -183,7 +186,7 @@ def main():
 
     spread = max(rates) - min(rates)
     flips = [q for q, flags in verdicts.items() if len(set(flags)) > 1]
-    reworded = [q for q, texts in answers.items() if len(texts) > 1]
+    reworded = [q for q, texts in answers.items() if len(set(texts)) > 1]
 
     print(f"\nmin {min(rates):.3f}  max {max(rates):.3f}  spread {spread:.3f}")
     print(f"{len(flips)} of {len(verdicts)} questions changed verdict between runs")
@@ -193,7 +196,7 @@ def main():
     for question, flags in verdicts.items():
         marks = "".join("R" if flag else "." for flag in flags)
         state = "FLIPS" if question in flips else "stable"
-        print(f"  {marks}  {state:>6}  {len(answers[question])} distinct  {question[:56]}")
+        print(f"  {marks}  {state:>6}  {len(set(answers[question]))} distinct  {question[:56]}")
 
     against_pinned = compare_to_pinned(verdicts)
 
@@ -206,6 +209,18 @@ def main():
         "questions_that_flipped": len(flips),
         "questions_reworded": len(reworded),
         "seconds": round(time.perf_counter() - started, 1),
+        # Per question, run by run: runs[i] is run i+1. Kept so a flip can be
+        # put down to wording or to behaviour by reading what was said.
+        "questions": [
+            {
+                "q": question,
+                "runs": [
+                    {"refused": flag, "answer": text}
+                    for flag, text in zip(verdicts[question], answers[question])
+                ],
+            }
+            for question in verdicts
+        ],
     }
     # A slice is not the measurement. --limit and a single run are for
     # checking that this script works; writing either over the recorded number
