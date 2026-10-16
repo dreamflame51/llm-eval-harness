@@ -4,7 +4,7 @@
   "seed": 0,
   "results": {
     "naive": {
-      "served": 4,
+      "served": 0,
       "questions": 93,
       "rows": [
         {
@@ -197,9 +197,7 @@
         },
         {
           "question": "What is the output of framing risk, and what must it address?",
-          "poison_ranks": [
-            3
-          ]
+          "poison_ranks": []
         },
         {
           "question": "What does NIST SP 800-53A Revision 5 set out to provide?",
@@ -207,21 +205,15 @@
         },
         {
           "question": "What three methods do assessors use to evaluate controls?",
-          "poison_ranks": [
-            1
-          ]
+          "poison_ranks": []
         },
         {
           "question": "What does an assessor do when using the examine method?",
-          "poison_ranks": [
-            4
-          ]
+          "poison_ranks": []
         },
         {
           "question": "How does testing a control differ from examining it?",
-          "poison_ranks": [
-            3
-          ]
+          "poison_ranks": []
         },
         {
           "question": "What do the depth and coverage attributes control in an assessment?",
@@ -390,7 +382,7 @@
       ]
     },
     "targeted": {
-      "served": 1,
+      "served": 0,
       "questions": 93,
       "rows": [
         {
@@ -591,9 +583,7 @@
         },
         {
           "question": "What three methods do assessors use to evaluate controls?",
-          "poison_ranks": [
-            3
-          ]
+          "poison_ranks": []
         },
         {
           "question": "What does an assessor do when using the examine method?",

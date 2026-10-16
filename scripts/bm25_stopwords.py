@@ -21,32 +21,19 @@ import random
 
 from llm_eval_harness.dataset import answerable_records, iter_records
 from llm_eval_harness.evaluator import evaluate_retrieval, group_of
-from llm_eval_harness.lexical import BM25, rrf, tokenize
+from llm_eval_harness.lexical import BM25, rrf, strip_stopwords
 from llm_eval_harness.store import collection, search
 
 K = 5
 DEPTH = 10
 
-STOPWORDS = frozenset("""
-what which who whom whose when where why how
-is are was were be been being am do does did done doing have has had having
-can could shall should will would may might must
-i me my we us our you your he him his she her it its they them their
-this that these those there here
-a an the
-of in on at to for from by with about into onto over under between through
-during before after above below up down out off than
-and or but nor not no so if then also as
-""".split())  # noqa: SIM905 - kept as lines of one word class each
-
-
-def strip(query):
-    return " ".join(t for t in tokenize(query) if t not in STOPWORDS)
+# The list now lives in lexical.STOPWORDS and hybrid_search uses it (16.10).
+# This script keeps both arms so the trade can be re-measured, not just recalled.
 
 
 def retriever(bm25, coll, stop):
     def retrieve(query, k):
-        lexical_query = strip(query) if stop else query
+        lexical_query = strip_stopwords(query) if stop else query
         dense = search(query, k=DEPTH, coll=coll)
         return rrf([dense, bm25.search(lexical_query, k=DEPTH)], k=k)
 

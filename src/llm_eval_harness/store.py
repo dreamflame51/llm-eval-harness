@@ -3,7 +3,7 @@ import functools
 import chromadb
 from chromadb.utils import embedding_functions
 
-from llm_eval_harness.lexical import BM25, rrf
+from llm_eval_harness.lexical import BM25, rrf, strip_stopwords
 from llm_eval_harness.tracing import traced
 
 # English-only: the corpus and the eval questions are English, and on the
@@ -107,7 +107,9 @@ def hybrid_search(query, k=5, coll=None, depth=DEPTH):
     if k <= 0:
         return []
     dense = search(query, k=depth, coll=coll)
-    lexical = lexical_index(coll).search(query, k=depth)
+    # Without stopwords: question words are heavy in NIST prose, and that let a
+    # poisoned document with no topic words in it into the top five (lexical.py).
+    lexical = lexical_index(coll).search(strip_stopwords(query), k=depth)
     fused = rrf([dense, lexical], k=k)
     # One shape out, whichever retriever found the chunk. A chunk only BM25
     # ranked has no distance - it was never scored in the embedding space -

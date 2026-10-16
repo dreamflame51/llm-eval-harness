@@ -33,6 +33,16 @@ records shift and one of them gets worse. The two questions the paragraph above
 is about stay misses. So the stopword list is not the missing piece, and the
 number is in docs/lessons.md #29 rather than in this module.
 
+**It went in anyway, on 16.10, for a reason that measurement did not look
+at.** Heavy question words are an attack surface: scripts/index_poisoning.py
+put 49 third-party injection emails into a copy of the index, and one of them,
+a fake chat with no word of the topic, was served for four questions on
+"what", "do" and "it" alone. With STOPWORDS stripped from the BM25 query
+(scripts/bm25_stopwords.py): poison served 4/93 -> 0/93, hit@5 one record
+lost and two won over 64. The list is function words only and was not tuned
+after the run. It closes the cheap attack, not every attack - a document
+stuffed with the corpus's own frequent question terms is the next one.
+
 BM25 is the standard answer and it is twenty lines. Terms are scored by how
 often they appear in a chunk (saturating, so a chunk that repeats one word
 does not win on that alone), damped by how common the term is across the
@@ -76,6 +86,27 @@ _TOKEN = re.compile(r"[a-z0-9]+(?:[-.][a-z0-9]+)*")
 
 def tokenize(text):
     return _TOKEN.findall(text.lower())
+
+
+# Function words only: question words, auxiliaries, pronouns, articles,
+# prepositions, conjunctions. Off-the-shelf lists were not used - scikit-learn's
+# includes "system", "describe" and "find", which are content in this corpus.
+STOPWORDS = frozenset("""
+what which who whom whose when where why how
+is are was were be been being am do does did done doing have has had having
+can could shall should will would may might must
+i me my we us our you your he him his she her it its they them their
+this that these those there here
+a an the
+of in on at to for from by with about into onto over under between through
+during before after above below up down out off than
+and or but nor not no so if then also as
+""".split())  # noqa: SIM905 - kept as lines of one word class each
+
+
+def strip_stopwords(query):
+    """The query as BM25 should see it. Applied to queries, not to the index."""
+    return " ".join(term for term in tokenize(query) if term not in STOPWORDS)
 
 
 class BM25:

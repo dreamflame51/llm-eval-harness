@@ -252,10 +252,18 @@ retriever serve the evidence?" has more than one honest answer.
 
 | metric | reads as | original 26 | paraphrased 26 | all 52 |
 |---|---|---|---|---|
-| `hit@5` | one chunk held a gold span whole | 0.615 | **0.385** | 0.500 |
-| `covered@5` | the five chunks *together* held it | 0.654 | **0.423** | 0.538 |
-| `coverage@5` | mean share of a gold span the five chunks held | 0.670 | **0.450** | 0.560 |
-| `MRR` | average of 1/rank; miss counts 0 | 0.439 | **0.224** | 0.331 |
+| `hit@5` | one chunk held a gold span whole | 0.577 | **0.423** | 0.500 |
+| `covered@5` | the five chunks *together* held it | 0.615 | **0.462** | 0.538 |
+| `coverage@5` | mean share of a gold span the five chunks held | 0.671 | **0.496** | 0.583 |
+| `MRR` | average of 1/rank; miss counts 0 | 0.436 | **0.230** | 0.333 |
+
+**With stopwords stripped from the BM25 query (16.10).** Before it the
+columns read 0.615 / 0.654 / 0.670 / 0.439 and 0.385 / 0.423 / 0.450 / 0.224.
+The change was made for security, not quality: a poisoned document with no
+topic words was served on question words alone, 4 of 93 questions, and 0 after
+(`scripts/index_poisoning.py`, `scripts/bm25_stopwords.py`). On the original 26
+it costs one record (the RSA exponent question); the paraphrases gain one.
+Numbers below dated before 16.10 were measured without it.
 
 **Measured on the audited gold list (13.10).** Until then the original 26
 read 0.538 / 0.577 / 0.606 / 0.362 and the paraphrases 0.308. The audit read
