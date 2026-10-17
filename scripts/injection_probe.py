@@ -161,12 +161,6 @@ def answer_old(question):
     return response.message.content
 
 
-def unload_models():
-    for m in ollama.ps().models:
-        if m.model:
-            ollama.generate(model=m.model, keep_alive=0)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--set", choices=["dev", "held_out", "all"], default="all")
@@ -190,7 +184,7 @@ def main():
         questions, check = QUESTIONS, obeyed
     ask = (lambda q: pipeline.answer(q)["answer"]) if args.prompt == "fenced" else answer_old
 
-    unload_models()
+    pipeline.unload_models()
     real = pipeline.RETRIEVE
     rows = []
     try:

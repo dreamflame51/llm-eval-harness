@@ -66,13 +66,17 @@ HEADER = """\
 #   retrieval:       {retriever}, k={k}, {embedder}
 #   chunking:        {size}/{overlap}
 #   prompt:          sha256 {prompt} of pipeline.SYSTEM
+#   model state:     cold - unloaded before recording ({unloaded})
 #
 # The retriever is named here because leaving it out cost a day: this block
 # read the same before and after BM25 was fused into retrieval, so a set
 # recorded under dense retrieval went on being scored as though it described
 # the running system (docs/lessons.md #25). The prompt is named for the same
 # reason: a set recorded before the chunks were fenced off (4dd1881) went on
-# being reported for a week after the prompt had changed.
+# being reported for a week after the prompt had changed. The model state is
+# named because sets recorded without it could not be reproduced: on 17.10,
+# two of ten records with identical chunks came back worded differently, and
+# nothing else had changed (docs/lessons.md #34).
 #
 # Fill in by hand, one record at a time, three independent questions:
 #
@@ -120,6 +124,7 @@ ANSWERABLE_HEADER = """\
 #   generator:       {model}, options {options}
 #   retrieval:       {retriever}, k={k}, {embedder}
 #   chunking:        {size}/{overlap}
+#   model state:     cold - unloaded before recording ({unloaded})
 #
 #   question         what was asked
 #   answer           what the generator said, from the chunks below
@@ -283,6 +288,11 @@ def main():
     records = refusal_records() if refusal else answerable_records()
     if args.kind:
         records = [r for r in records if r.get("kind") in args.kind]
+    # Recorded from a cold model, always: whether the model was already loaded
+    # changes the wording (docs/lessons.md #34), and a set that cannot say
+    # which state it came from cannot be reproduced to check its labels.
+    unloaded = pipeline.unload_models()
+    print(f"unloaded {', '.join(unloaded) or 'nothing'}")
     print(f"recording {len(records)} answers through {pipeline.RETRIEVE.__name__}\n")
     # The run's identity, on the trace: which retriever, which model, which
     # file. Three recordings of the same twelve questions had to be told apart
@@ -312,6 +322,7 @@ def main():
         size=chunker.SIZE,
         overlap=chunker.OVERLAP,
         prompt=hashlib.sha256(pipeline.SYSTEM.encode("utf-8")).hexdigest()[:12],
+        unloaded=", ".join(unloaded) or "nothing was loaded",
     )
     body = yaml.dump(
         rows, Dumper=Dumper, sort_keys=False, allow_unicode=True, width=88

@@ -81,24 +81,6 @@ print("@@" + json.dumps({
 """
 
 
-def unload_models():
-    """
-    Evict every model Ollama holds, so the next run loads from cold.
-
-    A fresh interpreter is not a fresh model: Ollama keeps a model resident for
-    a few minutes after the last call, so of five back-to-back child processes
-    only the first loaded it. The 14.10 measurement showed exactly that - every
-    rewording was run 1 against the rest, and runs 2-5 were byte-identical.
-    keep_alive=0 on an empty request is Ollama's documented way to unload.
-    """
-    import ollama
-
-    loaded = [m.model for m in ollama.ps().models if m.model]
-    for name in loaded:
-        ollama.generate(model=name, keep_alive=0)
-    return loaded
-
-
 def run_once(limit, in_process, index=1):
     if in_process:
         from llm_eval_harness import tracing
@@ -204,6 +186,8 @@ def main():
     with tracing.run(group, runs=args.runs, mode=mode):
         for run in range(1, args.runs + 1):
             if cold:
+                from llm_eval_harness.pipeline import unload_models
+
                 unloaded = unload_models()
                 print(f"run {run}: unloaded {', '.join(unloaded) or 'nothing'}", flush=True)
             began = time.perf_counter()
