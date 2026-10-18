@@ -1,0 +1,252 @@
+﻿# Hand labels for the 26 frozen answers in eval/answerable_answers.yaml.
+# Index of all labelling rules, both sets: docs/LABELING_RUBRIC.md.
+#
+# One annotator (the author of the system), labelled in chat, one record at a
+# time. Keyed by question, so a re-recording of the answers does not silently
+# inherit labels that describe text it no longer contains: check that the
+# answer text still matches before reusing a label.
+#
+#   correct    the answer against the reference answer in ground_truth.yaml
+#              yes      - same meaning as the reference
+#              partial  - part right; something missing, extra or misleading
+#              no       - wrong, or a refusal
+#   faithful   every claim in the answer is supported by the retrieved chunks
+#              (second pass; null until then)
+#
+# Rubric rules, decided on a concrete record and applied to every like one:
+#   R1  steps of a process given as a numbered list in the wrong order is
+#       "partial", not "yes": every item is there, but the reader learns the
+#       wrong sequence (record 1, the seven RMF steps).
+#   R2  an answer that gets the core right and then says the rest is missing
+#       from the context is "partial", not "no" (record 2).
+#   R3  an answer that may well be true but contains none of the items asked
+#       for is "no" (record 5: package format instead of package contents).
+#   R4  a pure refusal is correct: "no" plus declined: true, so a refusal (a
+#       retrieval defect when the gold text was not retrieved) can be counted
+#       apart from a wrong answer (a generator defect) (record 11).
+#   R5  a compound question is "yes" only when every part is right, else
+#       "partial" (record 17: CUI expansion right, the "why" half off-target).
+#   R6  faithful asks whether a claim is in the chunks, not whether it is true:
+#       a claim copied verbatim from a chunk counts as supported even when the
+#       chunk text is a PDF extraction artifact. The error then shows on the
+#       correct axis, which is where it belongs (record 1).
+#   R7  faithful checks that every span of the answer is present in the
+#       chunks (lexical grounding), not that the links between spans are
+#       right: a sentence welded from two chunk sentences, or a real quote
+#       attached to the wrong subject, is still "yes". The broken link
+#       shows on the correct axis. RAGAS and DeepEval judge claims by
+#       meaning, so on records flagged definitional: true a disagreement
+#       with them is a difference of definition, not a judge error
+#       (records 10 and 17; first labelled "no" on 10, revised for
+#       consistency).
+#   R8  a refusal that invents nothing is faithful: "yes". It still gets
+#       correct: "no" and declined: true, so honesty earns no correctness
+#       credit (records 11, 12, 16, 21).
+
+- question: "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?"
+  correct: partial
+  faithful: "yes"
+  note: "all seven named, numbered in the wrong order with PREPARE last (R1). The order is copied verbatim from chunk 1, where pypdf flattened the RMF circle diagram into one line; chunk 2 says Prepare comes first (R6)"
+
+- question: "What is a common control according to SP 800-37 Revision 2?"
+  correct: partial
+  faithful: "yes"
+  note: "core idea (inherited by systems) right, providers missing; then says the definition is missing (R2). Faithful: both claims check out; the definition sentence is in none of the five chunks"
+
+
+- question: "What is the difference between a common control and a hybrid control in the RMF?"
+  correct: "yes"
+  faithful: "yes"
+  note: "both halves of the reference present, hybrid as partially inherited. Faithful: every claim near-verbatim in chunks 3-4"
+
+- question: "What is the purpose of the Prepare step in the RMF?"
+  correct: "yes"
+  faithful: "yes"
+  note: "context and priorities, organization and system level - matches the reference. Faithful: both claims verbatim in chunks 4-5"
+
+- question: "What key artifacts are included in an authorization package under SP 800-37r2?"
+  correct: "no"
+  faithful: "yes"
+  note: "names none of the three reference artifacts; answers the format of the package, not its contents (R3). Faithful: the one claim verbatim in chunk 4 - wrong answer, faithful answer"
+
+
+- question: "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?"
+  correct: "yes"
+  faithful: "yes"
+  note: "all four, in order. Faithful: all four step labels in chunk 1, in order"
+
+- question: "What are the four components of the overall risk management process in SP 800-30r1?"
+  correct: "yes"
+  faithful: "yes"
+  note: "all four, in order. Faithful: verbatim list in chunk 1"
+
+- question: "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?"
+  correct: "yes"
+  faithful: "yes"
+  note: "all three tiers, correctly numbered. Faithful: one sentence in chunk 1 covers it"
+
+- question: "What risk factors are considered when conducting a risk assessment per SP 800-30?"
+  correct: "yes"
+  faithful: "yes"
+  note: "all four factors; order irrelevant for a list of factors (R1 is about process steps). Both libraries scored faithfulness 0.00 - check in pass 2. Faithful: footnote in chunk 2 lists all four factors, impact first - both libraries scored 0.00, both wrong"
+
+- question: "What is the purpose of the risk framing component of the risk management process?"
+  correct: "yes"
+  faithful: "yes"
+  definitional: true
+  note: "reference nearly verbatim, plus one extra clause. DeepEval faithfulness 0.00, RAGAS 1.00 - check in pass 2. Faithful: main claim verbatim in chunk 1; the tail is welded on from an unrelated sentence opening chunk 2 (risk-model coverage), so it is attributed to risk framing (R7)"
+
+- question: "What is the primary purpose of NIST SP 800-53A Revision 5?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "pure refusal; retrieval served none of the gold span (coverage@5 0), so declining was the right behaviour (R4). Faithful - refusal invents nothing (R8)"
+
+
+- question: "Name the three primary assessment methods defined in SP 800-53A."
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "says the context does not name the three methods; honest refusal, names none (R4). Faithful - refusal; its side claims (three methods, Appendix C) are in the chunks, the names appear only as table labels (R8)"
+
+- question: "What does the Examine assessment method involve?"
+  correct: "yes"
+  faithful: "yes"
+  note: "reference nearly verbatim. Faithful: verbatim in chunk 3"
+
+- question: "What is the difference between the Examine and Test assessment methods in SP 800-53A?"
+  correct: "yes"
+  faithful: "yes"
+  note: "both definitions nearly verbatim. Faithful: both definitions verbatim in chunk 3"
+
+- question: "How do the depth and coverage attributes of assessment methods affect the assessment?"
+  correct: "yes"
+  faithful: "yes"
+  note: "covers the reference and adds detail (basic/focused/comprehensive, assurance) - extra detail checked in pass 2. Faithful: all ten claims in chunks 1, 2, 4, 5, coverage values included"
+
+- question: "What is the purpose of NIST SP 800-171A Revision 3?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "pure refusal (R4). Faithful - refusal invents nothing (R8)"
+
+- question: "What does CUI stand for and why is its protection important according to SP 800-171Ar3?"
+  correct: partial
+  faithful: "yes"
+  definitional: true
+  note: "expansion right; \"why important\" answers why defining information types matters, not why protecting CUI does (R5). Faithful: the quote is verbatim (chunk 5) but its subject is the NARA registry, not CUI protection; yes under R7 (lexical grounding)"
+
+
+- question: "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?"
+  correct: partial
+  faithful: "yes"
+  note: "the core (organizations set the level of rigor) present; depth/coverage and who assesses missing. First labelled \"no\", changed for consistency with R2/R3. Faithful - one claim, near-verbatim in chunk 1"
+
+- question: "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?"
+  correct: partial
+  faithful: "yes"
+  borderline: true
+  note: "reference says the procedures are derived from 800-53A; the answer says 800-53A is a source of further guidance - a related but different relation. Could be \"no\" under R3; re-label in a week. Faithful - both parts in chunks 2 and 5, near-verbatim"
+
+- question: "How many security requirement families are defined in SP 800-171Ar3, and name them?"
+  correct: partial
+  faithful: "yes"
+  note: "count 17 right; list stops at 13 items on 'Identity'. Not a token limit, as first written here: chunk 1 holds the same 13 family names in the same order and is itself cut at 'Identi' by the chunk boundary - the model copied the list as far as the chunk went (R5). Faithful - number and all 13 names in chunk 1"
+
+- question: "What is the scope of NIST SP 800-78-5?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "pure refusal; one of the two questions no retriever configuration finds (lessons #29) (R4). Faithful - refusal invents nothing (R8)"
+
+- question: "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?"
+  correct: "yes"
+  faithful: "yes"
+  note: "FIPS 201-3, plus life-cycle detail. Faithful - verbatim in the abstract, chunk 1"
+
+- question: "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?"
+  correct: "yes"
+  faithful: "yes"
+  note: "65537. Faithful - verbatim in chunk 1"
+
+- question: "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?"
+  correct: "yes"
+  faithful: "yes"
+  note: "matches the reference exactly. Faithful - the through-2030 column of a flattened table in chunk 1, read correctly"
+
+- question: "What elliptic curves are recommended for PIV keys in SP 800-78-5?"
+  correct: "yes"
+  faithful: "yes"
+  note: "P-256 and P-384. Faithful - verbatim list in chunk 1"
+
+- question: "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?"
+  correct: partial
+  faithful: "yes"
+  note: "the link (800-53A guides the Assess step) is there; what Assess determines and the three methods are missing. Faithful - all three claims near-verbatim in chunks 1-2"
+
+# --- 12.10: multi_hop and partial records (eval/answerable_answers.c1.yaml) ---
+# Labels proposed by Claude, confirmed by the rater record by record in chat.
+# For a partial record, correct: yes means the answerable half is given AND
+# the missing half is said to be missing (the gold answer states both).
+
+- question: "SP 800-37r2 names four security risk factors and points to SP 800-30 for risk assessment. What are the factors, and what are the steps of the risk assessment process in SP 800-30?"
+  correct: "partial"
+  faithful: "yes"
+  note: "factors right; the SP 800-30 steps declared missing - the 800-30r1 span was not retrieved (complete@5 0) (R2)"
+
+- question: "Under SP 800-37r2, who approves the continuous monitoring strategy and its minimum monitoring frequency at the organization level, and who at the system level?"
+  correct: "partial"
+  faithful: "yes"
+  note: "system level only; the organization level is omitted without saying so - its span came half-retrieved (0.43) (R5)"
+
+- question: "SP 800-171A Revision 3 bases its assessment process on another NIST publication. What are the phases of that process, and what assessment methods does that publication define?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "pure refusal; none of the three spans retrieved (R4, R8)"
+
+- question: "After December 31, 2030, which algorithms may the PIV Card Application Administration Key use, and which key reference value identifies that key on the card?"
+  correct: "yes"
+  faithful: "yes"
+  note: "both hops, both spans retrieved"
+
+- question: "Which elliptic curves may PIV keys use, and when must the PIV Secure Messaging key use P-384?"
+  correct: "yes"
+  faithful: "yes"
+  note: "both hops, near-verbatim"
+
+- question: "According to SP 800-37r2, how do organizations decide how much residual risk is acceptable, and what are the possible risk responses?"
+  correct: "partial"
+  faithful: "yes"
+  note: "acceptable residual risk right; risk responses deferred to SP 800-39 - the glossary span was not retrieved (R2)"
+
+- question: "What RSA key sizes may the PIV Authentication key use through 2030, and how long does generating such a key on the card take?"
+  correct: "yes"
+  faithful: "yes"
+  note: "answerable half given, missing half declared missing"
+
+- question: "What is a common control under SP 800-37r2, and what share of an organization's controls are typically common controls?"
+  correct: "yes"
+  faithful: "yes"
+  note: "definition from the glossary span (added to the fixture as an alternative), missing half declared missing"
+
+- question: "Which assessment methods does SP 800-53A Revision 5 define, and how many hours should each method take?"
+  correct: "yes"
+  faithful: "yes"
+  note: "methods from the numbered list (added as an alternative span), missing half declared missing"
+
+- question: "What are the steps of the risk assessment process in SP 800-30 Revision 1, and how many days does each step take?"
+  correct: "yes"
+  faithful: "yes"
+  note: "four steps, missing half declared missing"
+
+- question: "Under SP 800-37r2, who approves the system-level continuous monitoring strategy, and what is the default minimum monitoring frequency?"
+  correct: "yes"
+  faithful: "yes"
+  note: "approver right, no default frequency stated as such"
+
+- question: "What are the phases of the SP 800-171A Revision 3 assessment process, and how long should each phase last?"
+  correct: "no"
+  declined: true
+  faithful: "yes"
+  note: "declined both halves; the phases span was not retrieved, so declining the answerable half too was the right behaviour (R4)"

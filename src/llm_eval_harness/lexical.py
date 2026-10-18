@@ -5,11 +5,43 @@ Why a second retriever at all. Ten of the twenty-six answerable questions were
 not served their gold span in the top five, and the misses were not random:
 they cluster on questions that name a document by its identifier - "What is the
 scope of NIST SP 800-78-5?", "What flexibility does SP 800-171Ar3 give to
-assessors?". Both of those gold spans sit whole inside a single indexed chunk,
-and all-MiniLM-L6-v2 ranks that chunk below position fifty. An embedding
-represents "SP 800-78-5" as a smear of subword tokens that look much like
-"SP 800-73" and "SP 800-53A"; exact strings are the one thing word matching is
-better at than meaning matching.
+assessors?". Dense retrieval ranks those gold chunks below position fifty.
+
+**The reasoning that followed from that was wrong, and it is left here because
+the fix it produced works anyway.** The argument was that an identifier is an
+exact string and exact strings are what word matching does better. Measured on
+17.09 (docs/lessons.md #29): neither gold span contains the identifier at all -
+one says "The assessment procedures are flexible and can be customized", the
+other "This document contains the technical specifications needed for" - so
+there is no exact string in the text to match. BM25 ranks the first of the two
+at 30 and never finds the second inside 300; the fused top five contains
+neither at any depth tried.
+
+What the fusion did improve is four other records, and it cost two. That is a
+real gain and it is not the gain this paragraph predicted.
+
+The tokenizer has no stopword list, which is the other half of it: in formal
+NIST prose the question words are rare and therefore heavy. "does" scores
+idf 4.76 and "what" 4.57, against 3.54 for "800-171ar3" - so for the scope
+question BM25's top three come from two other documents entirely, ranked on
+"what" and "scope".
+
+Removing them was tried, because it costs three minutes to try and an argument
+to avoid. Same fixture, query stripped of template words, nothing else touched:
+hit@5 and covered@5 do not move at all, coverage@5 goes 0.606 to 0.633, four
+records shift and one of them gets worse. The two questions the paragraph above
+is about stay misses. So the stopword list is not the missing piece, and the
+number is in docs/lessons.md #29 rather than in this module.
+
+**It went in anyway, on 16.10, for a reason that measurement did not look
+at.** Heavy question words are an attack surface: scripts/index_poisoning.py
+put 49 third-party injection emails into a copy of the index, and one of them,
+a fake chat with no word of the topic, was served for four questions on
+"what", "do" and "it" alone. With STOPWORDS stripped from the BM25 query
+(scripts/bm25_stopwords.py): poison served 4/93 -> 0/93, hit@5 one record
+lost and two won over 64. The list is function words only and was not tuned
+after the run. It closes the cheap attack, not every attack - a document
+stuffed with the corpus's own frequent question terms is the next one.
 
 BM25 is the standard answer and it is twenty lines. Terms are scored by how
 often they appear in a chunk (saturating, so a chunk that repeats one word
@@ -54,6 +86,27 @@ _TOKEN = re.compile(r"[a-z0-9]+(?:[-.][a-z0-9]+)*")
 
 def tokenize(text):
     return _TOKEN.findall(text.lower())
+
+
+# Function words only: question words, auxiliaries, pronouns, articles,
+# prepositions, conjunctions. Off-the-shelf lists were not used - scikit-learn's
+# includes "system", "describe" and "find", which are content in this corpus.
+STOPWORDS = frozenset("""
+what which who whom whose when where why how
+is are was were be been being am do does did done doing have has had having
+can could shall should will would may might must
+i me my we us our you your he him his she her it its they them their
+this that these those there here
+a an the
+of in on at to for from by with about into onto over under between through
+during before after above below up down out off than
+and or but nor not no so if then also as
+""".split())  # noqa: SIM905 - kept as lines of one word class each
+
+
+def strip_stopwords(query):
+    """The query as BM25 should see it. Applied to queries, not to the index."""
+    return " ".join(term for term in tokenize(query) if term not in STOPWORDS)
 
 
 class BM25:

@@ -1,0 +1,17 @@
+{
+  "model": "qwen3:8b",
+  "mode": "across_processes",
+  "runs": 5,
+  "verdicts_per_run": 58,
+  "clean_per_run": [
+    26,
+    26,
+    26,
+    26,
+    26
+  ],
+  "flipped": [],
+  "vs_cache": [],
+  "seconds": 1538.8,
+  "measured": "2026-10-13T03:42:30+00:00"
+}

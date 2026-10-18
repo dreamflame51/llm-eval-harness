@@ -12,15 +12,16 @@ two agree on what to call the metrics and not on what to compute:
 
   the means can agree while the records do not. Averaged over 26 answers the
   two faithfulness scores sit within 0.1 of each other. Per record they
-  correlate at 0.11. An aggregate that matches is not evidence that two
+  correlate at 0.19 on the current (hybrid) answers and 0.11 on the dense
+  baseline. An aggregate that matches is not evidence that two
   implementations measure the same thing.
 
   an answer with no claims in it has no agreed score. "Answer is missing"
-  scores faithfulness 1.00 in DeepEval on all six records where the model
-  declined - nothing in it is contradicted - and 0.00, 0.50 or 1.00 in RAGAS
-  on identical text, depending on whether its claim extractor found anything
-  in four words to check. A system that declined every question would be
-  perfectly faithful to one library and unpredictable to the other.
+  scores faithfulness 1.00 in DeepEval on every record where the model
+  declined - nothing in it is contradicted - and anything from 0.00 to 1.00
+  in RAGAS on identical text, depending on whether its claim extractor found
+  anything in four words to check. A system that declined every question
+  would be perfectly faithful to one library and unpredictable to the other.
 
   a judge in a library is still a judge. One DeepEval verdict here says a
   document title is "not mentioned in the retrieval context" when it is in
@@ -194,12 +195,12 @@ def main():
             "  - DeepEval calls every declined answer perfectly faithful. Nothing in\n"
             "    'Answer is missing' contradicts anything, so it scores 1.00, and a\n"
             "    system that declined every question would score a perfect 1.00.\n"
-            "  - RAGAS is not stable on the same input: the identical answer scores\n"
-            "    0.00, 0.50 and 1.00 across these records, depending on whether its\n"
-            "    claim extractor found a claim to check in four words.\n"
-            "  - Only RAGAS's answer_relevancy is consistent here: 0.00 on all six,\n"
-            "    which is the defensible reading - a decline does not address the\n"
-            "    question. DeepEval's reads four of the six as fully relevant.\n"
+            "  - RAGAS is not stable on the same input: the identical answer gets\n"
+            "    different faithfulness across these records, depending on whether\n"
+            "    its claim extractor found a claim to check in four words.\n"
+            "  - Only RAGAS's answer_relevancy is consistent here: 0.00 on every\n"
+            "    decline, which is the defensible reading - a decline does not\n"
+            "    address the question. DeepEval reads declines as fully relevant.\n"
             "  Read the definition, not the number."
         )
 

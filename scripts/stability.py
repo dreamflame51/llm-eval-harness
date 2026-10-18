@@ -20,6 +20,11 @@ consecutive runs of untouched code (docs/lessons.md #17). A check that cannot
 see the variable it was written to measure is worse than no check, so
 `--in-process` keeps the old behaviour and says what it is.
 
+**A cold model, too.** A fresh process turned out not to be enough: Ollama
+keeps the model resident between calls, so only the first of the runs loaded
+it, and runs 2-5 came back byte-identical (14.10). Each run now starts by
+unloading every resident model; `--warm` skips that, for comparison.
+
 Two numbers come out, and the second is the more telling:
 
     spread      max minus min of the metric across runs. What a threshold
@@ -34,13 +39,14 @@ threshold can read a measured number instead of an assumption.
 """
 
 import argparse
+import datetime
 import json
 import pathlib
 import subprocess
 import sys
 import time
 
-from llm_eval_harness import pins
+from llm_eval_harness import pins, tracing
 
 OUT = pathlib.Path("eval/drift.json")
 
@@ -50,14 +56,21 @@ OUT = pathlib.Path("eval/drift.json")
 # whole point.
 CHILD = """
 import json, sys
+from llm_eval_harness import tracing
 from llm_eval_harness.dataset import refusal_records
 from llm_eval_harness.refusal import evaluate_refusals
 
 limit = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+index = sys.argv[2] if len(sys.argv) > 2 else "?"
 records = refusal_records()
 if limit:
     records = records[:limit]
-result = evaluate_refusals(records)
+# The child opens its own run rather than inheriting a span: it is a separate
+# interpreter on purpose. What it does inherit, through the environment, is the
+# run's name, so all the repetitions carry one version stamp.
+with tracing.run(f"drift run {index}", run_index=index, records=len(records)):
+    result = evaluate_refusals(records)
+    tracing.flush()
 print("@@" + json.dumps({
     "rate": result["refusal_rate"],
     "answers": [
@@ -68,15 +81,17 @@ print("@@" + json.dumps({
 """
 
 
-def run_once(limit, in_process):
+def run_once(limit, in_process, index=1):
     if in_process:
+        from llm_eval_harness import tracing
         from llm_eval_harness.dataset import refusal_records
         from llm_eval_harness.refusal import evaluate_refusals
 
         records = refusal_records()
         if limit:
             records = records[:limit]
-        result = evaluate_refusals(records)
+        with tracing.run(f"drift run {index}", run_index=index, records=len(records)):
+            result = evaluate_refusals(records)
         return {
             "rate": result["refusal_rate"],
             "answers": [
@@ -86,7 +101,7 @@ def run_once(limit, in_process):
         }
 
     done = subprocess.run(
-        [sys.executable, "-c", CHILD, str(limit or 0)],
+        [sys.executable, "-c", CHILD, str(limit or 0), str(index)],
         capture_output=True,
         text=True,
         timeout=3600,
@@ -143,31 +158,56 @@ def parse_args():
         action="store_true",
         help="repeat in one process - the condition where the model does not move",
     )
+    parser.add_argument(
+        "--warm",
+        action="store_true",
+        help="do not unload the model between runs - only the first run loads it",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    mode = "one process" if args.in_process else "a fresh process each time"
+    cold = not (args.in_process or args.warm)
+    if args.in_process:
+        mode = "one process"
+    elif cold:
+        mode = "a fresh process and a cold model each time"
+    else:
+        mode = "a fresh process each time, model left loaded"
     print(f"{args.runs} runs, {mode}\n", flush=True)
 
     rates, verdicts, answers = [], {}, {}
     started = time.perf_counter()
-    for run in range(1, args.runs + 1):
-        began = time.perf_counter()
-        result = run_once(args.limit, args.in_process)
-        rates.append(result["rate"])
-        for row in result["answers"]:
-            verdicts.setdefault(row["q"], []).append(row["refused"])
-            answers.setdefault(row["q"], set()).add(row["answer"])
-        print(
-            f"run {run}: refusal_rate={result['rate']:.3f}  {time.perf_counter() - began:.0f}s",
-            flush=True,
-        )
+    # One name for the whole measurement, exported to the children through the
+    # environment: five runs of the same thing are only worth anything if they
+    # can be told apart and still found together.
+    group = f"drift {datetime.datetime.now(tz=datetime.UTC):%Y-%m-%d %H:%M}"
+    with tracing.run(group, runs=args.runs, mode=mode):
+        for run in range(1, args.runs + 1):
+            if cold:
+                from llm_eval_harness.pipeline import unload_models
+
+                unloaded = unload_models()
+                print(f"run {run}: unloaded {', '.join(unloaded) or 'nothing'}", flush=True)
+            began = time.perf_counter()
+            result = run_once(args.limit, args.in_process, index=run)
+            rates.append(result["rate"])
+            for row in result["answers"]:
+                verdicts.setdefault(row["q"], []).append(row["refused"])
+                # A list, in run order: a set would say how many wordings there
+                # were but not which run produced which, and a flip cannot be
+                # read without the text that flipped.
+                answers.setdefault(row["q"], []).append(row["answer"])
+            print(
+                f"run {run}: refusal_rate={result['rate']:.3f}  "
+                f"{time.perf_counter() - began:.0f}s",
+                flush=True,
+            )
 
     spread = max(rates) - min(rates)
     flips = [q for q, flags in verdicts.items() if len(set(flags)) > 1]
-    reworded = [q for q, texts in answers.items() if len(texts) > 1]
+    reworded = [q for q, texts in answers.items() if len(set(texts)) > 1]
 
     print(f"\nmin {min(rates):.3f}  max {max(rates):.3f}  spread {spread:.3f}")
     print(f"{len(flips)} of {len(verdicts)} questions changed verdict between runs")
@@ -177,12 +217,12 @@ def main():
     for question, flags in verdicts.items():
         marks = "".join("R" if flag else "." for flag in flags)
         state = "FLIPS" if question in flips else "stable"
-        print(f"  {marks}  {state:>6}  {len(answers[question])} distinct  {question[:56]}")
+        print(f"  {marks}  {state:>6}  {len(set(answers[question]))} distinct  {question[:56]}")
 
     against_pinned = compare_to_pinned(verdicts)
 
     payload = {
-        "mode": "in_process" if args.in_process else "across_processes",
+        "mode": "in_process" if args.in_process else ("cold" if cold else "warm"),
         "runs": args.runs,
         "records": len(verdicts),
         "rates": rates,
@@ -190,6 +230,18 @@ def main():
         "questions_that_flipped": len(flips),
         "questions_reworded": len(reworded),
         "seconds": round(time.perf_counter() - started, 1),
+        # Per question, run by run: runs[i] is run i+1. Kept so a flip can be
+        # put down to wording or to behaviour by reading what was said.
+        "questions": [
+            {
+                "q": question,
+                "runs": [
+                    {"refused": flag, "answer": text}
+                    for flag, text in zip(verdicts[question], answers[question])
+                ],
+            }
+            for question in verdicts
+        ],
     }
     # A slice is not the measurement. --limit and a single run are for
     # checking that this script works; writing either over the recorded number

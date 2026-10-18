@@ -1,0 +1,15 @@
+{
+  "model": "gemma4:latest",
+  "mode": "across_processes",
+  "runs": 3,
+  "verdicts_per_run": 58,
+  "clean_per_run": [
+    26,
+    26,
+    26
+  ],
+  "flipped": [],
+  "vs_cache": [],
+  "seconds": 3437.3,
+  "measured": "2026-10-13T04:39:48+00:00"
+}

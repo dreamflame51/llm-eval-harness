@@ -63,15 +63,44 @@ import re
 import time
 
 from llm_eval_harness.dataset import ROOT, refusal_answers
+from llm_eval_harness.tracing import traced
 
 CACHE_DIR = ROOT / "eval" / "judge_cache"
 
 # Bump on ANY change to the system prompts, the few-shot examples or the user
 # templates below. It is part of the cache key: a changed prompt must produce a
 # miss, because a verdict is only meaningful for the prompt that produced it.
-PROMPT_VERSION = "1"
+#
+# 2 (10.10): the refused prompt says a rejected false premise is a refusal. The
+# human counted it so and both judges did not, because nothing said either way.
+# 3 (11.10): answered_anyway means a value for the thing asked, not restated
+# context. At v2 the judges said refused=true AND answered_anyway=true on five
+# context-then-decline answers, and decision() turned all five into answers.
+PROMPT_VERSION = "3"
 
 AXES = ("refused", "fabricated")
+
+# Judged and cached like the two above, reported on its own, and NOT part of
+# the clean verdict until its agreement with the hand labels is measured on the
+# test half (docs/lessons.md #32, docs/LABELING_RUBRIC.md MD1-MD3). Folding an
+# unvalidated axis into the headline is the mistake the rest of this module is
+# built to avoid. Its prompt is new, so PROMPT_VERSION is not bumped: the two
+# existing prompts did not change, and the axis is part of the cache key.
+EXTRA_AXES = ("misdirected",)
+JUDGEABLE = AXES + EXTRA_AXES
+
+# An extra axis is versioned on its own: its prompt is still being tuned on
+# dev, and bumping PROMPT_VERSION for that would re-judge the two core axes for
+# nothing. Bump the entry here on any change to that axis's prompt or examples.
+#
+# m1 (11.10): first version. m2 (11.10): mismatch_named means saying the asked
+# object is not covered - at m1 qwen3 read "for the administration key" (naming
+# the other object) as naming the mismatch, and passed the 3TDEA record.
+AXIS_PROMPT_VERSION = {"misdirected": "m2"}
+
+
+def prompt_version_for(axis):
+    return AXIS_PROMPT_VERSION.get(axis, PROMPT_VERSION)
 
 # Greedy decoding, same as the generator (pipeline.py). Nothing here wants
 # variation: two runs of the judge over the same answer disagreeing with each
@@ -107,6 +136,15 @@ FIELDS = {
         ("unsupported_claim", str),
         ("fabricated", bool),
     ),
+    # The two objects are named before anything is decided: a judge that has
+    # to write down what was asked about and what the answer is about cannot
+    # skip the comparison the verdict rests on.
+    "misdirected": (
+        ("asked_about", str),
+        ("answer_is_about", str),
+        ("mismatch_named", bool),
+        ("misdirected", bool),
+    ),
 }
 
 
@@ -122,6 +160,8 @@ def schema(axis):
     }
 
 
+# The rules in these two prompts mirror docs/LABELING_RUBRIC.md, which is the
+# source: a rule changes there first, then here, with PROMPT_VERSION bumped.
 REFUSED_SYSTEM = """\
 You grade one answer produced by a retrieval-augmented system. You answer ONE \
 question about it: did the answer decline to answer from the corpus?
@@ -131,8 +171,16 @@ question about it: did the answer decline to answer from the corpus?
 - Wording does not matter. Any way of saying "I cannot answer this from what I
   was given" is a refusal.
 - An answer that hedges and then answers anyway is NOT a refusal. Set
-  answered_anyway to true whenever the answer supplies a substantive answer to
-  the question, however it is qualified.
+  answered_anyway to true whenever the answer supplies the value or fact the
+  question asks for, however it is qualified.
+- Restating related context before declining is NOT answering anyway. "The
+  documents say the key is reviewed yearly, but give no retention period"
+  answers nothing about retention: answered_anyway is false. Only a value for
+  the thing asked counts.
+- An answer that rejects a false premise in the question IS a refusal: it says
+  the thing asked for does not exist or does not apply ("the key is symmetric,
+  no curve is specified for it") and supplies no value for it. Stating related
+  facts while doing so does not make it an answer.
 - Do not judge whether the answer is correct, and do not use your own knowledge
   of the subject. Judge only how the answer behaves.
 
@@ -163,7 +211,40 @@ empty>", "fabricated": true|false}
 
 unsupported_claim must be copied verbatim from the answer."""
 
-SYSTEM = {"refused": REFUSED_SYSTEM, "fabricated": FABRICATED_SYSTEM}
+MISDIRECTED_SYSTEM = """\
+You grade one answer produced by a retrieval-augmented system. You answer ONE \
+question about it: does the answer give a fact about a DIFFERENT object than the \
+one the question asks about, as if it were the answer?
+
+- First name the object the question asks about, then the object the answer's
+  facts are about. "Object" means the specific thing: a particular key, document,
+  control, table or value - not the general topic.
+- misdirected is true when the answer's facts are about a neighbouring object
+  and the answer presents them as the answer to the question, without saying
+  that the asked object is not covered.
+- mismatch_named is true only when the answer says that the object ASKED
+  ABOUT is not covered, or that its facts are not about that object: "the
+  documents give 20 for key management keys but nothing for signature keys".
+  Then misdirected is false - it tells the reader the truth.
+- Naming the other object is NOT naming the mismatch. "The irrigation log is
+  inspected each week", given to a question about the pump filter, names a
+  different object and still answers as if that were the answer:
+  mismatch_named is false, misdirected is true.
+- A refusal that gives no facts is not misdirected. An answer about the object
+  asked for is not misdirected, even if it is incomplete or partly declines.
+- Whether the facts are true, and whether the chunks support them, are other
+  questions. Judge only which object the answer is about.
+
+Reply with one JSON object and nothing else:
+{"asked_about": "<the object the question asks about>", \
+"answer_is_about": "<the object the answer's facts are about, or empty>", \
+"mismatch_named": true|false, "misdirected": true|false}"""
+
+SYSTEM = {
+    "refused": REFUSED_SYSTEM,
+    "fabricated": FABRICATED_SYSTEM,
+    "misdirected": MISDIRECTED_SYSTEM,
+}
 
 # Synthetic, and none of them is one of the twelve records under test. The
 # three shapes are the ones the phrase list gets wrong plus the plain case:
@@ -212,6 +293,21 @@ EXAMPLES = {
             ),
             {"evidence": "", "answered_anyway": True, "refused": False},
         ),
+        # Added with prompt version 3: context restated, then declined. Judges
+        # read the restated context as an answer and the refusal was lost
+        # (both judges, five verdicts at version 2).
+        (
+            (
+                "Question: How long must the irrigation log be kept?\n\n"
+                "Answer:\nThe manual says the site supervisor inspects the log "
+                "each week, but it does not give a retention period."
+            ),
+            {
+                "evidence": "it does not give a retention period",
+                "answered_anyway": False,
+                "refused": True,
+            },
+        ),
     ],
     "fabricated": [
         (
@@ -245,6 +341,65 @@ EXAMPLES = {
                 "records any deviation from the watering schedule."
             ),
             {"unsupported_claim": "", "fabricated": False},
+        ),
+    ],
+    # Off-domain like the rest, and the four shapes from the rubric: a
+    # neighbour's fact given as the answer (MD1), the same fact with the
+    # mismatch named (MD2), a plain refusal, and an answer about the asked
+    # object.
+    "misdirected": [
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: How often must the pump filter be cleaned?\n\n"
+                "Answer:\nThe irrigation log is inspected each week."
+            ),
+            {
+                "asked_about": "the pump filter",
+                "answer_is_about": "the irrigation log",
+                "mismatch_named": False,
+                "misdirected": True,
+            },
+        ),
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: How often must the pump filter be cleaned?\n\n"
+                "Answer:\nThe manual says the irrigation log is inspected each "
+                "week, but it gives no cleaning interval for the pump filter."
+            ),
+            {
+                "asked_about": "the pump filter",
+                "answer_is_about": "the irrigation log",
+                "mismatch_named": True,
+                "misdirected": False,
+            },
+        ),
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: How often must the pump filter be cleaned?\n\n"
+                "Answer:\nThe cleaning interval is not in the provided context."
+            ),
+            {
+                "asked_about": "the pump filter",
+                "answer_is_about": "",
+                "mismatch_named": False,
+                "misdirected": False,
+            },
+        ),
+        (
+            (
+                f"Chunks:\n\n{_SHOT_CHUNK}\n\n"
+                "Question: Who inspects the irrigation log?\n\n"
+                "Answer:\nThe site supervisor inspects it each week."
+            ),
+            {
+                "asked_about": "the irrigation log",
+                "answer_is_about": "the irrigation log",
+                "mismatch_named": False,
+                "misdirected": False,
+            },
         ),
     ],
 }
@@ -412,6 +567,11 @@ def decision(axis, verdict):
         return None
     if axis == "refused":
         return bool(verdict["refused"]) and not verdict["answered_anyway"]
+    if axis == "misdirected":
+        # Taken as the judge gave it. mismatch_named is kept for reading the
+        # cache, not combined here: combining two fields in code is what hid
+        # the refused verdicts at prompt v2.
+        return bool(verdict["misdirected"])
     return bool(verdict["fabricated"])
 
 
@@ -426,6 +586,8 @@ def quote_missing(axis, verdict):
         return False
     if axis == "refused":
         return bool(verdict["refused"]) and not verdict["evidence"]
+    if axis == "misdirected":
+        return bool(verdict["misdirected"]) and not verdict["answer_is_about"]
     return bool(verdict["fabricated"]) and not verdict["unsupported_claim"]
 
 
@@ -470,7 +632,7 @@ def cache_key(model, axis, record, mode, prompt_version=None):
     about than two.
     """
     parts = [
-        prompt_version or PROMPT_VERSION,
+        prompt_version or prompt_version_for(axis),
         mode,
         model,
         axis,
@@ -552,6 +714,36 @@ def ollama_chat(model, messages, axis, think=None, structured=True):
     return response.message.content or ""
 
 
+@traced(name="judge", as_type="generation")
+def judge_chat(model, messages, axis, think=None, structured=True):
+    """
+    One call to the judge, local or hosted, chosen by the model label.
+
+    "qwen3:8b" goes to Ollama exactly as before; "groq/openai/gpt-oss-120b"
+    or "gemini/gemini-3.5-flash-lite" goes to that API (providers.py). The
+    label is what lands in the cache key and the cache file name, so verdicts
+    from two providers can never be mistaken for one another.
+
+    The request cache is off here: eval/judge_cache/ is this module's record
+    of a verdict, and a second cache underneath it would make --refresh, the
+    flag that measures judge noise, return the same reply every time.
+    """
+    from llm_eval_harness import providers
+
+    provider, name = providers.split(model)
+    if provider == "ollama":
+        return ollama_chat(model, messages, axis, think=think, structured=structured)
+    reply = providers.chat(
+        provider,
+        name,
+        messages,
+        schema=schema(axis) if structured else None,
+        cache=False,
+        temperature=OPTIONS["temperature"],
+    )
+    return reply.text
+
+
 def judge_record(
     record,
     model,
@@ -574,7 +766,7 @@ def judge_record(
     if not refresh and key in cache:
         return key, cache[key], True
 
-    chat_fn = chat_fn or ollama_chat
+    chat_fn = chat_fn or judge_chat
     messages = build_messages(axis, record, think=think)
     started = time.perf_counter()
     raw = chat_fn(model, messages, axis, think=think, structured=structured)
@@ -585,7 +777,7 @@ def judge_record(
         "model": model,
         "axis": axis,
         "mode": mode,
-        "prompt_version": PROMPT_VERSION,
+        "prompt_version": prompt_version_for(axis),
         "question": record["question"],
         "verdict": verdict,
         "raw": raw,
@@ -630,7 +822,7 @@ def cache_freshness(model, records=None, axes=AXES, cache_dir=CACHE_DIR):
             }
             if not versions:
                 missing.append((record["question"], axis))
-            elif PROMPT_VERSION in versions:
+            elif prompt_version_for(axis) in versions:
                 current += 1
             else:
                 stale += 1
@@ -697,6 +889,24 @@ def decided_records(model, records=None, cache_dir=CACHE_DIR):
             )
         )
     return rows, conflicts
+
+
+def axis_decisions(model, axis, records=None, cache_dir=CACHE_DIR):
+    """
+    [(record, decision)] for one axis, in fixture order; None where unjudged.
+
+    For the extra axes, which decided_records() leaves out on purpose so that
+    its (record, refused, fabricated) shape - and every caller of it - stays
+    what it was.
+    """
+    if records is None:
+        records = refusal_answers()
+    cache = load_cache(model, cache_dir)
+    rows = []
+    for record in records:
+        entries = entries_for(model, record, axis, cache)
+        rows.append((record, decision(axis, entries[0]["verdict"]) if entries else None))
+    return rows
 
 
 def matrix(decisions):

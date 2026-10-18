@@ -13,6 +13,10 @@ record, RAGAS against DeepEval, the traceability matrix and where the V-model le
 missing. Built from the committed files by `scripts/make_dashboard.py`; no model is
 called to render it.
 
+**[The map](https://claude.ai/artifact/XFTmdyQpzYAR1jGS8zuDmN)** - the same system drawn: the path
+a question takes, the instrument pointed at each stage, what CI runs on every push and what it
+cannot run at all. Ten minutes, no numbers to memorise. Source: [docs/system-map.html](docs/system-map.html).
+
 Problem log: [docs/lessons.md](docs/lessons.md) &middot;
 What is claimed and what checks it: [docs/traceability.md](docs/traceability.md) &middot;
 Where the levels are missing: [docs/v-model.md](docs/v-model.md)
@@ -97,8 +101,10 @@ Nothing in `metrics` is a gate. No acceptance threshold has been agreed for any
 metric in this project - see [docs/v-model.md](docs/v-model.md) - and a threshold
 invented to make a pipeline green is how a measurement turns into a ritual. What
 *is* gated: the suite, the lint, and `tests/eval/test_regression.py`, which pins
-every reported number by equality. A number that moves fails the build and has to be
-explained in a commit.
+every number read from a committed file - the judged refusal metric, the drift
+measurement, both library score files - by equality. A number that moves fails the
+build and has to be explained in a commit. The retrieval numbers are not among them:
+they need the index, which only the manual `retrieval` job builds.
 
 `retrieval` is manual because rebuilding the index embeds ~5000 chunks, and
 `continue-on-error` because a retrieval score moving by 0.02 is a measurement, not a
@@ -132,8 +138,8 @@ rather than linked.
 | `uv run python scripts/stability.py` | is the refusal score reproducible? |
 | `uv run python scripts/sweep.py` | which chunk size retrieves best? (minutes) |
 
-Rerun only when the judging itself changes - each needs Ollama and takes ~15
-minutes on this hardware:
+Rerun only when the judging itself changes - each needs Ollama and takes from a
+minute to hours on this hardware:
 
 | command | answers |
 |---|---|
@@ -146,7 +152,6 @@ minutes on this hardware:
 | `uv run python scripts/live_check.py` | does the live pipeline still behave the way the pinned numbers describe? (~20 min) |
 | `uv run python scripts/usefulness.py` | sit with the system on real tasks and record whether it was any use |
 | `uv run pytest` | the harness test suite |
-| `uv run pytest practice` | interview drill code, kept out of the main suite |
 
 **Three commands generate fresh answers, and they are not interchangeable.**
 They were converging on each other by accident, so the map is written down
@@ -155,14 +160,16 @@ here and the comparison they share lives in `llm_eval_harness/pins.py`:
 | command | asks | fails a release? |
 |---|---|---|
 | `refusal.py --live` | what does it say right now? Phrase-matched, answers printed in full | no - a diagnostic |
-| `stability.py` | how much does the number move when nothing changes? N runs, fresh process each | yes, if a question flips against the pin |
+| `stability.py` | how much does the number move when nothing changes? N runs, fresh process and cold model each | yes, if a question flips against the pin |
 | `live_check.py` | does the live system still behave as the frozen set says? One run, judged on both axes | yes |
 
 ## The reference set
 
-`eval/ground_truth.yaml` - 38 records:
+`eval/ground_truth.yaml` - 64 records:
 
 - **26 answerable**: question, gold answer, and the exact spans that support it.
+- **26 paraphrases** of those, one each (`paraphrase_of`), same answer and spans
+  - see the retrieval table below for what they changed.
 - **12 refusal tests**: the corpus cannot answer, so declining is the only
   correct response. Two classes of six, scored separately: `in_corpus_gap`
   (document present, fact absent) and `out_of_corpus` (document absent). The
@@ -197,13 +204,28 @@ carried exactly 0).
 |---|---|---|---|---|---|
 | `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
 | `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | 11/12 |
-| `eval/refusal_answers.yaml` (current) | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
+| `eval/prefence_baseline/refusal_answers.yaml` | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
+| `eval/prestopword_baseline/refusal_answers.yaml` (fenced prompt, 29 questions) | hybrid | 07.10 + 10.10 | 26/29 | 26/29 | 26/29 |
+| `eval/refusal_answers.yaml` (current, BM25 query without stopwords) | hybrid | 17.10, cold model | 26/29 | 27/29 | **27/29** |
+
+The last two rows differ in one retrieval change, and in one thing nobody had
+named: the 07.10 set was recorded without unloading the model, and on two of
+the ten records whose chunks did not change at all, a cold re-record words the
+answer differently. Two cold recordings on 17.10 agreed 29 of 29, byte for
+byte, so `record_answers.py` now unloads first and says so in the header
+([lessons #34](docs/lessons.md#34)).
 
 The middle row is a control, and it is there because a comparison between two
 recordings is not a comparison between two systems: the generator rewrites most
 of its answers between processes, so a difference between 14.09 and 16.09
 carries the day as well as the retriever. Holding the day fixed and swapping
 only the retriever is what the middle row buys.
+
+> **Withdrawn pending re-labelling (10.10).** The two `fabricated` labels this
+> paragraph rests on did not survive a second reading by the same rater: both
+> answers were re-recorded with near-identical content and labelled clean
+> ([lessons #31](docs/lessons.md#31)). Read the paragraph as what was believed
+> on 16.09, not as a measured cost of BM25.
 
 **Fusing BM25 into retrieval cost two records of grounding.** Two dense
 recordings score 11/12 by hand regardless of the day; the hybrid recording from
@@ -230,17 +252,47 @@ arrives, not what arrives beside it
 | `MISSING` | the quote is nowhere in the corpus | the fixture is wrong |
 | `SPLIT` | present, but no single chunk holds it whole | chunk size / overlap |
 
-Current: 48 of 51 contexts clean, 0 missing, 3 split.
+Current: 96 of 102 contexts clean, 0 missing, 6 split (the same three spans,
+each quoted by a question and its paraphrase).
 
 **`evaluator`** - retrieval. Four numbers over the same top 5, because "did the
 retriever serve the evidence?" has more than one honest answer.
 
-| metric | reads as | now |
-|---|---|---|
-| `hit@5` | one chunk held a gold span whole | **0.538** |
-| `covered@5` | the five chunks *together* held it | **0.577** |
-| `coverage@5` | mean share of a gold span the five chunks held | **0.606** |
-| `MRR` | average of 1/rank; miss counts 0 | **0.362** |
+| metric | reads as | original 26 | paraphrased 26 | all 52 |
+|---|---|---|---|---|
+| `hit@5` | one chunk held a gold span whole | 0.577 | **0.423** | 0.500 |
+| `covered@5` | the five chunks *together* held it | 0.615 | **0.462** | 0.538 |
+| `coverage@5` | mean share of a gold span the five chunks held | 0.671 | **0.496** | 0.583 |
+| `MRR` | average of 1/rank; miss counts 0 | 0.436 | **0.230** | 0.333 |
+
+**With stopwords stripped from the BM25 query (16.10).** Before it the
+columns read 0.615 / 0.654 / 0.670 / 0.439 and 0.385 / 0.423 / 0.450 / 0.224.
+The change was made for security, not quality: a poisoned document with no
+topic words was served on question words alone, 4 of 93 questions, and 0 after
+(`scripts/index_poisoning.py`, `scripts/bm25_stopwords.py`). On the original 26
+it costs one record (the RSA exponent question); the paraphrases gain one.
+Numbers below dated before 16.10 were measured without it.
+
+**Measured on the audited gold list (13.10).** Until then the original 26
+read 0.538 / 0.577 / 0.606 / 0.362 and the paraphrases 0.308. The audit read
+the retrieved chunks of every hit@5 miss whose answer was right, and found two
+records where retrieval had served a passage that answers the question on its
+own but was not among the gold spans; those passages were added as alternatives
+([#33](docs/lessons.md#33)). Dense retrieval on the same list: 0.423 -> 0.462,
+so the dense -> hybrid gap is 0.462 -> 0.615, the same four records better and
+one worse. Every number in this README dated before 13.10, and the chunk-size
+sweep below, was measured on the shorter list.
+
+**The original questions were easier than a user's.** They were drafted while
+reading the gold passage, and borrow its words. Each was paraphrased once
+(2026-10-07) with the same answer and the same gold spans: hit@5 falls from
+14/26 to 8/26 - seven families lose the hit, one gains it, exact McNemar
+p = 0.07. The questions share 41% of their longer words with the gold span on
+average, the paraphrases 35%: a modest difference, so wording leakage is part
+of the explanation and not proven to be all of it. The paraphrases were
+written by Claude, not by users. Intervals on n=26 are wide (hit@5 95% CI
+0.35-0.71 and 0.17-0.50); a paraphrase and its original are one family, so
+resample families, not questions.
 
 These score the retriever `pipeline.py` actually answers with - dense and BM25
 fused. Until 16.09 they scored dense retrieval alone, a day after the product
@@ -250,6 +302,36 @@ question being asked.
 
 `hit@k` ignores position, `MRR` does not - a system that always ranks the right
 chunk 5th looks perfect to one and poor to the other.
+
+**Two new kinds of answerable question (12.10), reported apart** so the
+columns above stay comparable with everything before them:
+
+| group | n | `hit@5` | `covered@5` | `complete@5` | `MRR` |
+|---|---|---|---|---|---|
+| `multi_hop` - the answer needs two or more passages | 6 | 0.667 | 0.833 | **0.333** | 0.667 |
+| `partial` - the corpus answers only half the question | 6 | 0.833 | 0.833 | n/a | 0.533 |
+
+`covered@5` treats a record's gold spans as alternatives - one served is
+enough - which is right for a question supported in two places and wrong for a
+question that needs both. `complete@5` requires every span, so it is read on
+`multi_hop` only. On multi-hop questions the retriever brings one hop five
+times in six and all of them twice: the gap between the two columns is the
+multi-hop failure, and the lenient metric hides it entirely. n is six; read
+the direction, not the decimals.
+
+**The generator follows the retriever, hop by hop.** The twelve answers
+(`eval/answerable_answers.c1.yaml`, labelled in `eval/answerable_labels.yaml`)
+invent nothing. The two multi-hop answers that are complete are exactly the two
+records where `complete@5` is 1; where a hop did not arrive, the answer either
+says so (two) or leaves it out without a word (one - the organization-level
+approver). All six partial answers decline the half the corpus lacks; one also
+declines the half it has, because that span was not retrieved.
+
+**And the ruler was short again.** Two partial answers were drawn from passages
+that were not among the gold spans - a glossary definition and a numbered list
+of methods. Retrieval had served the evidence and the metric called it a miss.
+With those two added as alternative spans, `partial` hit@5 went from 0.500 to
+0.833. The original 26 were then audited the same way (above): 0.538 -> 0.615.
 
 `hit@k` also charges the retriever for chunking. A span cut by a chunk boundary
 is unreachable however good retrieval is, so the metric partly measures how
@@ -277,40 +359,84 @@ when the model **declined and invented nothing**. Those are two separate
 questions, decided separately by an LLM judge: `refused` from the answer alone,
 `fabricated` against the five chunks the generator actually saw.
 
-| | declined, invented nothing |
+| | declined, invented nothing, not misdirected |
 |---|---|
-| hand labels | **9/12** |
-| judge, `qwen3:8b` | 10/12 |
-| phrase list (tripwire) | 11/12 |
+| hand labels | **27/29** |
+| judge, `qwen3:8b` | 26/29 - one false alarm on `fabricated` (below) |
+| phrase list (tripwire) | 27/29 |
 
-by class, by the labels: `in_corpus_gap` 5/6, `out_of_corpus` 4/6.
+by class, by the labels: `in_corpus_gap` 22/23, `out_of_corpus` 5/6.
+Seventeen of the 29 are bait questions: thirteen written to provoke an
+invented figure, which gemma4 never produced, and four built on false premises.
+Neither of the two that are not clean fabricated. Both are **misdirected** - a
+true fact about a neighbouring object given as the answer: CBEFF for SP 800-76,
+and the RSA exponent 65537 for the Secure Messaging key, which is ECDH. The
+third axis exists for them ([lessons #32](docs/lessons.md#32)).
 
-**These numbers do not move between runs.** The twelve answers are frozen in
+The 3TDEA bait was the third until 17.10. Its lure - the administration-key
+row of Table 7, "Through December 31, 2030 3TDEA" - is still at rank 2 after
+the stopword change; one of the other four chunks was replaced, and the model
+now declines. The bait still tests what it was built to test.
+
+**These numbers do not move between runs.** The 29 answers are frozen in
 `eval/refusal_answers.yaml`, hand-labelled, and the judge's verdicts are
 committed under `eval/judge_cache/`, so `refusal` reads them back without
 loading a model. Earlier refusal numbers in this README were samples of a
 drifting generator; these are not.
 
-**The judge is settled on one axis and at chance on the other.** Against the
-hand labels, re-made on 16.09 on a set that does carry fabrications:
+**The judge is measured on one axis only.** Against the hand labels of 18.10,
+on the current 29:
 
 | axis | `qwen3:8b` | `gemma4` |
 |---|---|---|
-| `refused` | 12/12, kappa **1.00** | 11/12, kappa 0.75 |
-| `fabricated` | 9/12, kappa **-0.12** | 10/12, kappa 0.00 |
+| `refused` | 28/29, kappa 0.65 | **29/29, kappa 1.00** |
+| `fabricated` | 27/29, kappa undefined | 29/29, kappa undefined |
 
-Raw agreement of 75-83% on the second row hides that it is no better than
-guessing: two of the twelve answers were labelled as fabricating, so a judge
-that always says "no" scores 10/12. The humans found two, `qwen3` found one - a
-different one - and `gemma4` none.
+Judge prompt version 3. Version 2 said a rejected false premise is a refusal and
+moved nothing it was aimed at; reading the cached verdicts showed why. The
+judges were answering `refused: true` and `answered_anyway: true` together on
+five answers that restate context and then decline, and the code combines the
+two as "refused and not answered anyway". Version 3 defines answered_anyway as
+giving the value asked for, not restating context. gemma4 went from kappa 0.36
+to 1.00.
 
-**One of those two is the case the judge was built for.** An answer that
-declines and then states a frequency its chunks do not carry: the phrase list
-passes it by construction, and `qwen3` passes it as well. That cell was empty
-for this fixture's whole life, which is why the claim could never be tested; it
-is occupied now, and nothing caught it. n is twelve and the kappas are brittle;
-the direction is not. See [#20](docs/lessons.md#20) and
-[#28](docs/lessons.md#28).
+`qwen3` disagrees three times: it calls the CBEFF answer a refusal - with empty
+evidence, nothing in the answer declines - and raises false alarms on
+fabricated for the SP 800-73 answer and for the symmetric Card Authentication
+key, whose answer names only AES-128 where the table also allows 192 and 256
+(incomplete, not invented). Until 17.10 the first two cancelled out and its
+clean count equalled the human's by accident. The CBEFF answer is misdirected,
+and under the new definition a misdirected fact is not "the value asked for",
+so it no longer counts as answering. The `fabricated` row cannot be read: the
+hand labels hold no fabrication.
+
+**The judge has a third axis, `misdirected`, kept out of the clean verdict.**
+Its prompt was tuned on dev only - two versions; qwen3 named both objects
+correctly and still called a neighbouring fact "the mismatch named" - and then
+read on test once:
+
+| `misdirected` | dev (15, 1 positive) | test (14, 2 positives) |
+|---|---|---|
+| `gemma4` | 15/15, kappa 1.00 | 13/14, kappa 0.63 - caught 65537, missed CBEFF |
+| `qwen3:8b` | 13/15, kappa -0.07 | 12/14, kappa 0.59 - caught both, two false alarms |
+
+Three positives in the whole set: enough to see that gemma4 can do it and qwen3
+is erratic, not enough to put the axis into the headline number.
+
+On the 17.10 set the dev positive (3TDEA) is gone, so dev has no positives
+left to measure. On test (unchanged in prompt, re-read because 5 of its 14
+answers are new) both judges score 12/14, kappa 0.42: both catch 65537, both
+miss CBEFF, and both flag the retired-signature-keys answer, which names the
+mismatch ("up to 20 retired key management keys ... nothing on digital
+signature keys") - the MD2 case the prompt was tuned against.
+
+Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
+against two hand-labelled fabrications, and called one of them the case the
+judge was built for. Neither label survived a second reading by the same rater
+([#28](docs/lessons.md#28), [#31](docs/lessons.md#31)). How well the judge
+catches a fabrication is measured only on synthetic ones: thirteen inserted
+into correct answers (`eval/synthetic_fabrications.results.json`) and the four
+calibration cases below.
 
 The phrase list is kept beside it: it decides refusal and nothing else, so a
 hedge that declines and then invents is a pass for it, unconditionally. Every
@@ -325,18 +451,33 @@ fabricated" to everything scores 92% against a set with one fabrication in it.
 Four synthetic answers with the verdicts fixed in advance; both judges pass, so
 a clean verdict is a verdict and not a stuck axis - [#20](docs/lessons.md#20).
 
-`pipeline.py` decodes greedily with a fixed seed, which removed the variation
-between repeated runs **inside one process** - `uv run python
-scripts/stability.py` re-checks that, and it is the only thing that check can
-see, because it repeats in a loop rather than in a new process. Across processes
-the model still drifts: same question, same five retrieved chunks, same
-distances to four decimals, different answer. The likely cause is the GPU/CPU
-layer split, which is re-decided on every model load - 4 GB of VRAM cannot hold
-this model - and greedy decoding then diverges from the first flipped argmax. A
-fixed seed does not help, because nothing is being sampled.
+`pipeline.py` decodes greedily with a fixed seed. What that buys depends on
+whether the model was just loaded, which `scripts/stability.py` measured on the
+29 refusal questions, five runs each, on 2026-10-14:
 
-So a generation-side number here is reproducible within a session and not
-between sessions. See [docs/lessons.md](docs/lessons.md) #17.
+| mode | refusal rate (phrase list) | texts per question |
+|---|---|---|
+| new process, model left loaded (`--warm`, `eval/drift_warm.json`) | 0.862, 0.897, 0.897, 0.897, 0.897 | 2 on 12 questions: run 1 against runs 2-5 |
+| new process, model unloaded first (default, `eval/drift.json`) | 0.862 ×5 | 1 |
+
+A new process is not a new model: Ollama keeps the model resident between
+calls, so in the warm measurement only run 1 loaded it, and runs 2-5 were
+byte-identical to each other. Five consecutive cold loads gave five identical
+sets of 29 texts. Why a resident model answers differently from a freshly
+loaded one is not established. The earlier explanation - the GPU/CPU layer
+split re-decided on every load, 4 GB of VRAM not holding the model ([#17](docs/lessons.md#17))
+- predicts that cold loads differ from each other, and five in a row did not.
+Two cold loads three hours apart did differ, in 1 text of 29, with both
+versions refusing.
+
+The rates above are on the phrase list as it was then; the one verdict that
+flipped was the list missing "no elliptic curve is specified", fixed since.
+
+**Tolerance for a live run.** Run cold. A per-question verdict that differs
+from the pin is a signal; `stability.py` exits non-zero on it. Changed wording
+with the same verdict is not, until loads hours apart have been measured on
+more than one sitting. A warm run is not compared against a cold pin: they are
+two states of the model, and the 0.034 between them was that, not noise.
 
 ## Configuration is measured, not guessed
 
@@ -348,7 +489,10 @@ ceiling of each metric on this fixture - the best it could possibly return
 whatever the retriever does. Every row here scores **dense** retrieval, which
 is what the question needs: the chunk size is being compared, so the retriever
 has to be held still. That is why the 800/160 row reads 0.423 and the table
-above, scoring the same configuration with BM25 fused in, reads 0.538:
+above, scoring the same configuration with BM25 fused in, read 0.538 on the
+same gold list. The sweep predates the 13.10 audit and was not re-run: on the
+audited list the 800/160 dense row reads 0.462, and the ranking between
+configurations is not expected to change, but that is not measured.
 
 | size / overlap | chunks | reach hit / cov | hit@5 | cov@5 | coverage@5 | MRR |
 |---|---|---|---|---|---|---|
@@ -390,7 +534,6 @@ eval/judge_cache/       the judge's verdicts, committed so the numbers reproduce
 tests/                  harness tests
 docs/                   problem log, Russian versions
 scripts/                judging, labelling, smoke check, calibration, sweep
-practice/               interview drills, outside the main test run
 data/corpus/            the five source PDFs
 data/chroma/            the index, rebuilt by ingest, not in git
 ```

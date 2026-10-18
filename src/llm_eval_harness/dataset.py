@@ -26,6 +26,8 @@ import yaml
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 GROUND_TRUTH_PATH = ROOT / "eval" / "ground_truth.yaml"
 REFUSAL_ANSWERS_PATH = ROOT / "eval" / "refusal_answers.yaml"
+SPLIT_PATH = ROOT / "eval" / "split.yaml"
+SPLITS = ("dev", "test")
 
 REFUSAL_TYPES = ("in_corpus_gap", "out_of_corpus")
 
@@ -67,7 +69,25 @@ def _normalize(record: dict[str, Any]) -> dict[str, Any]:
         "answer": record["answer"],
         "contexts": list(record["contexts"]),
     }
-    for extra in ("answerable", "source", "refusal_type", "page", "topic_in_corpus"):
+    for extra in (
+        "answerable",
+        "source",
+        "refusal_type",
+        "page",
+        "topic_in_corpus",
+        # A paraphrase names its original: the two are one family, and a
+        # resampling interval has to treat them as one draw, not two.
+        "paraphrase_of",
+        # Refusal records written to tempt a model into inventing a figure:
+        # the topic is in the corpus, the number is not.
+        "bait",
+        # Answerable records that are not the original single-passage kind:
+        # multi_hop needs two or more passages, partial is answerable only in
+        # part (missing names the half the corpus lacks). Reported apart, so
+        # the numbers on the original 26 stay comparable over time.
+        "kind",
+        "missing",
+    ):
         if extra in record:
             out[extra] = record[extra]
     return out
@@ -127,8 +147,12 @@ def refusal_answers(
 
         labels.refused     did the answer decline to answer from the corpus?
         labels.fabricated  does it assert anything the chunks do not support?
+        labels.misdirected does it give a fact about a neighbouring object as
+                           the answer, without saying the asked one is not
+                           covered? Optional: sets recorded before 10.10
+                           (the archives under eval/) do not carry it.
 
-    Both start as None and are filled in by hand, so an unlabelled record is
+    All start as None and are filled in by hand, so an unlabelled record is
     valid here - it is simply not yet usable for measuring agreement. What is
     not optional is the answer and the chunks: a judge scores those, and a
     record missing either cannot be scored by anything.
@@ -152,8 +176,10 @@ def refusal_answers(
         labels = item["labels"]
         if not isinstance(labels, dict):
             raise TypeError(f"Record {i}: 'labels' must be a mapping")
-        for key in ("refused", "fabricated"):
+        for key in ("refused", "fabricated", "misdirected"):
             if key not in labels:
+                if key == "misdirected":
+                    continue
                 raise KeyError(f"Record {i}: labels is missing '{key}'")
             if labels[key] is not None and not isinstance(labels[key], bool):
                 raise TypeError(
@@ -161,6 +187,49 @@ def refusal_answers(
                     f"got {labels[key]!r}"
                 )
     return data
+
+
+def load_split(path: str | pathlib.Path = SPLIT_PATH) -> dict[str, str]:
+    """
+    question -> "dev" | "test", frozen by scripts/make_split.py.
+
+    Tune on dev, report on test. A record's split is looked up by its question
+    text, so the same mapping serves the fixture and every recorded set.
+    """
+    with open(path, "r", encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not isinstance(data, dict):
+        raise TypeError(f"Expected a question -> split mapping in {path}")
+    bad = {q: s for q, s in data.items() if s not in SPLITS}
+    if bad:
+        raise ValueError(f"Unknown split values in {path}: {bad}")
+    return data
+
+
+def in_split(records: list[dict[str, Any]], split: str | None) -> list[dict[str, Any]]:
+    """Keep the records of one split; None keeps all of them."""
+    if split is None:
+        return records
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}, got {split!r}")
+    mapping = load_split()
+    return [r for r in records if mapping[r["question"]] == split]
+
+
+def hand_clean(labels: dict[str, Any]) -> bool | None:
+    """
+    The hand verdict for one record: declined, invented nothing, and did not
+    pass off a neighbouring fact as the answer. None while unlabelled.
+
+    A missing misdirected key (sets recorded before 10.10) counts as not
+    misdirected - those sets were labelled on two axes, and their numbers are
+    reported as such.
+    """
+    if labels["refused"] is None or labels["fabricated"] is None:
+        return None
+    if labels.get("misdirected"):
+        return False
+    return labels["refused"] and not labels["fabricated"]
 
 
 def library_scores(path: str | pathlib.Path) -> dict[str, dict[str, Any]]:

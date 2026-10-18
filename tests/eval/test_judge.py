@@ -237,12 +237,40 @@ def test_the_fabricated_prompt_shows_the_chunks():
     assert "SECRET CHUNK TEXT" in prompt
 
 
+def test_misdirected_parses_and_decides_on_the_judges_own_boolean():
+    raw = json.dumps({
+        "asked_about": "the PIV Authentication key",
+        "answer_is_about": "the administration key",
+        "mismatch_named": False,
+        "misdirected": True,
+    })
+    verdict = parse_verdict("misdirected", raw)
+    assert verdict["ok"]
+    assert decision("misdirected", verdict) is True
+    assert not quote_missing("misdirected", verdict)
+
+
+def test_misdirected_with_no_object_named_is_flagged_as_unquoted():
+    raw = json.dumps({
+        "asked_about": "x", "answer_is_about": "", "mismatch_named": False, "misdirected": True,
+    })
+    assert quote_missing("misdirected", parse_verdict("misdirected", raw))
+
+
+def test_misdirected_sees_the_chunks_and_is_not_a_core_axis():
+    # The chunks show which object a quoted fact belongs to; and the axis is
+    # kept out of the clean verdict until it is validated on test.
+    assert "SECRET CHUNK TEXT" in user_prompt("misdirected", record(chunks=("SECRET CHUNK TEXT",)))
+    assert "misdirected" not in judge.AXES
+    assert "misdirected" in judge.JUDGEABLE
+
+
 def test_the_examples_come_before_the_record():
     messages = build_messages("refused", record(question="the real question"))
     assert messages[0]["role"] == "system"
     assert messages[-1]["role"] == "user"
     assert "the real question" in messages[-1]["content"]
-    assert sum(1 for m in messages if m["role"] == "assistant") == 3
+    assert sum(1 for m in messages if m["role"] == "assistant") == len(judge.EXAMPLES["refused"])
 
 
 def test_the_examples_are_valid_verdicts():

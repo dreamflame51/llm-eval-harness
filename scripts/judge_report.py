@@ -31,11 +31,19 @@ decimals for that reason.
 import argparse
 import pathlib
 
-from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, refusal_answers
+from llm_eval_harness.dataset import (
+    REFUSAL_ANSWERS_PATH,
+    SPLITS,
+    hand_clean,
+    in_split,
+    refusal_answers,
+)
 from llm_eval_harness.judge import (
     AXES,
     CACHE_DIR,
+    EXTRA_AXES,
     agreement,
+    axis_decisions,
     decided_records,
     load_cache,
     matrix,
@@ -214,15 +222,15 @@ def print_against_labels(by_model, records, indent="  "):
         # about: the two axes are only useful together.
         pairs = []
         for record, refused, fabricated in by_model[model]:
-            labels = record["labels"]
-            if labels["refused"] is None or labels["fabricated"] is None:
+            hand = hand_clean(record["labels"])
+            if hand is None:
                 continue
             judged = (
                 None
                 if refused is None or fabricated is None
                 else (refused and not fabricated)
             )
-            pairs.append((labels["refused"] and not labels["fabricated"], judged))
+            pairs.append((hand, judged))
         result = agreement(pairs)
         print(
             f"{indent}{'clean':<11} {result['agree']}/{result['n']} "
@@ -240,14 +248,21 @@ def parse_args():
         "eval/dense_baseline/ is the other one worth reading: same questions, "
         "same afternoon, the retriever the product stopped using",
     )
+    parser.add_argument(
+        "--split",
+        choices=SPLITS,
+        help="report on one half of eval/split.yaml. Tune the judge prompt on "
+        "dev; quote agreement from test",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    records = refusal_answers(args.file)
+    records = in_split(refusal_answers(args.file), args.split)
     names = models()
-    print(f"{len(records)} recorded answers from {args.file}")
+    where = f", split {args.split}" if args.split else ""
+    print(f"{len(records)} recorded answers from {args.file}{where}")
     print(f"judges: {', '.join(names) or 'none'}; verdicts from {CACHE_DIR}\n")
 
     by_model = {}
@@ -268,6 +283,36 @@ def main():
 
     print("\nagreement with the hand labels")
     print_against_labels(by_model, records)
+
+    print_extra_axes(names, records)
+
+
+def print_extra_axes(names, records, indent="  "):
+    """
+    Axes judged and reported on their own, outside the clean verdict until
+    they are validated on test (judge.EXTRA_AXES). Only records labelled on
+    the axis count; sets recorded before it existed carry no label.
+    """
+    for axis in EXTRA_AXES:
+        labelled = [r for r in records if r["labels"].get(axis) is not None]
+        if not labelled:
+            continue
+        print(f"\n{axis} (extra axis, not in clean) - {len(labelled)} labelled")
+        for model in names:
+            rows = [(r, d) for r, d in axis_decisions(model, axis, labelled) if d is not None]
+            if not rows:
+                continue
+            result = agreement([(r["labels"][axis], d) for r, d in rows])
+            print(
+                f"{indent}{model:<30} {result['agree']}/{result['n']} "
+                f"({result['rate']:.0%}), kappa {fmt_kappa(result['kappa'])}"
+            )
+            for r, d in rows:
+                if r["labels"][axis] != d:
+                    print(
+                        f"{indent}  label={YES_NO[r['labels'][axis]]:<3} "
+                        f"judge={YES_NO[d]:<3} {r['question'][:52]}"
+                    )
 
 
 if __name__ == "__main__":

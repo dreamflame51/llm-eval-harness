@@ -18,10 +18,11 @@ span whole, covered@5 accepts the five together. Read them next to the
 ceilings printed by scripts/sweep.py.
 """
 
+import sys
 import time
 
 from llm_eval_harness.dataset import answerable_records
-from llm_eval_harness.evaluator import evaluate_retrieval
+from llm_eval_harness.evaluator import evaluate_retrieval, group_of
 from llm_eval_harness.lexical import BM25, rrf
 from llm_eval_harness.store import collection, search
 
@@ -61,7 +62,13 @@ def score(records, retrieve, k=K):
 
 
 def main():
+    # The original 26 by default: the dense -> hybrid comparison in the README
+    # and the lessons was made on them, and paraphrases or the 12.10 kinds
+    # would change what the numbers describe. --all scores everything.
     records = answerable_records()
+    if "--all" not in sys.argv:
+        records = [r for r in records if group_of(r) == "original"]
+    print(f"{len(records)} records")
     print("building BM25 over the indexed chunks", flush=True)
     started = time.perf_counter()
     bm25 = BM25(chunks_from_index())

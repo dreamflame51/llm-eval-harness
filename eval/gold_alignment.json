@@ -1,0 +1,161 @@
+{
+  "model": "qwen3:8b",
+  "per_record": [
+    {
+      "question": "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?",
+      "score": 0.0,
+      "declined": false,
+      "reason": "The score is 0.00 because the actual output contradicts the provided context in multiple ways, including incorrect ordering of steps, omission of the preparatory step, and misplacement of key steps such as 'AUTHORIZE' and 'CATEGORIZE', leading to significant factual inconsistencies."
+    },
+    {
+      "question": "What is a common control according to SP 800-37 Revision 2?",
+      "score": 0.5,
+      "declined": true,
+      "reason": "The score is 0.50 because the actual output partially aligns with the context by correctly identifying common controls as inheritable, but it contradicts the context by omitting the allocation process to common control providers."
+    },
+    {
+      "question": "What is the difference between a common control and a hybrid control in the RMF?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided contexts regarding common controls and hybrid controls, with no contradictions identified."
+    },
+    {
+      "question": "What is the purpose of the Prepare step in the RMF?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided context, accurately reflecting that the Prepare step in RMF is used to establish context and priorities for managing security and privacy risk from an organization- and system-level perspective."
+    },
+    {
+      "question": "What key artifacts are included in an authorization package under SP 800-37r2?",
+      "score": 0.0,
+      "declined": false,
+      "reason": "The score is 0.00 because the actual output contradicts multiple key points from the context, including the inclusion of plan of action and milestones, completed security and privacy assessment reports, and a unified approach for security and privacy evidence, which are not mentioned in the actual output."
+    },
+    {
+      "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided context, accurately describing the four-step risk assessment process without any contradictions or hallucinations."
+    },
+    {
+      "question": "What are the four components of the overall risk management process in SP 800-30r1?",
+      "score": 0.5,
+      "declined": false,
+      "reason": "The score is 0.50 because the actual output partially aligns with the context by correctly mentioning risk assessment as part of the risk management process, but contradicts the context by incorrectly identifying assessing risk as the first component instead of framing risk."
+    },
+    {
+      "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output aligns perfectly with the provided context, accurately describing how risk assessments can be applied across different levels of the organization's risk management tiers."
+    },
+    {
+      "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output accurately aligns with the provided context, correctly identifying the four risk factors as Impact of loss, Threats, Vulnerabilities, and Likelihood of occurrence."
+    },
+    {
+      "question": "What is the purpose of the risk framing component of the risk management process?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided context, accurately reflecting that the purpose of the risk framing component is to produce a risk management strategy addressing how organizations assess, respond to, and monitor risk."
+    },
+    {
+      "question": "What is the primary purpose of NIST SP 800-53A Revision 5?",
+      "score": 0.0,
+      "declined": true,
+      "reason": "The score is 0.00 because the actual output is missing, so it cannot be determined whether it agrees with the context."
+    },
+    {
+      "question": "Name the three primary assessment methods defined in SP 800-53A.",
+      "score": 0.0,
+      "declined": false,
+      "reason": "The score is 0.00 because the actual output directly contradicts the provided context by falsely claiming that the context does not name assessment methods, whereas the context explicitly states they include 'examine, interview, and test'."
+    },
+    {
+      "question": "What does the Examine assessment method involve?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output exactly matches the provided context with no contradictions."
+    },
+    {
+      "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output perfectly aligns with the provided contexts, accurately defining both 'Examine' and 'Test' without introducing any contradictions or hallucinations."
+    },
+    {
+      "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided contexts, accurately reflecting the attributes of assessment methods such as depth and coverage, and their relation to rigor, effort, and scope."
+    },
+    {
+      "question": "What is the purpose of NIST SP 800-171A Revision 3?",
+      "score": 0.0,
+      "declined": true,
+      "reason": "The score is 0.00 because the actual output is missing, so it cannot be determined whether it agrees with the context."
+    },
+    {
+      "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?",
+      "score": 0.0,
+      "declined": false,
+      "reason": "The score is 0.00 because the actual output contradicts the context by failing to address the importance and impact of protecting CUI as emphasized in the context, instead only defining what CUI stands for."
+    },
+    {
+      "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided context, which confirms that organizations have flexibility in defining the level of rigor and detail for assessments."
+    },
+    {
+      "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?",
+      "score": 0.0,
+      "declined": false,
+      "reason": "The score is 0.00 because the actual output contradicts the provided context by failing to explicitly mention the derivation from the assessment procedures in SP 800-53A [5], which is a key factual element stated in the context."
+    },
+    {
+      "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?",
+      "score": 0.875,
+      "declined": false,
+      "reason": "The score is 0.88 because the actual output aligns with most of the provided contexts regarding the security requirement families in SP 800-171, but it omits 'System and Communications Protection', which is explicitly listed in the context."
+    },
+    {
+      "question": "What is the scope of NIST SP 800-78-5?",
+      "score": 0.0,
+      "declined": true,
+      "reason": "The score is 0.00 because the actual output is missing, so it cannot be verified against the context."
+    },
+    {
+      "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided context, accurately reflecting that FIPS 201-3 defines the requirements for PIV life cycle activities."
+    },
+    {
+      "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output correctly aligns with the context, confirming that the RSA public exponent must be 65537, with no contradictions present."
+    },
+    {
+      "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output accurately aligns with the provided context, confirming RSA (2048 or 3072 bits) and ECDSA (Curve P-256 or P-384) as permitted algorithms and key sizes for the PIV Authentication key."
+    },
+    {
+      "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
+      "score": 1.0,
+      "declined": false,
+      "reason": "The score is 1.00 because the actual output fully aligns with the provided context, accurately stating that elliptic curve keys must correspond to Curve P-256 or Curve P-384, with no contradictions present."
+    },
+    {
+      "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?",
+      "score": 0.0,
+      "declined": false,
+      "reason": "The score is 0.00 because the actual output contains several explicit contradictions with the provided contexts, specifically failing to mention key elements such as correct implementation of controls, assessment methods, and alignment with NIST SP 800-53, Revision 5."
+    }
+  ]
+}

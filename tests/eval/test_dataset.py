@@ -5,8 +5,12 @@ import pytest
 from llm_eval_harness.dataset import (
     REFUSAL_TYPES,
     answerable_records,
+    hand_clean,
+    in_split,
+    iter_records,
     library_scores,
     load_ground_truth,
+    load_split,
     refusal_answers,
     refusal_records,
 )
@@ -140,6 +144,66 @@ def test_rejects_a_label_that_is_not_a_boolean(tmp_path):
     )
     with pytest.raises(TypeError):
         refusal_answers(answers(tmp_path, body))
+
+
+def test_every_question_has_a_split():
+    # A question added to the fixture after the split was frozen has no half,
+    # and would be dropped from both by in_split without a word.
+    split = load_split()
+    questions = {r["question"] for r in iter_records()}
+    assert questions == set(split)
+
+
+def test_a_paraphrase_is_in_the_same_split_as_its_original():
+    split = load_split()
+    for r in iter_records():
+        if "paraphrase_of" in r:
+            assert split[r["question"]] == split[r["paraphrase_of"]], r["question"]
+
+
+def test_each_kind_of_record_is_split_evenly():
+    split = load_split()
+    counts = {}
+    for r in iter_records():
+        if r["answerable"]:
+            kind = r.get("kind", "answerable")
+        else:
+            kind = "bait" if r.get("bait") else r["refusal_type"]
+        counts.setdefault(kind, {"dev": 0, "test": 0})[split[r["question"]]] += 1
+    for kind, c in counts.items():
+        assert abs(c["dev"] - c["test"]) <= 1, (kind, c)
+
+
+def test_in_split_partitions_the_recorded_refusal_set():
+    records = refusal_answers()
+    dev, test = in_split(records, "dev"), in_split(records, "test")
+    assert len(dev) + len(test) == len(records)
+    assert not {r["question"] for r in dev} & {r["question"] for r in test}
+
+
+def test_rejects_a_misdirected_label_that_is_not_a_boolean(tmp_path):
+    body = (
+        '- question: "a"\n  answer: "b"\n  retrieved: [{text: "c"}]\n'
+        '  labels: {refused: true, fabricated: false, misdirected: "yes"}\n'
+    )
+    with pytest.raises(TypeError):
+        refusal_answers(answers(tmp_path, body))
+
+
+def test_the_current_set_is_labelled_on_all_three_axes():
+    # The archives under eval/ predate the third axis and may omit it; the set
+    # the numbers are reported from may not, or a misdirected answer would be
+    # counted clean by default.
+    for rec in refusal_answers():
+        assert rec["labels"].get("misdirected") in (True, False), rec["question"]
+
+
+def test_a_misdirected_answer_is_not_clean_even_when_it_passes_both_other_axes():
+    assert hand_clean({"refused": True, "fabricated": False, "misdirected": True}) is False
+    assert hand_clean({"refused": True, "fabricated": False, "misdirected": False}) is True
+    # sets recorded before the axis existed are read on two axes
+    assert hand_clean({"refused": True, "fabricated": False}) is True
+    assert hand_clean({"refused": None, "fabricated": False}) is None
 
 
 def test_rejects_a_recorded_answer_without_labels(tmp_path):

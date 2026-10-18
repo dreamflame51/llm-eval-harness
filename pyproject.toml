@@ -8,18 +8,28 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "anthropic>=1.5.0",
     "chromadb>=1.5.9",
     "deepeval>=4.2.3",
+    "diskcache>=5.6.3",
     "langchain-community<0.4",
     "langchain-ollama>=1.1.0",
     "ollama>=0.6.2",
+    "openai>=3.14.0",
     "pypdf>=6.18.0",
-    "pytest>=9.1.1",
+    "python-dotenv>=1.2.3",
     "pyyaml>=6.0.2",
     "ragas<0.3",
     "requests>=2.34.2",
     "sentence-transformers>=6.0.1",
+    "transformers>=5.17.0",
+]
+
+[project.optional-dependencies]
+# Tracing is an extra, not a dependency: CI installs the base set and every
+# reported number is computed without it. Turn it on for a run with
+#     uv sync --extra trace
+trace = [
+    "langfuse>=3.0.0",
 ]
 
 [project.scripts]
@@ -31,17 +41,14 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
     "ruff>=0.16.6",
 ]
 
 [tool.ruff]
-src = ["src", "practice", "tests"]
+src = ["src", "tests"]
 
 [tool.pytest.ini_options]
-# Only the harness runs by default. practice/ is interview drill code - it hits
-# the network and is allowed to sit red while a task is in progress, so it must
-# not decide whether the project is green. Run it on purpose:
-#     uv run pytest practice
 testpaths = ["tests"]
 # scripts/ is importable because label_refusals.py edits the frozen answers
 # file in place, and that is worth a test rather than a careful hand.

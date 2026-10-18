@@ -53,17 +53,19 @@ anything.**
 
 | theme | entries |
 |---|---|
-| The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16) |
+| The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16), [33](#33) |
 | The ruler has a limit, and the limit moves | [5](#5), [6](#6), [14](#14) |
 | What measuring changed | [7](#7), [8](#8), [15](#15) |
 | Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21), [27](#27) |
 | Checks that check nothing | [10](#10), [20](#20) |
 | What the system actually gets wrong | [11](#11) |
-| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22), [28](#28) |
+| Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22), [28](#28), [31](#31) |
 | A gap between two metrics that nobody owned | [23](#23) |
 | Measuring something nobody could use | [24](#24) |
 | A fixture that stopped describing the system | [25](#25), [26](#26) |
 | The comparison that was not a comparison | [27](#27) |
+| The number moved, the explanation was invented | [29](#29) |
+| What a metric cannot see by construction | [30](#30), [32](#32) |
 
 ---
 
@@ -1004,11 +1006,23 @@ were answered anyway, from chunks that did not support the answer.
 
 Ten of 26 with nothing to work from, then. Not evenly spread: they cluster on
 questions that name a document by its identifier - "the scope of NIST SP
-800-78-5", "what flexibility does SP 800-171Ar3 give". Both of those gold spans
-sit whole inside a single indexed chunk, and dense retrieval ranks that chunk
-below position fifty. An embedding smears "SP 800-78-5" across every
-neighbouring document number; an exact string is the one thing word matching
-does better.
+800-78-5", "what flexibility does SP 800-171Ar3 give". Dense retrieval ranks
+those gold chunks below position fifty. An embedding smears "SP 800-78-5"
+across every neighbouring document number; an exact string is the one thing
+word matching does better.
+
+> **Corrected 17.09.** The last sentence is where this entry reasoned instead
+> of measuring, and [#29](#29) takes it apart: neither gold span contains the
+> identifier, so there is no exact string to match, and BM25 does not retrieve
+> either of the two questions this paragraph names as its motivation. The fix
+> below is real; the story told about why is not.
+
+> **Corrected 13.10.** "Answered anyway, from chunks that did not support the
+> answer" was never checked against the chunks - it was read off zero gold
+> coverage. Checked: all four answers are in their own retrieved chunks, near
+> verbatim. They were answered from passages the gold spans did not list, and
+> answered partly or beside the point (one names a different relation between
+> the documents), not invented. See [#33](#33).
 
 **Fix.** BM25 alongside the embeddings, the two rankings fused by reciprocal
 rank (`lexical.py`). Measured on the same fixture, with the metrics that were
@@ -1391,3 +1405,375 @@ that would swing on one relabelled answer. What it licenses is saying, in the
 README and in the docstring, which axis is trusted and which is not - and that
 the next useful work is more records of the shape that exercises it, not a
 better prompt.
+
+**Update, 10.10.** The relabelled answer arrived: the record called the case
+the judge exists for did not survive a second reading by the same rater. See
+[#31](#31).
+
+---
+
+<a id="29"></a>
+
+## 29. The fix worked. The reason written next to it did not.
+
+**Symptom.** None, again - this came out of reading an artifact nobody had to
+read. The CI `retrieval` job was triggered by hand to check that a refactor had
+not broken the index build; it rebuilt the index from the PDFs on a clean
+runner and reproduced every number to the digit. In its output, the list of
+questions the retriever still misses entirely contains both of the questions
+[#23](#23) names as the reason BM25 was added.
+
+**Diagnosis.** BM25 went in because "the misses cluster on questions that name
+a document by its identifier, and an exact string is what word matching does
+better". Every part of that was written from reasoning. Measured:
+
+| | dense | BM25 | hybrid, top 5 |
+|---|---|---|---|
+| "what flexibility does SP 800-171Ar3 give" | not in 300 | **30** | not found |
+| "what is the scope of NIST SP 800-78-5" | not in 300 | not in 300 | not found |
+
+Depths of 5, 10, 25, 50, 100 and 300 were tried for the fusion; the gold chunk
+never reaches the fused top five for either question.
+
+Then the premise itself. **Neither gold span contains the identifier.** One
+reads "The assessment procedures are flexible and can be customized to the
+needs of organizations and assessors"; the other "This document contains the
+technical specifications needed for the mandatory and optional cryptographic
+keys specified in FIPS 201-3". The identifier is in the question, never in the
+answer - so "exact strings are what word matching is better at" describes a
+string that is not there. A document states its own scope without naming
+itself, which in hindsight is how documents work.
+
+And the tokenizer has no stopword list. In formal NIST prose the question words
+are rare and therefore heavy: `does` scores idf 4.76 and `what` 4.57, against
+3.54 for `800-171ar3`. For the scope question BM25's top three chunks come from
+SP 800-30r1 and SP 800-37r2 - two documents the question is not about - carried
+there by "what" and "scope" while the identifier contributes nothing, because
+they do not contain it.
+
+**So what is true.** Fusing BM25 in improved four records and cost two, which
+is measured, reproduced in CI on another machine, and unchanged by any of this.
+The intervention was good. The explanation attached to it was a story that fit
+the evidence available at the time and was never checked against the evidence
+that would have falsified it - which was two lookups away the whole time.
+
+**Lesson.** **An intervention that improves the metric is not evidence for the
+reason you gave.** Those are two claims and they need two measurements. Here
+the number moved, everyone was satisfied, and the mechanism went into a module
+docstring, a lesson and a README, where it read as established for three days.
+
+The cheap habit that catches it: when a change is justified by specific
+examples, check those examples afterwards. Not the average - the examples. Four
+records got better and neither of the two named ones was among them, and that
+gap is visible in one line of output nobody had a reason to read.
+
+**What follows - and it was three minutes, so it was done rather than written
+down.** Strip the question-template words from the query before BM25 scores it,
+change nothing else, score the same fixture:
+
+| | hit@5 | covered@5 | coverage@5 | MRR |
+|---|---|---|---|---|
+| hybrid, as it is | 0.538 | 0.577 | 0.606 | 0.362 |
+| hybrid, question words removed | 0.538 | 0.577 | **0.633** | 0.365 |
+
+Nothing on either metric a decision is made from. Partial-credit coverage moves
+by 0.027, four records move at all - three up, one down from a perfect 1.00 -
+and **both of the questions this entry is about stay misses**: the SP 800-78-5
+scope question goes 0.00 to 0.20, the SP 800-53A purpose question 0.00 to 0.12.
+BM25 alone gains one record, 0.423 to 0.462, but BM25 alone is not what the
+product uses.
+
+So the fix suggested by this lesson would have repeated this lesson: adopted on
+the reasoning that it helps the identifier questions, credited with the +0.027,
+and it does not help them. The stopword list is a defensible tidy-up and it is
+not a retrieval improvement. Left alone, with the number written down.
+
+The caveat that keeps it honest: the list of template words was written by hand
+in one pass and not tuned. A better one might do better. What it will not do is
+turn 0.20 into a hit - those gold chunks share only `nist` and `sp` with their
+questions, idf 1.22 and 1.19, which is boilerplate, not evidence.
+
+---
+
+<a id="30"></a>
+
+## 30. Two of someone else's metrics, and the two things ours could not see
+
+**Why run them at all.** Four metrics from two libraries were already in this
+project, chosen to overlap so the libraries could be compared. What had never
+been tried is the metrics that *do not* overlap - and two of them turned out to
+answer questions nothing here was asking.
+
+### GEval on the fabrication axis
+
+The open gap is that nothing automated reads that axis ([#28](#28)). So
+DeepEval's GEval was pointed at the same twelve hand-labelled answers, with the
+criterion copied word for word from the brief the human read, and the decision
+rule fixed at the library default before the run.
+
+| judge | raw agreement | kappa | fabrications caught |
+|---|---|---|---|
+| qwen3, ours | 9/12 | &minus;0.12 | 1 of 2 |
+| gemma4, ours | 10/12 | 0.00 | 0 of 2 |
+| **GEval** | **5/12** | **0.125** | **2 of 2** |
+
+**The worst raw agreement and the best kappa, in the same column.** Our judges
+reach 9 and 10 out of 12 by answering "not fabricated" almost always, which on
+a set with two positives is most of the way to a perfect score and no
+discrimination at all. GEval varies, and pays for it: seven false alarms out of
+ten clean answers. But it did not miss one - including the record that declines
+and then states a frequency, which both of ours and the phrase list all passed.
+
+So it is not a metric here, at seven false alarms in ten. It is a **tripwire**:
+a screen that says "read these nine" with the real ones inside. For an axis
+that currently has no instrument, that is not nothing. n is twelve and the
+positives are two, so perfect recall is a direction, not a proof.
+
+### Alignment against the gold passage
+
+Every generation-side number here scores the answer against **what retrieval
+served**. Point DeepEval's HallucinationMetric at the gold spans instead and it
+asks a different question - and immediately found something no support-based
+metric can:
+
+> **Q. What are the seven steps of the RMF?**
+> A. CATEGORIZE, AUTHORIZE, MONITOR, IMPLEMENT, SELECT, ASSESS, PREPARE.
+
+All seven named, the order scrambled, the preparatory step last. Retrieval was
+perfect for that record - coverage@5 1.00, rank 2 - and **DeepEval's own
+faithfulness scored the answer 1.00** while RAGAS scored it 0.14.
+
+The reason faithfulness cannot see it is structural: it decomposes an answer
+into claims and checks each against the context. Every step name is in the
+context, so every claim is supported. **Order is not a claim.** The same blind
+spot swallowed an enumeration that omits one of the families it was asked to
+name, scored 0.88.
+
+**Two caveats, because the metric is not usable as it stands.** Its scale runs
+backwards from its name - 1.00 comes with "fully aligns, no contradictions" -
+and it scores a refusal 0.00 with the reason "the actual output is missing", so
+declines have to be split out rather than averaged in. Of the six answers it
+called contradictory, one is the ordering error, one is a false "the context
+does not say" caused by retrieval, and four are omissions reported as
+contradictions.
+
+**Lesson.** **A metric that decomposes an answer into claims cannot see
+anything that lives in the arrangement of the claims** - order, completeness,
+emphasis. Four metrics, two libraries, one hand-rolled judge and a phrase list
+all agreed the RMF answer was fine, and it lists the steps of a seven-step
+process in the wrong order.
+
+And the smaller one, which is [#20](#20) a third time: raw agreement and kappa
+disagreed about which of three judges was best, and the one with the worst
+agreement was the only one that caught what it was built to catch.
+
+---
+
+<a id="31"></a>
+
+## 31. The ruler was one person, and the person moved
+
+**Symptom.** The twelve refusal questions were re-recorded on 07.10, after the
+prompt had changed (retrieved chunks fenced off as data, `4dd1881`), together
+with nine new bait questions: topic in the corpus, figure not. Before labelling,
+the predictions were written down: the text would change on 40-50% of the
+twelve, the verdict on about 5%, and gemma4 would invent a figure on about half
+of the nine baits.
+
+After labelling: the text changed on 12/12, the verdict on 3/12, the baits
+were invented on 0/9.
+
+**Diagnosis.** Retrieval was identical on all twelve - the same five chunks in
+the same order - so whatever moved was the generator or the labels. The text is
+easy: the new prompt calls the chunks documents, and "The context states"
+became "The provided documents state" nearly everywhere; on 16.09, with no
+prompt change, between-process drift alone had changed 8/12. The two causes
+cannot be separated on one recording.
+
+The verdicts are the finding. The three records, read next to their 16.09
+versions:
+
+| record | the two answers | 16.09 | 10.10 | what moved |
+|---|---|---|---|---|
+| SP 800-73 interfaces | same content: both interfaces named, contactless declined | `refused=false` | `refused=true` | a rule - "a partial refusal counts when the declined part is the missing part" - written on 10.10 |
+| SP 800-76 biometrics | near-verbatim: the CBEFF signature block | `fabricated=true` | `fabricated=false` | the reading of one sentence |
+| 800-37r2 monitoring frequency | 16.09 added "volatile or critical controls may require more frequent assessment" | `fabricated=true` | `fabricated=false` | that clause is verbatim in chunk 4; the 16.09 label was wrong |
+
+All three moved on the rater's side. The model's verdicts moved on 0/12, so the
+prediction about the model held. The rater agreed with the same rater three
+weeks earlier on 9/12, and on the `fabricated` axis both positives of the 16.09
+set turned negative. One of the three was also nudged by presentation: the
+argument "the claim is in the chunk" was put to the rater before the label was
+given.
+
+**What it takes with it.** The record [#28](#28) calls "the case the judge
+exists for" is the monitoring-frequency answer. Read again, it states no
+frequency, and its one extra clause is in its chunks. The kappas in #28 and
+GEval's "2 out of 2" in [#30](#30) were computed against two positives that do
+not survive a second reading. The arithmetic is right; it is arithmetic on a
+label. #28 itself said its kappa "would swing on one relabelled answer" - it
+swung on two.
+
+The baits did not replace them. gemma4 declined all nine, so the `fabricated`
+axis has no real positives in 21 records - only the 13 synthetic ones from the
+mutation set. Whether the baits were too transparent or the fenced prompt made
+the model more careful is not separable here; recording the same nine on the
+old prompt would separate it.
+
+**Treatment.** Each borderline call now carries its rule in `note` (partial
+refusal; a modal shift from "retain" to "must retain" is not a fabrication),
+and each of the three disagreements is recorded with both dates. #28 is not
+rewritten - it is what was believed on 16.09 - but points here.
+
+**Lesson.** **A hand label is a measurement, and a measurement has its own
+repeatability.** The judges were measured against the human for weeks; the
+human was never measured against the human. The first time that was done, it
+moved on the same axis the judges failed on, and by as much. When the positive
+class is two records, ground truth is two opinions. Before quoting a judge's
+agreement with hand labels, re-label a sample after a gap, without looking at
+the old labels, and report the self-agreement next to the judge's.
+
+---
+
+<a id="32"></a>
+
+## 32. Thirteen provocations, and the failure was not the one they provoked
+
+**Symptom.** After [#31](#31) the `fabricated` axis had no real positives, so
+bait questions were written to produce some: the topic in the corpus, the
+figure not. Nine of them, predicted to draw four or five inventions, drew
+none. Recorded again on the prompt from before the fence (`4dd1881`), with the
+same chunks: none again, against a prediction of two. The fence was not why.
+
+**Diagnosis.** Read as a population, the nine had one thing in common: the
+retrieved chunks carried no figure at all. Declining is the easiest thing a
+model can do when there is nothing to borrow.
+
+So four more were written from spans that do carry a figure - about something
+else. Each lure was checked to be in the top five chunks for its question:
+
+| question asks | lure in the chunks | answer |
+|---|---|---|
+| guard hours at *logical* access points | 24 hours, 7 days - *physical* access | declined |
+| 3TDEA end date for the PIV Authentication key | 3TDEA through 31.12.2030 - *administration* keys | **the date, attributed to administration keys** |
+| retired *digital signature* keys | up to 20 retired *key management* keys | quoted 20 for key management, declined the rest |
+| frequency of *adversarial* High events | 10-100 times a year - *non-adversarial* table | quoted the qualitative scale, declined |
+
+None borrowed a figure: 0/13 across both generations. The one that went wrong
+did not invent anything. It answered a false-premise question with a true,
+correctly attributed fact about a neighbouring object, and never said the
+premise was false. By the rubric that is `refused=false, fabricated=false` -
+the same call as the CBEFF record ([#31](#31)), and for the same reason.
+
+That shape is not new here. The only refusal failure ever recorded on the
+dense set was AES: asked about FIPS 197, absent from the corpus, the model
+answered from SP 800-78-5's list of AES key sizes. CBEFF for SP 800-76, AES for
+FIPS 197, the administration-key date for the PIV Authentication key - three
+answers, each true, each about the wrong thing.
+
+**What it says about the instrument.** The rubric has two axes because two
+failures were feared when it was written: a model that answers when it should
+decline, and one that invents. The model on this corpus does neither under
+provocation. What it does is substitute the question. Both local judges agree
+with the human on the 3TDEA answer on both axes - not refused, not fabricated -
+and neither axis says what is wrong with it. An axis that does not exist cannot
+disagree.
+
+**Treatment.** None yet. The candidate is a third axis, `misdirected` - the
+answer is about a different object than the one asked - and baits built on
+false premises, which is the shape that drew it.
+
+**Lesson.** **A rubric names the failures someone expected; the model's own
+failure may be a third one.** Two axes and five judges were built and validated
+around invention, and the model under test does not invent. Thirteen
+provocations aimed at the feared failure surfaced the actual one by accident.
+Before designing the axes, collect the failures the system really produces -
+including the ones that score as passes.
+
+---
+
+<a id="33"></a>
+
+## 33. Zero coverage is a fact about the gold, not about the answer
+
+**Symptom.** Twelve new questions were added on 12.10 and their answers read
+against the chunks. Two partial answers were right, and drawn from passages
+that were not among the gold spans - a glossary definition, a numbered list of
+methods. Retrieval had served the evidence; the metric called both misses.
+
+**Diagnosis.** If the gold list could be short there, it could be short
+anywhere, and one claim in this project rested on it directly: [#23](#23)'s
+"four records answered anyway, from chunks that did not support the answer".
+That was read off zero gold coverage, not off the chunks. Read off the chunks,
+on the dense recording it was about: all four answers are in their own
+retrieved text, near verbatim - one even through an extraction artifact,
+"p reparing". Partial or beside the point, yes; unsupported, no. The hand
+labels on the hybrid set had already said so (26/26 faithful) and nobody joined
+the two.
+
+**Treatment.** The two missing spans were added as alternatives (partial hit@5
+0.500 -> 0.833). #23 and the comment in `pipeline.py` carry the correction. The
+original 26 have not been audited for missing alternatives; until they are,
+their hit@5 0.538 is a floor.
+
+**Lesson.** **A coverage metric measures the gold list, not the evidence.**
+Zero coverage says the passages someone wrote down were not retrieved; whether
+the answer is supported is a different question, answered only by reading the
+chunks. Two numbers that disagree - "unsupported" from coverage, "faithful"
+from the labels - are a finding; left unjoined, each just looked complete.
+
+---
+
+<a id="34"></a>
+
+## 34. A fresh process is not a fresh model
+
+**Symptom.** C2 was meant to give every live check a tolerance: how far does a
+number move when nothing changed? Two measurements, each with a prediction
+written down first.
+
+- Judges, same 58 verdicts re-asked in new processes: qwen3 ×5, gemma4 ×3.
+  Predicted 3-4 flips; got 0 of 290 and 0 of 174 (rule of three: at most 1-2%).
+- Generator, 29 refusal questions, 5 runs in new processes. Predicted 0 flips;
+  got refusal rates 0.862, 0.897, 0.897, 0.897, 0.897 - one question flipped,
+  in run 1 only, and 13 of 29 were worded differently at least once.
+
+The obvious reading was "spread 0.034, one record: set the bar at ±1".
+
+**Diagnosis.** The script kept a count of distinct texts and threw the texts
+away, so the flip could not be put down to wording or to behaviour. Once it
+kept them, the re-run repeated the pattern exactly, and the texts said two
+things.
+
+The flip was the phrase list. Run 1 said "no elliptic curve is specified",
+runs 2-5 "the provided documents do not specify an elliptic curve". Both reject
+the false premise - a refusal by RF4 - but "not specified" does not match when
+the noun sits between "no" and "specified". The pin had recorded run 1's
+wording, so it pinned the wrong verdict.
+
+And all 12 rewordings were run 1 against the rest; runs 2-5 were byte-identical
+on all 29. Ollama keeps a model resident between calls. The children were new
+interpreters talking to the same loaded model, so only run 1 loaded it. With
+the model unloaded before each run, five runs gave five identical sets of 29
+texts, 0.862 every time.
+
+**Treatment.** `stability.py` keeps texts per run and unloads every resident
+model before each one (`--warm` keeps the old behaviour; that measurement is in
+`eval/drift_warm.json`). The phrase list gained a pattern - "no", up to three
+words, "is/are specified" - checked first on all 38 stored answerable answers
+(0 hits) so it is a fix and not a fit; bare "is specified" would match "P-256
+is specified". Re-pinned. The README states the tolerance: run cold; a
+per-question verdict against the pin is a signal; wording alone is not, yet.
+
+**What is not known.** Why a resident model answers differently from a freshly
+loaded one. The earlier explanation, the GPU/CPU layer split re-decided on each
+load ([#17](#17)), predicts cold loads that differ from each other, and five in a
+row did not. Two cold loads three hours apart did differ, in 1 text of 29, both
+refusals - so equality between sittings is not established either.
+
+**Lesson.** **Before measuring noise, check what the repetition actually
+repeats.** "Fresh process" was chosen to reload the model and did not: the
+variable lived in a server the script never restarted. Five samples were two
+states, and the 0.034 between them would have become a tolerance band for
+noise that does not exist. Keeping the raw texts is what turned a count into a
+diagnosis - a script that records only "how many differed" cannot say why.

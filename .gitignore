@@ -11,6 +11,9 @@ wheels/
 
 # Tooling caches
 .pytest_cache/
+# Raw judge traffic (llm_eval_harness/providers.py). The committed record of a
+# verdict is eval/judge_cache/.
+.cache/
 .deepeval/
 
 # Chroma index - derived, rebuilt by ingest, and tied to the embedding model
@@ -21,3 +24,15 @@ data/chroma/
 
 # Personal interview-prep notes. Kept on disk, out of a public repository.
 docs/rehearsal.md
+docs/rehearsal.ru.md
+LEARNING_PLAN.md
+METRICS_CHEATSHEET.md
+METRICS_CHEATSHEET.ru.md
+docs/LEARNING_LOG.md
+docs/LEARNING_LOG.ru.md
+docs/INTERVIEW_QA.md
+
+# Langfuse keys. The project's own numbers never depend on them - tracing is
+# additive and off by default - but a leaked secret key is still a leaked key.
+.env
+docker/langfuse/.env

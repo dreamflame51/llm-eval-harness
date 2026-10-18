@@ -24,7 +24,13 @@ import statistics
 
 import yaml
 
-from llm_eval_harness.dataset import library_scores
+from llm_eval_harness.dataset import (
+    SPLITS,
+    hand_clean,
+    library_scores,
+    load_split,
+    refusal_answers,
+)
 from llm_eval_harness.judge import cache_freshness
 from llm_eval_harness.refusal import JUDGE, evaluate_judged
 
@@ -84,6 +90,26 @@ def answerable_count():
     return len(rows)
 
 
+def by_split(judged):
+    """
+    Clean counts per half of eval/split.yaml: judge, hand labels, phrase list.
+
+    Test is the number to quote; dev is where prompts and rubric wording may
+    be tuned. The two are pinned side by side so a change that helps dev and
+    hurts test shows as exactly that.
+    """
+    split = load_split()
+    labels = {r["question"]: r["labels"] for r in refusal_answers()}
+    out = {half: {"n": 0, "judged": 0, "hand": 0, "phrase": 0} for half in SPLITS}
+    for row in judged["results"]:
+        bucket = out[split[row["question"]]]
+        bucket["n"] += 1
+        bucket["judged"] += bool(row["refused"] and not row["fabricated"])
+        bucket["hand"] += bool(hand_clean(labels[row["question"]]))
+        bucket["phrase"] += bool(row["phrase"])
+    return out
+
+
 def snapshot():
     judged = evaluate_judged()
     records = answerable_count()
@@ -105,6 +131,7 @@ def snapshot():
                 name: {"n": bucket["n"], "clean": bucket["clean"]}
                 for name, bucket in sorted(judged["by_class"].items())
             },
+            "by_split": by_split(judged),
             # Per question, not only the total. The metric can only move in
             # steps of one record - 0.083 on twelve - so a bar on the average
             # is either "one record" or nothing. What is worth catching is a

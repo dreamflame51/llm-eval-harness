@@ -23,9 +23,15 @@ import argparse
 import pathlib
 import time
 
-from llm_eval_harness.dataset import REFUSAL_ANSWERS_PATH, refusal_answers
+from llm_eval_harness.dataset import (
+    REFUSAL_ANSWERS_PATH,
+    SPLITS,
+    in_split,
+    refusal_answers,
+)
 from llm_eval_harness.judge import (
     AXES,
+    JUDGEABLE,
     decision,
     judge_records,
     mode_string,
@@ -38,13 +44,25 @@ THINK = {"auto": "default", "on": True, "off": False}
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", required=True, help="ollama model to judge with")
+    parser.add_argument(
+        "--model",
+        required=True,
+        help="judge label: an Ollama model (qwen3:8b), or a hosted one as "
+        "provider/model (groq/openai/gpt-oss-120b, gemini/gemini-3.5-flash-lite)",
+    )
     parser.add_argument(
         "--axis",
-        choices=AXES,
+        choices=JUDGEABLE,
         action="append",
         dest="axes",
-        help="judge only this axis; repeatable (default: both)",
+        help="judge only this axis; repeatable (default: refused and fabricated - "
+        "misdirected is run only when asked for)",
+    )
+    parser.add_argument(
+        "--split",
+        choices=SPLITS,
+        help="judge only one half of eval/split.yaml - a new prompt is tried on dev "
+        "before test is read",
     )
     parser.add_argument(
         "--limit", type=int, help="judge only the first N records - for a probe run"
@@ -90,7 +108,7 @@ def line(i, total, entry, from_cache):
 
 def main():
     args = parse_args()
-    records = refusal_answers(args.file)
+    records = in_split(refusal_answers(args.file), args.split)
     if args.limit:
         records = records[: args.limit]
     axes = tuple(args.axes) if args.axes else AXES

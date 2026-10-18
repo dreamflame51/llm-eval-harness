@@ -16,7 +16,8 @@ fails the check.
 
 It cannot run in CI: the runner has no Ollama. It is a local gate - before a
 release, after touching pipeline.py or the retriever, on whatever cadence the
-work deserves. Twelve records cost about twenty minutes on this hardware.
+work deserves. Twelve records cost about thirteen minutes on this hardware -
+nineteen before the two passes below were split by model.
 
 Two outcomes it deliberately does not collapse into one. A flip means either
 the system regressed **or** the frozen set is stale, and those need different

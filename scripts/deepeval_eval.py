@@ -119,6 +119,76 @@ def no_think_model(name, temperature=0, num_predict=None):
     )
 
 
+def hosted_model(model_label):
+    """
+    DeepEval's model interface over providers.chat, for a hosted judge.
+
+    Through providers.chat rather than DeepEval's own OpenAI class so that
+    the retry policy and the request cache are the same ones the harness's
+    own judge uses - a resumed run after a rate limit costs only what had not
+    been answered.
+    """
+    from deepeval.models import DeepEvalBaseLLM
+
+    from llm_eval_harness import providers
+    from llm_eval_harness.judge import extract_json
+
+    provider, name = providers.split(model_label)
+
+    class HostedModel(DeepEvalBaseLLM):
+        def load_model(self):
+            return self
+
+        def get_model_name(self):
+            return model_label
+
+        def generate(self, prompt, schema=None):
+            reply = providers.chat(
+                provider,
+                name,
+                [{"role": "user", "content": prompt}],
+                schema=schema.model_json_schema() if schema else None,
+            )
+            # A custom DeepEvalBaseLLM returns the result alone. The (result,
+            # cost) pair NoThinkOllama returns is the contract of DeepEval's
+            # native models, which that class subclasses; returned from here
+            # it reaches the metric as a tuple and every metric fails.
+            if schema is None:
+                return reply.text
+            try:
+                return schema.model_validate_json(reply.text)
+            except ValueError:
+                # A model under a schema constraint still fences or prefixes
+                # the object now and then; take the first balanced one.
+                return schema.model_validate_json(extract_json(reply.text) or "")
+
+        async def a_generate(self, prompt, schema=None):
+            return self.generate(prompt, schema)
+
+    return HostedModel(model_label)
+
+
+def judge_model(model_label, num_predict=None):
+    """The judge for a label: hosted when it names a provider, else Ollama."""
+    from llm_eval_harness import providers
+
+    if providers.split(model_label)[0] == "ollama":
+        return no_think_model(model_label, num_predict=num_predict)
+    return hosted_model(model_label)
+
+
+def default_out(model_label):
+    """
+    eval/deepeval_scores.json belongs to qwen3:8b and is pinned by the
+    regression suite; another judge writes beside it, never over it.
+    """
+    if model_label == "qwen3:8b":
+        return OUT
+    from llm_eval_harness.judge import _slug
+
+    return OUT.with_name(f"deepeval_scores.{_slug(model_label)}.json")
+
+
 def load_rows(limit=None):
     rows = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
     return rows[:limit] if limit else rows
@@ -166,7 +236,12 @@ def build_cases(rows):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default="qwen3:8b", help="ollama model to judge with")
+    parser.add_argument(
+        "--model",
+        default="qwen3:8b",
+        help="judge label: an Ollama model, or provider/model "
+        "(gemini/gemini-3.5-flash-lite, groq/openai/gpt-oss-120b)",
+    )
     parser.add_argument("--limit", type=int, help="score only the first N records")
     parser.add_argument(
         "--metric",
@@ -201,8 +276,8 @@ def main():
         ContextualRecallMetric,
         FaithfulnessMetric,
     )
-    out = args.out or OUT
-    model = no_think_model(args.model, num_predict=args.num_predict)
+    out = args.out or default_out(args.model)
+    model = judge_model(args.model, num_predict=args.num_predict)
     # One at a time, and no progress spinner per metric: the run is measured in
     # minutes per record and the timing below is the point of the exercise.
     common = {"model": model, "async_mode": False, "include_reason": True}
@@ -236,7 +311,9 @@ def main():
         # score and reason as state, and reusing one across records makes the
         # failure mode a silently stale number rather than an error.
         for i, case in enumerate(cases):
-            if name in per_record[i] and not args.refresh:
+            # A None is a failed measurement, not a finished one: a resumed
+            # run after a quota error has to retry exactly those.
+            if per_record[i].get(name) is not None and not args.refresh:
                 print(f"  {name:<18} {i + 1}/{len(cases)}  cached", flush=True)
                 continue
             measured = time.perf_counter()
@@ -244,7 +321,12 @@ def main():
             try:
                 metric.measure(case)
                 score, reason = metric.score, metric.reason
-            except Exception as exc:  # noqa: BLE001 - a failed metric is data
+            except Exception as exc:  # a failed metric is data
+                if type(exc).__name__ == "QuotaExhausted":
+                    # Every later call would fail the same way; stop, keep
+                    # what was measured, say when to come back.
+                    save(per_record, args.model, wanted, timings, out)
+                    raise SystemExit(str(exc)) from exc
                 score, reason = None, f"{type(exc).__name__}: {exc}"
             timings[name] += time.perf_counter() - measured
             per_record[i][name] = _clean(score)

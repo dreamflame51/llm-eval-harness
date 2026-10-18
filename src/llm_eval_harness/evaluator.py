@@ -145,7 +145,9 @@ def covered_fraction(gold_context, retrieved, min_run=MIN_RUN):
         reach = start
         for hay in haystacks:
             end = start + run
-            if end > n or not _occurs(" ".join(words[start:end]), hay, start > 0, end < n):
+            if end > n or not _occurs(
+                " ".join(words[start:end]), hay, start > 0, end < n
+            ):
                 continue
             while end < n and _occurs(
                 " ".join(words[start : end + 1]), hay, start > 0, end + 1 < n
@@ -165,6 +167,22 @@ def context_coverage(gold_contexts, retrieved, min_run=MIN_RUN):
     enough. Partial coverage of two different spans does not add up.
     """
     return max(
+        (covered_fraction(ctx, retrieved, min_run) for ctx in gold_contexts),
+        default=0.0,
+    )
+
+
+def complete_coverage(gold_contexts, retrieved, min_run=MIN_RUN):
+    """
+    Coverage of the WORST-covered gold context: every span must be served.
+
+    context_coverage() treats a record's spans as alternatives - one is
+    enough - which is right for a single-passage question that happens to be
+    supported in two places. A multi_hop record's spans are not alternatives:
+    the answer needs all of them, and taking the best one scores half the
+    evidence as the whole of it.
+    """
+    return min(
         (covered_fraction(ctx, retrieved, min_run) for ctx in gold_contexts),
         default=0.0,
     )
@@ -199,34 +217,86 @@ def evaluate_retrieval(records=None, k=K, search_fn=None):
 
         search_fn = RETRIEVE
 
-    ranks, coverages = [], []
+    ranks, coverages, completes = [], [], []
     for rec in records:
-        # One retrieval, both metrics: they must describe the same top k, or
+        # One retrieval, every metric: they must describe the same top k, or
         # the gap between them stops meaning anything.
         retrieved = search_fn(rec["question"], k=k)
         ranks.append((rec["question"], rank_of_first_hit(rec["contexts"], retrieved)))
-        coverages.append((rec["question"], context_coverage(rec["contexts"], retrieved)))
+        coverages.append(
+            (rec["question"], context_coverage(rec["contexts"], retrieved))
+        )
+        completes.append(
+            (rec["question"], complete_coverage(rec["contexts"], retrieved))
+        )
 
-    found = [rank for _, rank in ranks if rank is not None]
-    n = len(ranks)
     return {
         "k": k,
+        **aggregate(ranks, coverages, completes),
+        "ranks": ranks,
+        "coverages": coverages,
+        "completes": completes,
+    }
+
+
+def aggregate(ranks, coverages, completes=None):
+    """The averages over (question, rank) and (question, coverage) lists -
+    one definition, used for the whole set and for each group of it.
+
+    complete_at_k is the strict one: every gold span of the record served
+    whole. The only honest number for multi_hop records."""
+    found = [rank for _, rank in ranks if rank is not None]
+    n = len(ranks)
+    out = {
         "n": n,
         "hit_at_k": len(found) / n if n else 0.0,
         "mrr": sum(1 / rank for rank in found) / n if n else 0.0,
         "coverage_at_k": sum(c for _, c in coverages) / n if n else 0.0,
         "covered_at_k": sum(1 for _, c in coverages if c >= FULL) / n if n else 0.0,
-        "ranks": ranks,
-        "coverages": coverages,
     }
+    if completes is not None:
+        out["complete_at_k"] = sum(1 for _, c in completes if c >= FULL) / n if n else 0.0
+    return out
+
+
+def group_of(record):
+    """original, paraphrase, multi_hop or partial. Reported apart: the
+    original 26 are what every earlier number in this project describes."""
+    if "paraphrase_of" in record:
+        return "paraphrase"
+    return record.get("kind", "original")
+
+
+def by_group(result, records):
+    """{group: aggregate} over the same retrieval, in a fixed order."""
+    group = {r["question"]: group_of(r) for r in records}
+    out = {}
+    for name in ("original", "paraphrase", "multi_hop", "partial"):
+        ranks = [(q, r) for q, r in result["ranks"] if group[q] == name]
+        if ranks:
+            coverages = [(q, c) for q, c in result["coverages"] if group[q] == name]
+            completes = [(q, c) for q, c in result["completes"] if group[q] == name]
+            out[name] = aggregate(ranks, coverages, completes)
+    return out
 
 
 if __name__ == "__main__":
-    result = evaluate_retrieval()
+    records = answerable_records()
+    result = evaluate_retrieval(records)
     k, n = result["k"], result["n"]
 
+    print(f"{'group':<11} {'n':>3}  hit@{k}  covered@{k}  complete@{k}  coverage@{k}   MRR")
+    for name, g in by_group(result, records).items():
+        print(
+            f"{name:<11} {g['n']:>3}  {g['hit_at_k']:.3f}  {g['covered_at_k']:.3f}"
+            f"      {g['complete_at_k']:.3f}       {g['coverage_at_k']:.3f}       {g['mrr']:.3f}"
+        )
+    print()
+
     print(f"{n} answerable questions, k={k}")
-    print(f"hit@{k}:      {result['hit_at_k']:.3f}  (one chunk holds a gold span whole)")
+    print(
+        f"hit@{k}:      {result['hit_at_k']:.3f}  (one chunk holds a gold span whole)"
+    )
     print(f"covered@{k}:  {result['covered_at_k']:.3f}  (the k chunks together do)")
     print(f"coverage@{k}: {result['coverage_at_k']:.3f}  (mean share of a gold span)")
     print(f"MRR:         {result['mrr']:.3f}")

@@ -100,20 +100,73 @@ def load_rows(limit=None):
     return rows[:limit] if limit else rows
 
 
-def load_scores():
-    if not OUT.exists():
+def default_out(model_label):
+    """eval/ragas_scores.json is qwen3:8b's and pinned; other judges write beside it."""
+    if model_label == "qwen3:8b":
+        return OUT
+    from llm_eval_harness.judge import _slug
+
+    return OUT.with_name(f"ragas_scores.{_slug(model_label)}.json")
+
+
+def judge_llm(model_label):
+    """
+    The LangChain chat model RAGAS judges with: Ollama, or a hosted
+    OpenAI-compatible endpoint named as provider/model.
+
+    Hosted calls go through ChatOpenAI rather than providers.chat because RAGAS
+    wants a LangChain model; the SDK's own retry honours Retry-After, and
+    RAGAS's disk cache makes a resumed run free for what was already asked.
+    """
+    from ragas.cache import DiskCacheBackend
+    from ragas.llms import LangchainLLMWrapper
+
+    from llm_eval_harness import providers
+
+    provider, name = providers.split(model_label)
+    if provider == "ollama":
+        from langchain_ollama import ChatOllama
+
+        chat = ChatOllama(
+            model=name,
+            temperature=0,
+            num_predict=2048,
+            # See the module docstring: with thinking on, the parser fails,
+            # retries three times and fails again, at 15 minutes a metric.
+            reasoning=False,
+        )
+        return LangchainLLMWrapper(chat)
+
+    from langchain_openai import ChatOpenAI
+
+    base_url, key = providers.credentials(provider)
+    chat = ChatOpenAI(
+        model=name,
+        base_url=base_url,
+        api_key=key,
+        temperature=0,
+        max_tokens=2048,
+        max_retries=8,
+        timeout=300,
+    )
+    cache = DiskCacheBackend(str(providers.CACHE_DIR.parent / "ragas"))
+    return LangchainLLMWrapper(chat, cache=cache)
+
+
+def load_scores(out=OUT):
+    if not out.exists():
         return {}
-    return json.loads(OUT.read_text(encoding="utf-8")).get("per_record", {})
+    return json.loads(out.read_text(encoding="utf-8")).get("per_record", {})
 
 
-def save_scores(scores, model, timings):
+def save_scores(scores, model, timings, out=OUT):
     payload = {
         "model": model,
         "records": len(scores),
         "seconds_per_metric": timings,
         "per_record": scores,
     }
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    out.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def build_metrics(llm, embeddings, wanted):
@@ -153,7 +206,15 @@ def sample_for(row):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default="qwen3:8b", help="ollama model RAGAS judges with")
+    parser.add_argument(
+        "--model",
+        default="qwen3:8b",
+        help="judge label: an Ollama model, or provider/model "
+        "(gemini/gemini-3.5-flash-lite, groq/openai/gpt-oss-120b)",
+    )
+    parser.add_argument(
+        "--out", type=pathlib.Path, help="score file (default depends on the judge)"
+    )
     parser.add_argument("--limit", type=int, help="score only the first N records")
     parser.add_argument(
         "--metric",
@@ -170,24 +231,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    from langchain_ollama import ChatOllama
     from ragas.embeddings import LangchainEmbeddingsWrapper
-    from ragas.llms import LangchainLLMWrapper
 
     wanted = args.metrics or list(METRIC_NAMES)
     rows = load_rows(args.limit)
-    scores = {} if args.refresh else load_scores()
+    out = args.out or default_out(args.model)
+    scores = {} if args.refresh else load_scores(out)
 
-    llm = LangchainLLMWrapper(
-        ChatOllama(
-            model=args.model,
-            temperature=0,
-            num_predict=2048,
-            # See the module docstring: with thinking on, the parser fails,
-            # retries three times and fails again, at 15 minutes a metric.
-            reasoning=False,
-        )
-    )
+    llm = judge_llm(args.model)
     metrics = build_metrics(llm, LangchainEmbeddingsWrapper(LocalEmbeddings()), wanted)
 
     print(f"{len(rows)} records x {len(wanted)} metrics, judged by {args.model}")
@@ -200,7 +251,8 @@ def main():
         question = row["question"]
         record = scores.setdefault(question, {})
         for name in wanted:
-            if name in record and not args.refresh:
+            # None is a failed measurement - retried on resume, not skipped.
+            if record.get(name) is not None and not args.refresh:
                 print(f"  {i:>2}/{len(rows)}  {name:<18} {record[name]}  cached", flush=True)
                 continue
             metric_started = time.perf_counter()
@@ -220,7 +272,7 @@ def main():
             # Written after every metric, not at the end: the full run is
             # hours, and an interruption must not cost what it already paid
             # for. Same reason the judge cache is written per verdict.
-            save_scores(scores, args.model, {k: round(v, 1) for k, v in timings.items()})
+            save_scores(scores, args.model, {k: round(v, 1) for k, v in timings.items()}, out)
 
     elapsed = time.perf_counter() - started
     print(f"\n{elapsed:.0f}s total, {elapsed / max(len(rows), 1):.0f}s per record")
@@ -236,7 +288,7 @@ def main():
             f"  {name:<18} {got}   {timings[name]:>7.0f}s"
             + (f"   ({failed} failed)" if failed else "")
         )
-    print(f"\nwrote {OUT}")
+    print(f"\nwrote {out}")
 
 
 def _clean(value):
