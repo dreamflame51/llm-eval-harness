@@ -6,7 +6,7 @@
     "n": 29,
     "clean": 26,
     "undecided": 0,
-    "phrase_rate": 0.8966,
+    "phrase_rate": 0.931,
     "by_class": {
       "in_corpus_gap": {
         "n": 23,
@@ -21,8 +21,8 @@
       "dev": {
         "n": 15,
         "judged": 13,
-        "hand": 14,
-        "phrase": 14
+        "hand": 15,
+        "phrase": 15
       },
       "test": {
         "n": 14,
@@ -143,9 +143,9 @@
         "phrase": true
       },
       "Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?": {
-        "refused": false,
+        "refused": true,
         "fabricated": false,
-        "phrase": false
+        "phrase": true
       },
       "How many retired digital signature keys can a PIV Card hold under SP 800-78-5?": {
         "refused": true,
@@ -164,7 +164,7 @@
       },
       "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?": {
         "refused": true,
-        "fabricated": false,
+        "fabricated": true,
         "phrase": true
       },
       "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?": {

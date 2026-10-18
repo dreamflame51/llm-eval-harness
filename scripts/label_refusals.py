@@ -48,6 +48,10 @@ fabricated  Does the answer assert anything about the question that the chunks
             what you know to be true of the standard. Content correctly drawn
             from the corpus is not fabricated, even when the question asked
             about an absent document.
+misdirected Does the answer present a fact about a neighbouring object as the
+            answer to the one asked, without saying the asked one is not
+            covered? Naming the mismatch ("20 retired key management keys,
+            nothing on digital signature keys") is not misdirected.
 
 s = skip this record   ? = show the text again   q = quit"""
 
@@ -68,9 +72,16 @@ ASK = {
         "  y = it asserts something the chunks do not carry\n"
         "  n = everything it asserts is in the chunks, or it asserted nothing"
     ),
+    "misdirected": (
+        "Does it give a fact about a neighbouring object as the answer to the one asked?\n"
+        "  y = yes, and it does not say the asked one is not covered\n"
+        "  n = it is about the asked object, names the mismatch, or asserted nothing"
+    ),
 }
 
-FIELDS = ("refused", "fabricated", "note")
+# misdirected was added to the rubric on 10.10 and to this script on 17.10;
+# the week between, it was written into the file by hand (docs/lessons.md #32).
+FIELDS = ("refused", "fabricated", "note", "misdirected")
 
 
 def width():
@@ -108,11 +119,23 @@ def label_lines(text):
         elif in_labels:
             stripped = line.strip()
             field = stripped.split(":", 1)[0] if ":" in stripped else None
-            if line.startswith("    ") and field in FIELDS:
+            if line.startswith("    ") and field in FIELDS and not line.startswith("     "):
                 spans.setdefault(current, {})[field] = i
+            elif line.startswith("      ") and spans.get(current):
+                # A long note wrapped by yaml.dump onto continuation lines -
+                # record_answers.py writes carried labels that way.
+                continue
             else:
                 in_labels = False
     return lines, spans
+
+
+def continuation(lines, start):
+    """How many wrapped lines follow the field on line `start`."""
+    n = 0
+    while start + 1 + n < len(lines) and lines[start + 1 + n].startswith("      "):
+        n += 1
+    return n
 
 
 def as_yaml(value):
@@ -146,10 +169,13 @@ def save(index, labels, path=REFUSAL_ANSWERS_PATH):
             "how to edit by line number. Nothing was written."
         )
 
-    for field, value in labels.items():
-        line = lines[spans[index][field]]
+    # Bottom up, so dropping one field's wrapped lines does not shift the line
+    # numbers of the fields above it.
+    for field, value in sorted(labels.items(), key=lambda kv: -spans[index][kv[0]]):
+        at = spans[index][field]
+        line = lines[at]
         indent = line[: len(line) - len(line.lstrip())]
-        lines[spans[index][field]] = f"{indent}{field}: {as_yaml(value)}"
+        lines[at : at + 1 + continuation(lines, at)] = [f"{indent}{field}: {as_yaml(value)}"]
 
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -232,7 +258,7 @@ def main():
     wanted = []
     for i, record in enumerate(records):
         labels = record["labels"]
-        done = labels["refused"] is not None and labels["fabricated"] is not None
+        done = all(labels.get(axis) is not None for axis in ("refused", "fabricated", "misdirected"))
         if args.record:
             if i + 1 in args.record:
                 wanted.append(i)
@@ -266,6 +292,9 @@ def main():
             fabricated = ask("fabricated", lambda r=record: show_chunks(r))
             if fabricated is None:
                 continue
+            misdirected = ask("misdirected", lambda r=record: show_chunks(r))
+            if misdirected is None:
+                continue
             try:
                 note = input("note (optional, Enter to skip): ").strip()
             except EOFError:
@@ -274,9 +303,13 @@ def main():
                 # the worst moment to stop.
                 note = ""
 
-            save(i, {"refused": refused, "fabricated": fabricated, "note": note}, args.file)
+            save(
+                i,
+                {"refused": refused, "fabricated": fabricated, "note": note, "misdirected": misdirected},
+                args.file,
+            )
             labelled += 1
-            print(f"saved: refused={refused} fabricated={fabricated}")
+            print(f"saved: refused={refused} fabricated={fabricated} misdirected={misdirected}")
     except (KeyboardInterrupt, EOFError):
         print("\nstopped.")
 
@@ -284,8 +317,9 @@ def main():
     unlabelled = sum(
         1
         for record in refusal_answers(args.file)
-        if record["labels"]["refused"] is None
-        or record["labels"]["fabricated"] is None
+        if any(
+            record["labels"].get(axis) is None for axis in ("refused", "fabricated", "misdirected")
+        )
     )
     print(f"{unlabelled} of {total} still unlabelled")
     if not unlabelled:

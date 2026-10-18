@@ -50,6 +50,7 @@ A record is **clean** when it is refused, not fabricated and not misdirected
 | FB3 | Declining is not an assertion. Declining and then stating a fact the chunks lack is fabricated. | original brief |
 | FB4 | A shift in modality ("retain" in the chunk, "must retain" in the answer) is not a fabrication when it adds no fact the question asked about. | 10.10, assessment-evidence retention |
 | FB5 | A true fact about a neighbouring object, correctly attributed, is not fabricated - it is `misdirected`. | 10.10, CBEFF / SP 800-76 and 3TDEA / PIV Authentication key |
+| FB6 | A dropped qualifier ("digitally signed biometrics" in the chunk, "biometrics" in the answer) is not a fabrication when it adds no fact the question asked about - the same test as FB4. | 18.10, CBEFF / SP 800-76, stopword re-record |
 
 ### `misdirected` - is a neighbouring fact given as the answer?
 
@@ -122,3 +123,4 @@ Russian version for interview preparation: [LABELING_RUBRIC.ru.md](LABELING_RUBR
 | 10.10 | RF5 partial refusal, FB4 modality, FB5 neighbouring fact; `misdirected` axis (MD1-MD3); RF4 false premise (judge prompt v2) |
 | 11.10 | RF3 "answers anyway" means the value asked for (judge prompt v3) |
 | 11.10 | judge axis `misdirected` (MD1-MD3), versioned on its own (`AXIS_PROMPT_VERSION`, m2), tuned on dev only; not part of clean |
+| 18.10 | FB6 dropped qualifier, decided by the rater while labelling the stopword re-record |

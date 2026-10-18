@@ -7,63 +7,66 @@
 # invalidates every label below.
 #
 # Provenance of this snapshot:
-#   recorded:        2026-10-07 for the first 21 records, 2026-10-10 for the last 4
-#                    (second-generation baits, from refusal_answers.bait2.yaml).
-#                    Same generator, prompt (fenced, 4dd1881) and retriever.
-#                    Records 26-29 (false-premise baits) recorded 2026-10-10
-#                    into refusal_answers.bait3.yaml, prompt sha256 fc4458b5c1a7;
-#                    labelled by Claude, labels agreed with the rater.
+#   recorded:        2026-10-17
 #   generator:       gemma4:latest, options {'temperature': 0, 'seed': 0}
 #   retrieval:       hybrid_search, k=5, sentence-transformers/all-MiniLM-L6-v2
 #   chunking:        800/160
+#   prompt:          sha256 fc4458b5c1a7 of pipeline.SYSTEM
+#   labels:          18.10. 8 carried by record_answers.py (answer and chunks
+#                    byte-identical to refusal_answers.yaml); 8 carried after
+#                    checking (same answer, new chunks, pure refusals); 13 new
+#                    answers proposed by Claude and agreed with the rater, who
+#                    decided the one boundary case (CBEFF, FB6).
+#   model state:     cold - unloaded before recording (nothing was loaded)
 #
 # The retriever is named here because leaving it out cost a day: this block
 # read the same before and after BM25 was fused into retrieval, so a set
 # recorded under dense retrieval went on being scored as though it described
-# the running system (docs/lessons.md #25).
+# the running system (docs/lessons.md #25). The prompt is named for the same
+# reason: a set recorded before the chunks were fenced off (4dd1881) went on
+# being reported for a week after the prompt had changed. The model state is
+# named because sets recorded without it could not be reproduced: on 17.10,
+# two of ten records with identical chunks came back worded differently, and
+# nothing else had changed (docs/lessons.md #34).
 #
-# Fill in by hand, one record at a time, two independent questions:
+# Fill in by hand, one record at a time, three independent questions:
 #
 #   refused     did the answer decline to answer from the corpus?
 #               A sentence that names what is missing counts ("the context does
 #               not state a minimum"). An answer that hedges and then answers
 #               anyway does NOT count as a refusal - "answers" meaning it gives
 #               the value asked for; restating related context and then
-#               declining still counts as a refusal (11.10). An answer that rejects a
+#               declining still counts as a refusal. An answer that rejects a
 #               false premise ("the key is symmetric, no curve applies") and
-#               gives no value for it DOES count (rule added 10.10).
+#               gives no value for it DOES count.
 #   fabricated  does the answer assert anything about the question that the
 #               retrieved chunks below do not support? Judge against those
 #               chunks only - not against what you know to be true of the
 #               standard. Content correctly drawn from the corpus is not
 #               fabricated, even when the question asked about an absent
 #               document.
+#   misdirected does the answer present a fact about a neighbouring object as
+#               the answer to the one asked, without saying the asked one is
+#               not covered? "Up to 20 retired key management keys, but nothing
+#               on digital signature keys" is not misdirected: it names the
+#               mismatch. "3TDEA is usable through 2030 for the administration
+#               key", given to a question about the PIV Authentication key, is.
+#               (docs/lessons.md #32)
 #
-# The two are independent, and the combination that matters most is
-# refused=true with fabricated=true: declined, then invented anyway. The phrase
-# list in refusal.py cannot see that case at all, which is why this set exists.
+# The three are independent. A record is clean only when it is refused, not
+# fabricated and not misdirected. The combination the phrase list cannot see
+# is refused=true with fabricated=true: declined, then invented anyway. The
+# one no flag saw until 10.10 is a true fact about the wrong thing.
 #
-#   misdirected (added 10.10, docs/lessons.md #32) does the answer present a
-#               fact about a neighbouring object as the answer to the one
-#               asked, without saying the asked one is not covered? Naming the
-#               mismatch ("20 retired key management keys, nothing on digital
-#               signature keys") is not misdirected.
-#
-#               Labelled by Claude on 10.10, not by the rater: the rule and the
-#               four boundary records (10, 11, 23, 24) were agreed with the
-#               rater, the other 21 were applied by Claude. True on 10 and 23.
-#               A record is clean only if refused, not fabricated and not
-#               misdirected.
-#
-# Leave note free-form; it is where a case that resists both flags gets
+# Leave note free-form; it is where a case that resists the flags gets
 # described.
 
 - question: What is the maximum time permitted between authorization reviews under SP 800-37r2?
   source: NIST.SP.800-37r2
-  answer: The provided documents state that if the continuous monitoring program is not sufficiently
+  answer: The documents state that if the continuous monitoring program is not sufficiently
     comprehensive to fully support ongoing authorization, a maximum authorization period can
-    be specified by the authorizing official, but they do not specify what the maximum time
-    permitted between authorization reviews is.
+    be specified by the authorizing official, but they do not specify what that maximum time
+    period is.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
@@ -85,17 +88,17 @@
       \ necessary if an event occurs that \nproduces risk above the acceptable organizational\
       \ risk tolerance. A reauthorization may be "
   - source: NIST.SP.800-37r2
-    distance: 0.4876
-    text: "he authorizing official verifies on an \nongoing basis as part of continuous monitoring\
-      \ (see Task M-2) that the established terms and conditions \nfor authorization are being\
-      \ followed by the system owner or common control provider. \nWhen the system is operating\
-      \ under ongoing authorization, the authorizing official continues to be \nresponsible\
-      \ and accountable for explicitly understanding and accepting the risk of continuing\
-      \ to operate \nor use the system or continuing to provide common controls for inheritance.\
-      \ For ongoing authorization, \nthe authorization frequency is specified in lieu of an\
-      \ authorization termination date. The authorizing \nofficial reviews the information\
-      \ with the specific time-driven authorization frequency defined by the \norganization\
-      \ as part of the continuous monitoring st"
+    distance: null
+    text: "k determination and acceptance of risk to organizational operations and assets,\
+      \ individuals, \nother organizations, and the Nation. In all situations where there\
+      \ is a decision to reauthorize a \nsystem or the common controls inherited by organizational\
+      \ systems, the maximum reuse of \nauthorization information is encouraged to minimize\
+      \ the time and expense associated with the \nreauthorization effort (subject to organizational\
+      \ reuse policy).  \nEVENT-DRIVEN TRIGGERS AND SIGNIFICANT CHANGES \nOrganizations define\
+      \ event-driven triggers (i.e., indicators or prompts that cause a predefined \norganizational\
+      \ reaction) for both ongoing authorization and reauthorization. Event-driven \ntriggers\
+      \ may include, but are not limited to:  \n• New threat, vulnerability, privacy risk,\
+      \ or impact information;  \n• An i"
   - source: NIST.SP.800-37r2
     distance: 0.4568
     text: "                                          A System Life Cycle Approach for Security\
@@ -109,16 +112,15 @@
       \ part of the system authorization to \noperate.139 \nAuthorization to Use \nAn auth"
   - source: NIST.SP.800-37r2
     distance: null
-    text: "800-37r2 \n \nrequirements, and the costs to the organization. Appendix G provides\
-      \ additional information \nand considerations for determining authorization boundaries,\
-      \ including boundaries for complex \nsystems and software applications. \n \n \n \n\
-      \ \n \n \n \n \n \n \n \n2.6   REQUIREMENTS AND CONTROLS \nBefore executing the RMF,\
-      \ it is important to understand the concept of security and privacy \nrequirements and\
-      \ the relationship between requirements and controls. The term requirements \ncan be\
-      \ used in different contexts. In the context of federal information security and privacy\
-      \ \npolicies, the term is generally used to refer to information security and privacy\
-      \ obligations \nimposed on organizations. For example, OMB Circular A-130 imposes a\
-      \ series of information \nsecurity and privacy requirements with whic"
+    text: "oing common control authorization; denial of ongoing authorization to operate,\
+      \ denial of ongoing \nauthorization to use, denial of ongoing common control authorization.\
+      \  \n                                                 \n110 See Appendix F for additional\
+      \ information about time- and event-driven authorizations and reporting.  \nNIST SP\
+      \ 800-37, REVISION 2                                 RISK MANAGEMENT FRAMEWORK FOR INFORMATION\
+      \ SYSTEMS AND ORGANIZATIONS \n                                                     \
+      \                                                                                  \
+      \                   A System Life Cycle Approach for Security and Privacy          \
+      \                                                                   \n____________________________________________________________"
   - source: NIST.SP.800-37r2
     distance: 0.4645
     text: "ing \nofficial reviews the information with the specific time-driven authorization\
@@ -131,21 +133,20 @@
       \ determines the level of formality for the process of communicating and acknowledging\
       \ \ncontinued risk acceptance by the authorizing official. The authorizing official\
       \ may continue to establish \nand convey the spec"
-
 - question: What is the required minimum assessment frequency for continuous monitoring of
     common controls under SP 800-37r2?
   source: NIST.SP.800-37r2
   answer: The provided documents describe the process for establishing the minimum frequency
     for control monitoring, stating that the criteria are established in collaboration with
-    organizational officials (including common control providers) and that the frequency may
-    be guided by an organizational risk assessment. However, the documents do not specify
-    a required minimum assessment frequency for common controls.
+    organizational officials (such as common control providers) and that the authorizing official
+    approves the continuous monitoring strategy and the minimum frequency. However, the documents
+    do not specify a required minimum assessment frequency for common controls.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
     refused: true
     fabricated: false
-    note: "Rater disagreement: the 2026-09-16 label was fabricated=true for an answer whose extra clause (volatile or critical controls assessed more often) is verbatim in chunk 4 - most likely a labelling error then, not a model change. Retrieval identical in both sets."
+    note: ''
     misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
@@ -207,11 +208,10 @@
       \ monitoring strategy identifies the criteria for determining the frequency with which\
       \ \ncontrols are monitored post-implementation and the plan for the ongoing assessment\
       \ of those controls. \nThe criteria are established by t"
-
 - question: What is the maximum allowable password length specified in SP 800-63B?
   source: out-of-corpus
   answer: The maximum allowable password length specified in SP 800-63B is not available in
-    the provided documents.
+    the provided context.
   refusal_type: out_of_corpus
   topic_in_corpus: true
   labels:
@@ -280,7 +280,6 @@
       \ system is routed through authorized access \ncontrol points. \nA.03.01.12.c[02]: remote\
       \ access to the system is routed through managed access \ncontrol points. \nA.03.01.12.d[1]:\
       \ remote execution of privileged commands is aut"
-
 - question: What is the recommended minimum key size for AES in FIPS 197?
   source: out-of-corpus
   answer: The recommended minimum key size for AES in FIPS 197 is not provided in the context.
@@ -318,29 +317,15 @@
       \ (of card’s static ECDH key): \n186-4: \nPKG (Public Key Generation): CURVE(P-256 \n\
       (E"
   - source: NIST.SP.800-78-5
-    distance: 0.4971
-    text: "n FIPS 201-3 \nFIPS 201-3 employs cryptographic mechanisms to authenticate cardholders,\
-      \ secure information \nstored on the PIV Card, and secure the supporting infrastructure.\
-      \ FIPS 201-3 and its supporting \ndocuments specify a suite of keys to be stored on\
-      \ the PIV Card for personal identity verification, \ndigital signature generation, and\
-      \ key management. The PIV cryptographic keys specified in FIPS \n201-3 and SP 800-73\
-      \ are: \n• The asymmetric PIV Authentication key, \n• An asymmetric Card Authentication\
-      \ key, \n• A symmetric Card Authentication key (deprecated), \n• An asymmetric digital\
-      \ signature key for signing documents and messages, \n• An asymmetric key management\
-      \ key that supports key establishment or key transport \nand up to 20 retired key management\
-      \ keys, \n• A symmetric PIV Card Application"
-  - source: NIST.SP.800-78-5
     distance: null
-    text: "with FIPS 186-3 and  \n• Extending the permitted use of SHA-1 after December 31,\
-      \ 2010, when signing \nrevocation information under limited circumstances. \nIn 2014,\
-      \ Revision 4 updates included: \n• Adding algorithm and key size requirements for secure\
-      \ messaging, \n• Adding Cryptographic Algorithm Validation Program (CAVP) validation\
-      \ testing \nrequirements, and  \n• Clarifying that RSA public keys may only have a public\
-      \ exponent of 65537. \nIn 2024, Revision 5 updates incorporated the following changes:\
-      \ \n• Table 1 reflects additional higher strength keys with at least 128-bit security\
-      \ and \nsuggested sunsets of lower sized keys by 2030 in anticipation of the recommended\
-      \ \nmigration to 128-bit security strength in 2031, \n• Accommodation of the Secure\
-      \ Messaging Authentication key, \n• Deprecation of the"
+    text: "......................................................................... 20 \n\
+      Appendix A. List of Symbols, Abbreviations, and Acronyms ........................................................\
+      \ 22 \nAppendix B. Change Log ............................................................................................................\
+      \ 24 \n \nList of Tables \nTable 1. Algorithm and key size requirements for PIV key\
+      \ types ..........................................................6  \nTable 2. Signature\
+      \ algorithm and key size requirements for PIV information........................................7\
+      \  \nTable 3. FIPS 201-3 signature algorithm object identifiers ...................................................................8\
+      \  \nTable 4. Public key object identifiers for PIV key types ...................."
   - source: NIST.SP.800-78-5
     distance: 0.4464
     text: " Algorithms \nJuly 2024   and Key Sizes for PIV \n17 \nSupported \nPrivate Keys\
@@ -353,13 +338,25 @@
       \ \nSignature Generation \nfor 2048-bit RSA with \npublic key exponent \n65537 \nKey\
       \ Generation: \n186-4: \n186-4KEY(gen): \nFIPS186-4_Fixed_e (65537) or FIPS186-4_Random_e\
       \ \nPGM(Any Prime Generation Method) \nPrerequisites: DRBG; SHS \n \nSig"
-
+  - source: NIST.SP.800-78-5
+    distance: null
+    text: "with FIPS 186-3 and  \n• Extending the permitted use of SHA-1 after December 31,\
+      \ 2010, when signing \nrevocation information under limited circumstances. \nIn 2014,\
+      \ Revision 4 updates included: \n• Adding algorithm and key size requirements for secure\
+      \ messaging, \n• Adding Cryptographic Algorithm Validation Program (CAVP) validation\
+      \ testing \nrequirements, and  \n• Clarifying that RSA public keys may only have a public\
+      \ exponent of 65537. \nIn 2024, Revision 5 updates incorporated the following changes:\
+      \ \n• Table 1 reflects additional higher strength keys with at least 128-bit security\
+      \ and \nsuggested sunsets of lower sized keys by 2030 in anticipation of the recommended\
+      \ \nmigration to 128-bit security strength in 2031, \n• Accommodation of the Secure\
+      \ Messaging Authentication key, \n• Deprecation of the"
 - question: What level of residual risk does SP 800-30 Revision 1 define as acceptable for
     a federal information system?
   source: nistspecialpublication800-30r1
-  answer: The provided documents do not state what level of residual risk SP 800-30 Revision
-    1 defines as acceptable for a federal information system. One document notes that organizations
-    determine acceptable degrees of residual risk based on organizational risk tolerance.
+  answer: The provided documents state that organizations determine acceptable degrees of
+    residual risk based on organizational risk tolerance, but they do not specify a particular
+    level of residual risk that SP 800-30 Revision 1 defines as acceptable for a federal information
+    system.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
@@ -368,6 +365,18 @@
     note: ''
     misdirected: false
   retrieved:
+  - source: nistspecialpublication800-30r1
+    distance: 0.399
+    text: "rds and Technology Special Publication 800-37, Revision 1, \nGuide for Applying\
+      \ the Risk Management Framework to Federal Information Systems: A \nSecurity Life Cycle\
+      \ Approach, February 2010. \nSpecial Publication 800-30                            \
+      \                                                  Guide for Conducting Risk Assessments\
+      \ \n________________________________________________________________________________________________\
+      \ \nAPPENDIX A   PAGE A-2 \n4. National Institute of Standards and Technology Special\
+      \ Publication 800-39, Managing \nInformation Security Risk: Organization, Mission, and\
+      \ Information System View, March \n2011. \n5. National Institute of Standards and Technology\
+      \ Special Publication 800-53, Revision 3, \nRecommended Security Controls for Federal\
+      \ Information Systems and Organiza"
   - source: NIST.SP.800-37r2
     distance: 0.409
     text: "y part of the risk-based decision process is \nthe recognition that regardless\
@@ -381,30 +390,6 @@
       \ 800-39] provide \ninformation about security risk assessments and associated risk\
       \ factors. [IR 8062] and Section 2.3 provide ad"
   - source: nistspecialpublication800-30r1
-    distance: 0.399
-    text: "rds and Technology Special Publication 800-37, Revision 1, \nGuide for Applying\
-      \ the Risk Management Framework to Federal Information Systems: A \nSecurity Life Cycle\
-      \ Approach, February 2010. \nSpecial Publication 800-30                            \
-      \                                                  Guide for Conducting Risk Assessments\
-      \ \n________________________________________________________________________________________________\
-      \ \nAPPENDIX A   PAGE A-2 \n4. National Institute of Standards and Technology Special\
-      \ Publication 800-39, Managing \nInformation Security Risk: Organization, Mission, and\
-      \ Information System View, March \n2011. \n5. National Institute of Standards and Technology\
-      \ Special Publication 800-53, Revision 3, \nRecommended Security Controls for Federal\
-      \ Information Systems and Organiza"
-  - source: nistspecialpublication800-30r1
-    distance: 0.424
-    text: "urpose, scope, and assumptions of the risk assessment. \n• Conduct the appropriate\
-      \ risk assessment tasks, as needed. \n• Communicate the subsequent risk assessment results\
-      \ to specified organizational personnel. \n \nSpecial Publication 800-30           \
-      \                                                                   Guide for Conducting\
-      \ Risk Assessments \n________________________________________________________________________________________________\
-      \ \nAPPENDIX A   PAGE A-1 \nAPPENDIX A \nREFERENCES \nLAWS, POLICIES, DIRECTIVES, INSTRUCTIONS,\
-      \ STANDARDS, AND GUIDELINES \nLEGISLATION \n1. E-Government Act [includes FISMA] (P.L.\
-      \ 107-347), December 2002. \n2. Federal Information Security Management Act (P.L. 107-347,\
-      \ Title III), December 2002.  \n POLICIES, DIRECTIVES, INSTRUCTIONS  \n1. Office of\
-      \ Managem"
-  - source: nistspecialpublication800-30r1
     distance: 0.3953
     text: "be \nappropriate for different missions/business functions, different categories\
       \ of information systems, and/or \nfor systems at different stages in the system development\
@@ -416,24 +401,35 @@
       \ can be made with \ngreater fidelity. For such assessments, a semi-quantitative assessment\
       \ using the 0-100 value scales \nmay be more appropriate. \nThe expectation set forth\
       \ in Special Publica"
-  - source: NIST.SP.800-37r2
+  - source: nistspecialpublication800-30r1
+    distance: 0.4073
+    text: "sk can be based solely on the \nassumptions, constraints, risk tolerances, priorities,\
+      \ and trade-offs established in the risk framing \nstep (i.e., derived primarily from\
+      \ Tier 1 activities). However, more realistic and meaningful risk \nassessments are\
+      \ based on assessments conducted across multiple mission/business lines (i.e., \nderived\
+      \ primarily from Tier 2 activities). The ability of organizations to effectively use\
+      \ Tier 2 risk \n                                                 \n35 In particular,\
+      \ risk assessment results support investment risk management. NIST Special Publication\
+      \ 800-65 provides \nguidance on integrating information security into the Capital Planning\
+      \ and Investment Control (CPIC) process. \nSpecial Publication 800-30              \
+      \                                               "
+  - source: nistspecialpublication800-30r1
     distance: null
-    text: "n. The risk \nmanagement strategy includes an expression of organizational risk\
-      \ tolerance; acceptable risk assessment \nmethodologies and risk response strategies;\
-      \ a process for consistently evaluating security and privacy \nrisks organization-wide;\
-      \ and approaches for monitoring risk over time. As organizations define and \nimplement\
-      \ the risk management strategies, policies, procedures, and processes, it is important\
-      \ that they \ninclude SCRM considerations. The risk management strategy for security\
-      \ and privacy connects security \nand privacy programs with the management control systems\
-      \ established in the organization’s Enterprise \nRisk Management strategy.55 \nReferences:\
-      \  [SP 800-30]; [SP 800-39] (Organization Level); [SP 800-160 v1] (Risk Management,\
-      \ Decision \nManagement, Quality Assurance, Qua"
-
+    text: "rinciples and guidelines. \n4. ISO/IEC 30101:2009, Risk management – Risk assessment\
+      \ techniques. \n5. ISO/IEC Guide 73, Risk management – Vocabulary. \n6. ISO/IEC 27005:2011,\
+      \ Information technology – Security techniques – Information \nsecurity risk management.\
+      \ \nGUIDELINES \n1. National Institute of Standards and Technology Special Publication\
+      \ 800-18, Revision 1, \nGuide for Developing Security Plans for Federal Information\
+      \ Systems, February 2006. \n2. National Institute of Standards and Technology Special\
+      \ Publication 800-34, Revision 1, \nContingency Planning Guide for Federal Information\
+      \ Systems, May 2010. \n3. National Institute of Standards and Technology Special Publication\
+      \ 800-37, Revision 1, \nGuide for Applying the Risk Management Framework to Federal\
+      \ Information Systems: A \nSecurity Life Cy"
 - question: How many hours of assessor training does SP 800-53A Revision 5 require before
     someone can conduct a control assessment?
   source: NIST.SP.800-53Ar5
   answer: The provided documents do not state how many hours of assessor training SP 800-53A
-    Revision 5 requires before someone can conduct a control assessment.
+    Revision 5 requires before conducting a control assessment.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
@@ -454,18 +450,18 @@
       \ and organization-specific conditions, optimizing the procedures for \nefficiency,\
       \ and addressing the potential for unexpected events that may impact the assessment,\
       \ \nthe asses"
-  - source: NIST.SP.800-171Ar3
+  - source: NIST.SP.800-37r2
     distance: null
-    text: " personnel after initial training is defined. \nA.03.02.02.ODP[02]: events that\
-      \ require role-based security training are defined. \nA.03.02.02.ODP[03]: the frequency\
-      \ at which to update role-based security training \ncontent is defined. \nA.03.02.02.ODP[04]:\
-      \ events that require role-based security training content \nupdates are defined. \n\
-      A.03.02.02.a.01[01]: role-based security training is provided to organizational \npersonnel\
-      \ before authorizing access to the system or CUI. \nA.03.02.02.a.01[02]: role-based\
-      \ security training is provided to organizational \npersonnel before performing assigned\
-      \ duties. \nA.03.02.02.a.01[03]: role-based security training is provided to organizational\
-      \ \npersonnel <A.03.02.02.ODP[01]: frequency> after initial training. \nA.03.02.02.a.02:\
-      \ role-based security training is pr"
+    text: "ing the findings and \nrecommendations from the \ncontrol assessments. \n• Control\
+      \ Assessor • System Owner \n• Common Control Provider \n• System Security Officer \n\
+      • System Privacy Officer \nTASK A-5 \nRemediation Actions \nConduct initial remediation\
+      \ \nactions on the controls and \nreassess remediated controls. \n• System Owner \n\
+      • Common Control Provider \n• Control Assessor \n• Authorizing Official or Authorizing\
+      \ \nOfficial Designated Representative \n• Senior Agency Information Security \nOfficer\
+      \ \n• Senior Agency Official for Privacy \n• Senior Accountable Official for Risk \n\
+      Management or Risk Executive \n(Function) \n• Information Owner or Steward \n• Systems\
+      \ Security Engineer \n• Privacy Engineer \n• System Security Officer \n• System Privacy\
+      \ Officer \nNIST SP 800-37, REVISION 2                              "
   - source: NIST.SP.800-53Ar5
     distance: 0.4266
     text: "AND \nOBJECTIVES \nAn assessment procedure consists of a set of assessment objectives,\
@@ -478,18 +474,17 @@
       assessment findings.22 Assessment findings reflect or are subsequently used to help\
       \ determine \nthe overall effectiveness of the control and help the authorizing official\
       \ make an informed, risk-\nbased decision on whether t"
-  - source: NIST.SP.800-37r2
+  - source: NIST.SP.800-53Ar5
     distance: null
-    text: " privacy control assessors \nthat is necessary. \nOrganizations can conduct self-assessments\
-      \ of controls or obtain the services of an independent control \nassessor. An independent\
-      \ assessor is an individual or group that can conduct an impartial assessment. \nImpartiality\
-      \ means that assessors are free from perceived or actual conflicts of interest with\
-      \ respect to \nthe determination of control effectiveness or the development, operation,\
-      \ or management of the system, \ncommon controls, or program management controls. The\
-      \ authorizing official determines the level of \nassessor independence based on applicable\
-      \ laws, executive orders, directives, regulations, policies, or \nstandards. The authorizing\
-      \ official consults with the Office of the Inspector General, chief  information \n\
-      officer, senior agency"
+    text: " assessment data collection and reporting cost-effective, timely, and \nefficient.\
+      \ \nNIST SP 800-53A REV. 5  ASSESSING SECURITY AND PRIVACY CONTROLS IN INFORMATION SYSTEMS\
+      \ AND ORGANIZATIONS \n_________________________________________________________________________________________________________________________________________________\
+      \ \nAPPENDIX E   PAGE 720 \nThis publication is available free of charge from: https://doi.org/10.6028/NIST.SP.800-53Ar5\
+      \ \n \n \nFIGURE 9:  SECURITY AND PRIVACY CONTROL ASSESSMENT FINDINGS EXAMPLE \nCP-03\
+      \ CONTINGENCY TRAINING\nASSESSMENT OBJECTIVE\nDetermine if:\nASSESSMENT \nFINDING ASSESSOR\
+      \ COMMENTS AND RECOMMENDATIONS\nCP-03_ODP[01] the time period within which to provide\
+      \ contingency training after\nassuming a contingency role or responsibility is deﬁned;\
+      \ S System ABC con"
   - source: NIST.SP.800-53Ar5
     distance: 0.4444
     text: "ying scoping \nconsiderations on the applicability and implementation of \nbaseline\
@@ -502,12 +497,11 @@
       \ with the \nflexibility needed to meet specific organizational requirements \nand avoid\
       \ overly constrained assessment approaches. \ntest A type of assessment method that\
       \ is characterized by the \nprocess of exercising "
-
 - question: What score must an organization achieve to pass an assessment conducted under
     SP 800-171A Revision 3?
   source: NIST.SP.800-171Ar3
-  answer: The provided documents do not state what specific score an organization must achieve
-    to pass an assessment conducted under SP 800-171A Revision 3.
+  answer: The provided documents do not specify a numerical score that an organization must
+    achieve to pass an assessment conducted under SP 800-171A Revision 3.
   refusal_type: in_corpus_gap
   topic_in_corpus: false
   labels:
@@ -551,18 +545,17 @@
       \ and assessors is an important aspect of conducting \nan effective assessment. Preparatory\
       \ activities address a range of issues relating to the cost, \nschedule, and conduct\
       \ of the assessment. From an organizational pe"
-  - source: nistspecialpublication800-30r1
+  - source: NIST.SP.800-37r2
     distance: null
-    text: "which \nthe organization might use under specific operational conditions. \nEffectiveness\
-      \ Time Frame \nOrganizations determine how long the results of particular risk assessments\
-      \ can be used to legitimately inform risk-\nbased decisions. The time frame is usually\
-      \ related to the purpose of the assessment. For example, a risk assessment to \ninform\
-      \ Tier 1 policy-related decisions needs to be relevant for an extended period of time\
-      \ since the governance process \nfor policy changes can be time-consuming in many organizations.\
-      \ A risk assessment conducted to inform a Tier 3 \ndecision on the use of a compensating\
-      \ security control for an information system may be relevant only until the next \n\
-      release of the information technology product providing the required security capability.\
-      \ Organizations determin"
+    text: "nce with applicable privacy \nrequirements and manage privacy risks. \nNote: Controls\
+      \ can be selected to achieve multiple objectives; those controls \nthat are selected\
+      \ to achieve both security and privacy objectives require a \ndegree of collaboration\
+      \ between the organization’s information security \nprogram and privacy program. \n\
+      NIST SP 800-37, REVISION 2                                 RISK MANAGEMENT FRAMEWORK\
+      \ FOR INFORMATION SYSTEMS AND ORGANIZATIONS \n                                     \
+      \                                                                                  \
+      \                                   A System Life Cycle Approach for Security and Privacy\
+      \                                                                             \n___________________________________________________________"
   - source: NIST.SP.800-171Ar3
     distance: 0.3913
     text: "SO 15408 [6] evaluations. \n) \n• Establishing organizational points of contact\
@@ -575,7 +568,6 @@
       \ \n• Artifacts are collected and provided to assessors. \n• Mechanisms to minimize\
       \ ambiguities and misunderstandings about the security \nrequirements, implementation\
       \ issues, and weaknesses/deficiencies identified dur"
-
 - question: What is the minimum PIN length required for a PIV Card according to SP 800-78-5?
   source: NIST.SP.800-78-5
   answer: The provided documents do not specify the minimum PIN length required for a PIV
@@ -589,18 +581,6 @@
     misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
-    distance: 0.4409
-    text: " certificate. \nThe cryptographic algorithms, key sizes, and parameters that may\
-      \ be used to sign these \nmechanisms are specified in Sec. 4, which also describes rules\
-      \ for encoding the signatures to \nensure interoperability. \nFIPS 201-3 permits optional\
-      \ card management operations. These operations may only be \nperformed after the PIV\
-      \ Card authenticates the card management system. Card management \nsystems are authenticated\
-      \ through the use of PIV Card Application Administration Keys. The \ncryptographic algorithms\
-      \ and key sizes that may be used for these keys are specified in Sec. 5.   \nNIST SP\
-      \ 800-78-5  Cryptographic Algorithms \nJuly 2024   and Key Sizes for PIV \n5 \n3. On-Card\
-      \ Cryptographic Requirements \nFIPS 201-3 identifies a suite of objects that are stored\
-      \ on the PIV Card for use in authen"
-  - source: NIST.SP.800-78-5
     distance: 0.4457
     text: "cification for ECDH key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic\
       \ Algorithms \nJuly 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Information\
@@ -612,6 +592,18 @@
       \ (CVC), \n• The optional intermediate CVC, \n• The CHUID, \n• Biometric information\
       \ (e.g., fingerprints), and \n• The SP 800-73-4 Security Object. \nApproved digital\
       \ signature algorithms are specified in [FIPS186"
+  - source: NIST.SP.800-78-5
+    distance: 0.4409
+    text: " certificate. \nThe cryptographic algorithms, key sizes, and parameters that may\
+      \ be used to sign these \nmechanisms are specified in Sec. 4, which also describes rules\
+      \ for encoding the signatures to \nensure interoperability. \nFIPS 201-3 permits optional\
+      \ card management operations. These operations may only be \nperformed after the PIV\
+      \ Card authenticates the card management system. Card management \nsystems are authenticated\
+      \ through the use of PIV Card Application Administration Keys. The \ncryptographic algorithms\
+      \ and key sizes that may be used for these keys are specified in Sec. 5.   \nNIST SP\
+      \ 800-78-5  Cryptographic Algorithms \nJuly 2024   and Key Sizes for PIV \n5 \n3. On-Card\
+      \ Cryptographic Requirements \nFIPS 201-3 identifies a suite of objects that are stored\
+      \ on the PIV Card for use in authen"
   - source: NIST.SP.800-78-5
     distance: 0.4331
     text: "7, Cryptographic Algorithm Validation Testing Requirements, specifies the \ncryptographic\
@@ -648,7 +640,6 @@
       \ SP 800-73 specify six types of cryptographic keys to be used as credentials by \n\
       the PIV cardholder: \n1. The mandatory PIV Authentication key, \n2. The mandatory asymmetric\
       \ Card Authentication key, \n3. An optional"
-
 - question: What are the four security levels defined in FIPS 140-3 for cryptographic modules?
   source: out-of-corpus
   answer: The provided documents do not state the four security levels defined in FIPS 140-3
@@ -719,31 +710,18 @@
       \ cryptographic protection; \npersonnel with information security responsibilities;\
       \ system developers; system \nadministrators] \nTest \n[SELECT FROM: mechanisms for\
       \ supporting or implementing cryptographic \nprotection] \nREFERE"
-
 - question: Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?
   source: out-of-corpus
-  answer: The documents state that digitally signed biometrics are protected using the Common
-    Biometric Exchange Formats Framework (CBEFF) signature block.
+  answer: The documents state that biometrics are protected using the Common Biometric Exchange
+    Formats Framework (CBEFF) signature block.
   refusal_type: out_of_corpus
   topic_in_corpus: true
   labels:
     refused: false
     fabricated: false
-    note: "No explicit refusal: answers with CBEFF from chunk 4, which lists signed biometrics among objects specified in FIPS 201-3, SP 800-73 and SP 800-76. Partial, and the attribution to SP 800-76 is only by implication, but supported. Rater disagreement: the 2026-09-16 label for a near-identical answer was fabricated=true (signature packaging, not a data format); relabelled 2026-10-10 as a supported partial answer."
+    note: "No explicit refusal: answers with CBEFF, a fact about signed biometrics in general, to a question about SP 800-76 formats - misdirected. Drops the chunk's 'digitally signed', widening the claim to all biometrics; not fabricated under FB6 (a dropped qualifier adds no fact the question asked about). Decided 18.10."
     misdirected: true
   retrieved:
-  - source: NIST.SP.800-78-5
-    distance: 0.2677
-    text: "aphic keys. This document contains the technical \nspecifications needed for the\
-      \ mandatory and optional cryptographic keys specified in FIPS 201-\n3, as well as the\
-      \ supporting infrastructure specified in FIPS 201-3 and the related SP 800-73, \nInterfaces\
-      \ for Personal Identity Verification [SP800-73], and SP 800-76, Biometric Specifications\
-      \ \nfor Personal Identity Verification [SP800-76], which rely on cryptographic functions.\
-      \  \n1.2. Scope \nThe scope of this recommendation encompasses the PIV Card, infrastructure\
-      \ components that \nsupport issuance and management of the PIV Card, and applications\
-      \ that rely on the credentials \nsupported by the PIV Card to provide security services.\
-      \ This recommendation identifies \nacceptable symmetric and asymmetric encryption algorithms,\
-      \ digital signature algorith"
   - source: NIST.SP.800-78-5
     distance: 0.3273
     text: "An asymmetric key management key that supports key establishment or key transport\
@@ -756,6 +734,18 @@
       \ \nthe algorithms identified in this section. \nCryptographically protected objects\
       \ specified in FIPS 201-3, SP 800-73, and SP 800-76 include: \n• The X.509 certificates\
       \ for each asymmetric key on the PIV Card, "
+  - source: NIST.SP.800-78-5
+    distance: 0.2677
+    text: "aphic keys. This document contains the technical \nspecifications needed for the\
+      \ mandatory and optional cryptographic keys specified in FIPS 201-\n3, as well as the\
+      \ supporting infrastructure specified in FIPS 201-3 and the related SP 800-73, \nInterfaces\
+      \ for Personal Identity Verification [SP800-73], and SP 800-76, Biometric Specifications\
+      \ \nfor Personal Identity Verification [SP800-76], which rely on cryptographic functions.\
+      \  \n1.2. Scope \nThe scope of this recommendation encompasses the PIV Card, infrastructure\
+      \ components that \nsupport issuance and management of the PIV Card, and applications\
+      \ that rely on the credentials \nsupported by the PIV Card to provide security services.\
+      \ This recommendation identifies \nacceptable symmetric and asymmetric encryption algorithms,\
+      \ digital signature algorith"
   - source: NIST.SP.800-78-5
     distance: 0.3467
     text: "24   and Key Sizes for PIV \n5 \n3. On-Card Cryptographic Requirements \nFIPS 201-3\
@@ -781,18 +771,17 @@
       \ cryptographic algorithms, key sizes, and parameters that may be used to \nprotect\
       \ these objects. Certification authorities (CA) and"
   - source: NIST.SP.800-78-5
-    distance: null
-    text: "arameter [PKCS1]. \nThe secure messaging CVC shall be signed using ECDSA (Curve\
-      \ P-256) with SHA-256 if it contains \nan ECDH (Curve P-256) subject public key and\
-      \ shall be signed using ECDSA (Curve P-384) with \nSHA-384 otherwise. The Intermediate\
-      \ CVC shall be signed using RSA with SHA-256 and PKCS #1 \nv1.5 padding. \nFIPS 201-3,\
-      \ SP 800-73, and SP 800-76 specify formats for the CHUID, the Security Object, the \n\
-      biometric information, and X.509 public key certificates, which rely on OIDs to specify\
-      \ which \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024   and Key Sizes for\
-      \ PIV \n8 \nsignature algorithm was used to generate the digital signature. The object\
-      \ identifiers specified \nin Table 3 must be used in FIPS 201-3 implementations to identify\
-      \ the signature algorithm.4\n4 The OID for RSA with S"
-
+    distance: 0.2955
+    text: "cification for ECDH key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic\
+      \ Algorithms \nJuly 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Information\
+      \ Stored on the PIV Card \n3.2.1. Specification of Digital Signatures on Authentication\
+      \ Information \nFIPS 201-3 requires the use of digital signatures to protect the integrity\
+      \ and authenticity of \ninformation stored on the PIV Card. FIPS 201-3 and SP 800-73\
+      \ require digital signatures on the \nfollowing objects stored on the PIV Card: \n•\
+      \ X.509 public key certificates, \n• The optional secure messaging card verifiable certificate\
+      \ (CVC), \n• The optional intermediate CVC, \n• The CHUID, \n• Biometric information\
+      \ (e.g., fingerprints), and \n• The SP 800-73-4 Security Object. \nApproved digital\
+      \ signature algorithms are specified in [FIPS186"
 - question: Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless
     authentication?
   source: out-of-corpus
@@ -807,7 +796,10 @@
   labels:
     refused: true
     fabricated: false
-    note: "Partial refusal: first half answered from chunk 1 (SP 800-78-5 sec. 6 names both interfaces), second half (contactless) correctly declined. Labelled refused=true because the part the corpus lacks was declined. The gold answer calls the whole question unanswerable; the first half is answerable, so the record is half-defective (cf. lesson #16)."
+    note: 'Partial refusal: first half answered from chunk 1 (SP 800-78-5 sec. 6 names both
+      interfaces), second half (contactless) correctly declined. Labelled refused=true because
+      the part the corpus lacks was declined. The gold answer calls the whole question unanswerable;
+      the first half is answerable, so the record is half-defective (cf. lesson #16).'
     misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
@@ -870,13 +862,12 @@
       \ commands \ndefined in [SP800-73]. \n• Section 7, Cryptographic Algorithm Validation\
       \ Testing Requirements, specifies the \ncryptographic algorithm validation testing that\
       \ must be performed on the PIV Card \nba"
-
 - question: What identity proofing requirements does FIPS 201-3 impose before a PIV Card may
     be issued?
   source: out-of-corpus
   answer: The provided documents state that FIPS 201-3 defines the requirements for PIV life
-    cycle activities, including identity proofing, registration, PIV Card issuance, and PIV
-    Card usage, but they do not specify what those identity proofing requirements are.
+    cycle activities, including identity proofing, but they do not specify what those identity
+    proofing requirements are.
   refusal_type: out_of_corpus
   topic_in_corpus: true
   labels:
@@ -934,18 +925,17 @@
       \ This recommendation identifies \nacceptable symmetric and asymmetric encryption algorithms,\
       \ digital signature algorith"
   - source: NIST.SP.800-78-5
-    distance: 0.2887
-    text: " certificate. \nThe cryptographic algorithms, key sizes, and parameters that may\
-      \ be used to sign these \nmechanisms are specified in Sec. 4, which also describes rules\
-      \ for encoding the signatures to \nensure interoperability. \nFIPS 201-3 permits optional\
-      \ card management operations. These operations may only be \nperformed after the PIV\
-      \ Card authenticates the card management system. Card management \nsystems are authenticated\
-      \ through the use of PIV Card Application Administration Keys. The \ncryptographic algorithms\
-      \ and key sizes that may be used for these keys are specified in Sec. 5.   \nNIST SP\
-      \ 800-78-5  Cryptographic Algorithms \nJuly 2024   and Key Sizes for PIV \n5 \n3. On-Card\
-      \ Cryptographic Requirements \nFIPS 201-3 identifies a suite of objects that are stored\
-      \ on the PIV Card for use in authen"
-
+    distance: 0.3182
+    text: "24   and Key Sizes for PIV \n5 \n3. On-Card Cryptographic Requirements \nFIPS 201-3\
+      \ identifies a suite of objects that are stored on the PIV Card for use in authentication\
+      \ \nmechanisms or other security protocols. These objects may be divided into three\
+      \ classes: \ncryptographic keys, signed authentication information stored on the PIV\
+      \ Card, and message \ndigests of information stored on the PIV Card. Cryptographic requirements\
+      \ for PIV keys are \ndetailed in Sec. 3.1. Cryptographic requirements for other stored\
+      \ objects are detailed in Sec. \n3.2. \n3.1. PIV Cryptographic Keys \nFIPS 201-3 and\
+      \ SP 800-73 specify six types of cryptographic keys to be used as credentials by \n\
+      the PIV cardholder: \n1. The mandatory PIV Authentication key, \n2. The mandatory asymmetric\
+      \ Card Authentication key, \n3. An optional"
 - question: How many days does an organization have to remediate a high-severity assessment
     finding under SP 800-37r2?
   source: NIST.SP.800-37r2
@@ -960,6 +950,18 @@
     misdirected: false
   retrieved:
   - source: NIST.SP.800-37r2
+    distance: 0.4981
+    text: ", functional testing, \nacceptance testing), organizations may consider potential\
+      \ reuse of those results to reduce duplication of \nefforts. And finally, assessment\
+      \ results can be reused to support reciprocity, for example, assessment \nresults supporting\
+      \ an authorization to use (see Appendix F). Additional information on assessment result\
+      \ \nreuse is available in [SP 800-53A]. \nReferences:  [SP 800-53A]; [SP 800-160 v1]\
+      \ (Verification and Validation Processes); [IR 8011 v1]. \nASSESSMENT REPORTS \nTASK\
+      \ A-4   Prepare the assessment reports documenting the findings and recommendations\
+      \ from the \ncontrol assessments. \nPotential Inputs:  Completed control assessments\
+      \ and associated assessment evidence. \nExpected Outputs:  Completed security and privacy\
+      \ assessment reports detailing the assessor finding"
+  - source: NIST.SP.800-37r2
     distance: 0.4255
     text: "inforces the concept that \nassessment reports are evolving documents. Interim\
       \ reports are used, as appropriate, to inform the final \nassessment report. Organizations\
@@ -971,29 +973,6 @@
       \ Validation Processes). \nREMEDIATION ACTIONS \nTASK A-5   Conduct initial remediation\
       \ actions on the controls and reassess remediated controls. \nPotential Inputs:  Completed\
       \ security and privacy assessment "
-  - source: nistspecialpublication800-30r1
-    distance: null
-    text: "which \nthe organization might use under specific operational conditions. \nEffectiveness\
-      \ Time Frame \nOrganizations determine how long the results of particular risk assessments\
-      \ can be used to legitimately inform risk-\nbased decisions. The time frame is usually\
-      \ related to the purpose of the assessment. For example, a risk assessment to \ninform\
-      \ Tier 1 policy-related decisions needs to be relevant for an extended period of time\
-      \ since the governance process \nfor policy changes can be time-consuming in many organizations.\
-      \ A risk assessment conducted to inform a Tier 3 \ndecision on the use of a compensating\
-      \ security control for an information system may be relevant only until the next \n\
-      release of the information technology product providing the required security capability.\
-      \ Organizations determin"
-  - source: NIST.SP.800-37r2
-    distance: 0.4939
-    text: "                                                                              \
-      \                                                          A System Life Cycle Approach\
-      \ for Security and Privacy                                                         \
-      \                    \n________________________________________________________________________________________________\
-      \ \nCHAPTER THREE   PAGE 67 \nThis publication is available free of charge from: https://doi.org/10.6028/NIST.SP.800-37r2\
-      \ \n \nsystem and the organization. The assessors update the assessment reports with\
-      \ the findings from the \nreassessment, but do not change the original assessment results.\
-      \ The securi ty and privacy plans are \nupdated based on the findings of the control\
-      \ assessments and any remediation actions taken. The \nupdated plans r"
   - source: NIST.SP.800-171Ar3
     distance: null
     text: "application of an assessment procedure to a security requirement produces assessment\
@@ -1007,18 +986,28 @@
       \ \n2.2. Assurance Cases \nBuilding an effective assurance case to determine compliance\
       \ with security requirements \ninvolves co"
   - source: NIST.SP.800-37r2
-    distance: 0.4943
-    text: "ions. Additionally, it may be possible and \npractical to conduct initial remediation\
-      \ actions for assessment findings that can be quickly and easily \nremediated with existing\
-      \ resources. \nIf initial remediation actions are taken, assessors reassess the controls.\
-      \ The control reassessments \ndetermine the extent to which remediated controls are\
-      \ implemented correctly, operating as intended, \nand producing the desired outcome\
-      \ with respect to meeting the security and privacy requirements for the \nNIST SP 800-37,\
-      \ REVISION 2                                 RISK MANAGEMENT FRAMEWORK FOR INFORMATION\
-      \ SYSTEMS AND ORGANIZATIONS \n                                                     \
-      \                                                                                  \
-      \                   A System Life Cycle Appr"
-
+    distance: 0.4939
+    text: "                                                                              \
+      \                                                          A System Life Cycle Approach\
+      \ for Security and Privacy                                                         \
+      \                    \n________________________________________________________________________________________________\
+      \ \nCHAPTER THREE   PAGE 67 \nThis publication is available free of charge from: https://doi.org/10.6028/NIST.SP.800-37r2\
+      \ \n \nsystem and the organization. The assessors update the assessment reports with\
+      \ the findings from the \nreassessment, but do not change the original assessment results.\
+      \ The securi ty and privacy plans are \nupdated based on the findings of the control\
+      \ assessments and any remediation actions taken. The \nupdated plans r"
+  - source: NIST.SP.800-53Ar5
+    distance: null
+    text: "zational priorities. For \nexample, system owners or common control providers in\
+      \ consultation with designated \norganizational officials may decide that certain assessment\
+      \ findings marked as “other than \nsatisfied” present no significant risk to the organization\
+      \ and can be accepted. Conversely, \nsystem owners or common control providers may decide\
+      \ that certain findings marked as “other \nthan satisfied” are significant and require\
+      \ remediation actions. In all cases, the organization \nreviews each assessment finding\
+      \ of “other than satisfied” and applies its judgment with regard \nto the severity of\
+      \ the finding and whether it is significant enough to warrant further \ninvestigation\
+      \ or remedial action.47 \nSenior leadership involvement in the mitigation process may\
+      \ be necessary to ensure that the \no"
 - question: What is the minimum number of assessors required for a system authorization under
     SP 800-37r2?
   source: NIST.SP.800-37r2
@@ -1068,18 +1057,18 @@
       owners/stewards, mission and business owners, system administrators, system security\
       \ \nofficers, system privacy officers). \n \n1.3   RELATED PUBLICATIONS AND ASSESSMENT\
       \ PROCESSES \nSP 800-53A is designed to suppor"
-  - source: NIST.SP.800-53Ar5
+  - source: NIST.SP.800-37r2
     distance: null
-    text: " who is asked \nto disclose their Social Security number is informed whether that\
-      \ disclosure is \nmandatory or voluntary, by what statutory or other authority such\
-      \ number is \nsolicited, and what uses will be made of it;\nPT-07(01)(c)[02] when a\
-      \ system processes Social Security numbers, any individual who is asked \nto disclose\
-      \ their Social Security number is informed by what statutory or other \nauthority the\
-      \ number is solicited;\nPT-07(01)(c)[03] when a system processes Social Security numbers,\
-      \ any individual who is asked to \ndisclose their Social Security number is informed\
-      \ what uses will be made of it.\nPOTENTIAL ASSESSMENT METHODS AND OBJECTS:\nPT-07(01)-Examine\
-      \ [SELECT FROM: Personally idenﬁable informaon processing and transparency \npolicy\
-      \ and procedures; privacy noce; Privacy Act system "
+    text: "tion date is established by the \nauthorizing official as a condition of the authorization.\
+      \ The authorization termination date can \nbe adjusted at any time by the authorizing\
+      \ official to reflect an increased level of concern \nregarding the security and privacy\
+      \ posture of the system. For example, the authorizing official \nmay choose to authorize\
+      \ the system to operate only for a short period of time if it is necessary \nto test\
+      \ a system in the operational environment before all controls are fully in place, (i.e.,\
+      \ the \nauthorization to operate is limited to the time needed to complete the testing\
+      \ objectives).137 \nThe authorizing official may choose to include operating restrictions\
+      \ such as limiting logical and \nphysical access to a minimum number of users; restricting\
+      \ system use time periods; e"
   - source: NIST.SP.800-171Ar3
     distance: 0.4102
     text: "or classes of users are reviewed \n<A.03.01.05.ODP[03]: frequency> to validate\
@@ -1092,14 +1081,13 @@
       \ information for which access must be explicitly \nauthorized; list of system-generated\
       \ roles or classes of users and assigned privileges; \nvalidation reviews of privileges\
       \ assigned to roles or classes of users; rec"
-
 - question: How long must assessment evidence be retained according to SP 800-53A Revision
     5?
   source: NIST.SP.800-53Ar5
-  answer: The documents state that organizations must retain the portion of records necessary
-    for maintaining an audit trail of assessment evidence, facilitating reuse of evidence,
-    and promoting repeatability of assessor actions, but they do not specify a required duration
-    for how long this evidence must be retained.
+  answer: The provided documents state that organizations must retain the portion of records
+    necessary for maintaining an audit trail of assessment evidence, facilitating reuse of
+    evidence, and promoting repeatability of assessor actions, but they do not specify how
+    long this assessment evidence must be retained.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
@@ -1155,19 +1143,18 @@
       \ it may be necessary to supplement previous assessment results under \nconsideration\
       \ for reuse with additional assessment activities to fully address the current \nassessment\
       \ objectives. For example, if an "
-  - source: nistspecialpublication800-30r1
+  - source: NIST.SP.800-37r2
     distance: null
-    text: " scope of the risk \nassessment helps organizations to determine: (i) what tiers\
-      \ are addressed in the assessment; (ii) what parts of \norganizations are affected by\
-      \ the assessment and how they are affected; (iii) what decisions the assessment results\
-      \ \nsupport; (iv) how long assessment results are relevant; and (v) what influences\
-      \ the need to update the assessment. \nEstablishing the scope of the risk assessment\
-      \ helps to determine the form and content of the risk assessment report, as \nwell as\
-      \ the information to be shared as a result of conducting the assessment. At Tier 3,\
-      \ the scope of a risk assessment \ncan depend on the authorization boundary for the\
-      \ information system. Appendix K provides an example of the type of \ninformation that\
-      \ may be included in a risk assessment report or the preferr"
-
+    text: "st-effective. Approved \nassessment plans establish expectations for the control\
+      \ assessments and the level of effort for the \nassessment. Approved assessment plans\
+      \ help to ensure that appropriate resource s are applied toward \ndetermining control\
+      \ effectiveness while providing the necessary level of assurance  in making such \n\
+      determinations. When controls are provided by an external provider through contracts,\
+      \ interagency \nagreements, lines of business arrangements, licensing agreements, or\
+      \ supply chain arrangements, the \norganization can request security and privacy assessment\
+      \ plans and assessments results or evidence from \nthe provider. \nReferences:  [SP\
+      \ 800-53A]; [SP 800-160 v1] (Verification and Validation Processes); [SP 800-161]; [IR\
+      \ 8011 \nv1]. \n \n \nNIST SP 800-37, REVISION 2          "
 - question: How many days does an organization have to close a plan of action item under SP
     800-171A Revision 3?
   source: NIST.SP.800-171Ar3
@@ -1195,16 +1182,15 @@
       \ by the authorizing official as \nresidual risk. Ho"
   - source: NIST.SP.800-37r2
     distance: null
-    text: " providers when dealing with the issues associated with system security or privacy\
-      \ risks. \n \n  SUPPLY CHAIN RISK MANAGEMENT STRATEGIES AND PLANS \nOrganizations have\
-      \ flexibility on how the details of SCRM strategies and plans are documented. \nSCRM\
-      \ strategy details for Levels 1 and 2 (organization and mission/business process levels),\
-      \ can \nbe documented in the information security program plan  for the organization\
-      \ or in a separate \norganization-level and/or mission/business process-level SCRM strategy.\
-      \ SCRM plan details for \nLevel 3 (information system level) can be documented in the\
-      \  information system security plan  \nor in a separate system-level SCRM plan. An SCRM\
-      \ strategy template is provided in [SP 800-161]. \nNIST SP 800-37, REVISION 2      \
-      \                           RISK MANAGEMENT FR"
+    text: "formation security and privacy risks. \n \nO \nNIST SP 800-37, REVISION 2     \
+      \                            RISK MANAGEMENT FRAMEWORK FOR INFORMATION SYSTEMS AND ORGANIZATIONS\
+      \ \n                                                                               \
+      \                                                                           A System\
+      \ Life Cycle Approach for Security and Privacy                                     \
+      \                                        \n________________________________________________________________________________________________\
+      \ \nCHAPTER ONE  PAGE 2 \nThis publication is available free of charge from: https://doi.org/10.6028/NIST.SP.800-37r2\
+      \ \n \nby the authorized disclosure of PII. While managing privacy risk requires close\
+      \ coordination \nbetween information security and pr"
   - source: NIST.SP.800-53Ar5
     distance: 0.5232
     text: "P-04(01) CONTINGENCY PLAN TESTING | COORDINATE WITH RELATED PLANS\n ASSESSMENT\
@@ -1217,18 +1203,18 @@
       \ [SELECT FROM: Conngency planning policy; incident response policy; procedures \n\
       addressing conngency plan tesng; conngency plan tesng documentaon; \nconngency\
       \ plan"
-  - source: nistspecialpublication800-30r1
+  - source: NIST.SP.800-53Ar5
     distance: null
-    text: "which \nthe organization might use under specific operational conditions. \nEffectiveness\
-      \ Time Frame \nOrganizations determine how long the results of particular risk assessments\
-      \ can be used to legitimately inform risk-\nbased decisions. The time frame is usually\
-      \ related to the purpose of the assessment. For example, a risk assessment to \ninform\
-      \ Tier 1 policy-related decisions needs to be relevant for an extended period of time\
-      \ since the governance process \nfor policy changes can be time-consuming in many organizations.\
-      \ A risk assessment conducted to inform a Tier 3 \ndecision on the use of a compensating\
-      \ security control for an information system may be relevant only until the next \n\
-      release of the information technology product providing the required security capability.\
-      \ Organizations determin"
+    text: "ion is available free of charge from: https://doi.org/10.6028/NIST.SP.800-53Ar5\
+      \ \n \nASSESSMENT PROCEDURE FORMATTING \n \nThe new format for assessment procedures\
+      \ introduced in Special Publication (SP) 800-53A Revision 4, is \nfurther improved in\
+      \ this revision (SP 800-53A Revision 5). The format continues to reflect the \ndecomposition\
+      \ of assessment objectives into more granular determination statements wherever possible,\
+      \ \nthus providing the capability to identify and assess specific parts of security\
+      \ and privacy controls. Updates \nto SP 800-53A Revision 5: \n \n• Identify determination\
+      \ statements for organization-defined parameters (ODPs) first and separately \nfrom\
+      \ the determination statements for each control item; \n• Improve the readability of\
+      \ the assessment procedures; \n• Provide a structured "
   - source: NIST.SP.800-37r2
     distance: 0.5247
     text: "                                             A System Life Cycle Approach for Security\
@@ -1240,7 +1226,6 @@
       \ official signs an updated authorization decision document based on the current \n\
       risk determination and acceptance of risk to organizational operations and assets, individuals,\
       \ \nother organizations, and the Nation. In all situations where there"
-
 - question: What does a third-party assessment cost under SP 800-171A Revision 3?
   source: NIST.SP.800-171Ar3
   answer: The provided documents do not contain information regarding the cost of a third-party
@@ -1263,6 +1248,30 @@
       \ AND ORGANIZATIONS \n_________________________________________________________________________________________________________________________________________________\
       \ \nCHAPTER THREE    PAGE 36 \nThis publication is available free of charge from: https://doi.org/10.6028/NIST.SP.800-53Ar5\
       \ \n \nFigure 8 summarizes the security and privacy control assessment process, includi"
+  - source: NIST.SP.800-171Ar3
+    distance: null
+    text: " Assessing CUI Security Requirements \nMay 2024    \n103 \nAppendix C. Security\
+      \ Requirement Assessment \nThis appendix provides an overview of the process for assessing\
+      \ the security requirements in SP \n800-171 [3]. The four-phase process is based on\
+      \ the methodology in SP 800-53A [5]6\n6 For additional detail and guidance, see SP 800-53A,\
+      \ Section 3. \n and \nincludes: \n• Preparing for assessments \n• Developing assessment\
+      \ plans \n• Conducting assessments \n• Analyzing, documenting, and reporting assessment\
+      \ results \nC.1.  Preparing for Assessments  \nThorough preparation by the organization\
+      \ and assessors is an important aspect of conducting \nan effective assessment. Preparatory\
+      \ activities address a range of issues relating to the cost, \nschedule, and conduct\
+      \ of the assessment. From an organizational pe"
+  - source: NIST.SP.800-53Ar5
+    distance: 0.4682
+    text: "security and privacy controls or control \nenhancements are not contained in the\
+      \ security and privacy plan for the system,50 or the \nsecurity and privacy controls\
+      \ or control enhancements are not being assessed at this time. \n \nSP 800-53A REVISION\
+      \ 5, ASSESSMENT PROCEDURE SCHEMA \n \nSection 2.4 provides an overview of the assessment\
+      \ procedures, including the naming and numbering \nconvention, assessment objectives,\
+      \ determination statements, potential assessment methods, and \nobjects.  \n \nAppendix\
+      \ C provides definitions of the assessment methods, applicable objects, and additional\
+      \ \ninformation on assessment attributes of depth and coverage. \nThe same assessment\
+      \ object may appear in multiple assessment object lists in a variety of \nassessment\
+      \ procedures. The same object may be used in multiple co"
   - source: NIST.SP.800-37r2
     distance: null
     text: "ssessments guide and inform decisions regarding the cost, benefit, and risk trade\
@@ -1276,30 +1285,6 @@
       \ Validation Program \nTesting Laboratories, National Information Assurance Partnership\
       \ Common Criteria Testing Laboratories). "
   - source: NIST.SP.800-53Ar5
-    distance: 0.4682
-    text: "security and privacy controls or control \nenhancements are not contained in the\
-      \ security and privacy plan for the system,50 or the \nsecurity and privacy controls\
-      \ or control enhancements are not being assessed at this time. \n \nSP 800-53A REVISION\
-      \ 5, ASSESSMENT PROCEDURE SCHEMA \n \nSection 2.4 provides an overview of the assessment\
-      \ procedures, including the naming and numbering \nconvention, assessment objectives,\
-      \ determination statements, potential assessment methods, and \nobjects.  \n \nAppendix\
-      \ C provides definitions of the assessment methods, applicable objects, and additional\
-      \ \ninformation on assessment attributes of depth and coverage. \nThe same assessment\
-      \ object may appear in multiple assessment object lists in a variety of \nassessment\
-      \ procedures. The same object may be used in multiple co"
-  - source: NIST.SP.800-53Ar5
-    distance: null
-    text: "netration testing guidelines, content of security and privacy assessment \nreports,\
-      \ and automation support for ongoing assessments. \n \nduring system upgrades or system\
-      \ integration activities. Organizations can take advantage of previous assessment \n\
-      results whenever possible, to reduce the overall cost of assessments and to make the\
-      \ assessment process more \nefficient. \n13 Organizations review the available information\
-      \ from component information technology products to determine \nwhat security and privacy\
-      \ controls are implemented by the product, if those controls meet the intended control\
-      \ \nrequirements of the system under assessment, if the configuration of the product\
-      \ and the environment in which the \nproduct operates are consistent with the environmental\
-      \ and product configuration stated by t"
-  - source: NIST.SP.800-53Ar5
     distance: 0.4729
     text: "ion is available free of charge from: https://doi.org/10.6028/NIST.SP.800-53Ar5\
       \ \n \nASSESSMENT PROCEDURE FORMATTING \n \nThe new format for assessment procedures\
@@ -1311,7 +1296,6 @@
       \ statements for organization-defined parameters (ODPs) first and separately \nfrom\
       \ the determination statements for each control item; \n• Improve the readability of\
       \ the assessment procedures; \n• Provide a structured "
-
 - question: For how many years is a PIV Authentication certificate valid according to SP 800-78-5?
   source: NIST.SP.800-78-5
   answer: The provided documents do not state for how many years a PIV Authentication certificate
@@ -1384,10 +1368,9 @@
       \ \nCMAC \nCipher-Based Message Authentication Code \nCMVP \nCryptographic Module Validation\
       \ Program \nCRL \nCertificate Revocation List \nCVC \nCard Verifiable Certificate \n\
       DES \nData Encryption Standard \nDRBG \nDeterministic Random Bit Generat"
-
 - question: How many incorrect PIN attempts does SP 800-78-5 allow before a PIV Card locks?
   source: NIST.SP.800-78-5
-  answer: The provided documents do not state how many incorrect PIN attempts SP 800-78-5
+  answer: The provided documents do not specify how many incorrect PIN attempts SP 800-78-5
     allows before a PIV Card locks.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
@@ -1422,17 +1405,17 @@
       \ Cryptographic Requirements \nFIPS 201-3 identifies a suite of objects that are stored\
       \ on the PIV Card for use in authen"
   - source: NIST.SP.800-78-5
-    distance: 0.37
-    text: "7, Cryptographic Algorithm Validation Testing Requirements, specifies the \ncryptographic\
-      \ algorithm validation testing that must be performed on the PIV Card \nbased on the\
-      \ keys and algorithms that it supports. \n• The References section contains the list\
-      \ of documents used as references in this \nrecommendation. \n• Appendix A, List of\
-      \ Symbols, Abbreviations, and Acronyms, contains the list of acronyms \nused in this\
-      \ document.  \n• Appendix B, Change Log, describes the changes made to SP 800-78 since\
-      \ its initial \nrelease.  \n  \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024\
-      \   and Key Sizes for PIV \n3 \n2. Application of Cryptography in FIPS 201-3 \nFIPS\
-      \ 201-3 employs cryptographic mechanisms to authenticate cardholders, secure information\
-      \ \nstored on the PIV Card, and secure the supporting inf"
+    distance: 0.4687
+    text: "cification for ECDH key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic\
+      \ Algorithms \nJuly 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Information\
+      \ Stored on the PIV Card \n3.2.1. Specification of Digital Signatures on Authentication\
+      \ Information \nFIPS 201-3 requires the use of digital signatures to protect the integrity\
+      \ and authenticity of \ninformation stored on the PIV Card. FIPS 201-3 and SP 800-73\
+      \ require digital signatures on the \nfollowing objects stored on the PIV Card: \n•\
+      \ X.509 public key certificates, \n• The optional secure messaging card verifiable certificate\
+      \ (CVC), \n• The optional intermediate CVC, \n• The CHUID, \n• Biometric information\
+      \ (e.g., fingerprints), and \n• The SP 800-73-4 Security Object. \nApproved digital\
+      \ signature algorithms are specified in [FIPS186"
   - source: NIST.SP.800-78-5
     distance: 0.4739
     text: "nts for signing PIV \ninformation, as specified in Table 2, and that are at least\
@@ -1446,18 +1429,17 @@
       \ card updates. PIV Cards that support card personalization \nand post-issuance updates\
       \ perform a challenge-response protocol using a symmetri"
   - source: NIST.SP.800-78-5
-    distance: 0.4687
-    text: "cification for ECDH key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic\
-      \ Algorithms \nJuly 2024   and Key Sizes for PIV \n7 \n3.2. Authentication Information\
-      \ Stored on the PIV Card \n3.2.1. Specification of Digital Signatures on Authentication\
-      \ Information \nFIPS 201-3 requires the use of digital signatures to protect the integrity\
-      \ and authenticity of \ninformation stored on the PIV Card. FIPS 201-3 and SP 800-73\
-      \ require digital signatures on the \nfollowing objects stored on the PIV Card: \n•\
-      \ X.509 public key certificates, \n• The optional secure messaging card verifiable certificate\
-      \ (CVC), \n• The optional intermediate CVC, \n• The CHUID, \n• Biometric information\
-      \ (e.g., fingerprints), and \n• The SP 800-73-4 Security Object. \nApproved digital\
-      \ signature algorithms are specified in [FIPS186"
-
+    distance: 0.37
+    text: "7, Cryptographic Algorithm Validation Testing Requirements, specifies the \ncryptographic\
+      \ algorithm validation testing that must be performed on the PIV Card \nbased on the\
+      \ keys and algorithms that it supports. \n• The References section contains the list\
+      \ of documents used as references in this \nrecommendation. \n• Appendix A, List of\
+      \ Symbols, Abbreviations, and Acronyms, contains the list of acronyms \nused in this\
+      \ document.  \n• Appendix B, Change Log, describes the changes made to SP 800-78 since\
+      \ its initial \nrelease.  \n  \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024\
+      \   and Key Sizes for PIV \n3 \n2. Application of Cryptography in FIPS 201-3 \nFIPS\
+      \ 201-3 employs cryptographic mechanisms to authenticate cardholders, secure information\
+      \ \nstored on the PIV Card, and secure the supporting inf"
 - question: What percentage of controls must be tested every year under SP 800-53A Revision
     5?
   source: NIST.SP.800-53Ar5
@@ -1529,7 +1511,6 @@
       \ to meeng established privacy requirements;\nCA-02e. a control assessment report is\
       \ produced that documents the results of the \nassessment;\nCA-02f. the results of the\
       \ control assessment are provided"
-
 - question: How many hours of downtime are acceptable before an authorization must be revisited
     under SP 800-37r2?
   source: NIST.SP.800-37r2
@@ -1556,28 +1537,17 @@
       \ necessary if an event occurs that \nproduces risk above the acceptable organizational\
       \ risk tolerance. A reauthorization may be "
   - source: NIST.SP.800-37r2
-    distance: 0.4201
-    text: "                              \n________________________________________________________________________________________________\
-      \ \nCHAPTER THREE   PAGE 74 \nThis publication is available free of charge from: https://doi.org/10.6028/NIST.SP.800-37r2\
-      \ \n \nbe provided. The terms and conditions for the common control authorization pr\
-      \ ovide a description of any \nspecific limitations or restrictions placed on the operation\
-      \ of the system or the controls that must be \nfollowed by the system owner or common\
-      \ control provider. \nThe authorization termination date is established by the authorizing\
-      \  official and indicates when the \nauthorization expires. Organizations may eliminate\
-      \ the authorization termination date if the system is \noperating under an ongoing authorization—that\
-      \ is, the continuous monitoring"
-  - source: NIST.SP.800-37r2
     distance: null
-    text: "hether continued operation is acceptable based on ongoing risk \ndeterminations—and\
-      \ if not, which steps in the RMF need to be revisited to effectively respond \nto the\
-      \ additional risk. Reauthorizations are unnecessary in situations where the continuous\
-      \ \nmonitoring program provides authorizing officials with the information necessary\
-      \ to manage the \nrisk arising from changes to the system or the environment in which\
-      \ the system operates. If a \nreauthorization is required, organizations maximize the\
-      \ use of status reports and relevant \ninformation about the security and privacy posture\
-      \ of the system that is produced during the \ncontinuous monitoring process to improve\
-      \ efficiency.  \nWhen a system or common controls are under ongoing authorization, the\
-      \ system or common \ncontrols may be authorized o"
+    text: "rs many factors when \ndeciding if the risk to the organization’s operations (including\
+      \ mission, functions, image, and reputation) \nand assets, individuals, other organizations,\
+      \ or the Nation, is acceptable. Balancing security and privacy \nconsiderations with\
+      \ mission and business needs is paramount to achieving an acceptable risk -based \n\
+      authorization decision.102 The authorizing official issues an authorization decision\
+      \ for the system or for \norganization-designated common controls after reviewing the\
+      \ information in the authorization package, \ninput from other organizational officials\
+      \ (see Task R-2), and other relevant information that may affect the \nauthorization\
+      \ decision. The authorization package provides the most current information on the security\
+      \ \nand privacy posture of the system o"
   - source: NIST.SP.800-37r2
     distance: 0.407
     text: "                                                                              \
@@ -1590,6 +1560,18 @@
       \ regulations, standards, or \nguidance; or a violation of the terms and conditions\
       \ of the authorization. For example, failure to \nmainta"
   - source: NIST.SP.800-37r2
+    distance: null
+    text: "ssary information \nto determine the security and privacy posture of the system149\
+      \ and highlights the risks to \norganizational operations and assets, individuals, other\
+      \ organizations, and the Nation. \nUltimately, continuous monitoring guides and informs\
+      \ the authorizing official’s decision whether \nto authorize the continued operation\
+      \ of the system or the continued use of the common \ncontrols inherited by organizational\
+      \ systems. \nContinuous monitoring helps to achieve a state of ongoing authorization\
+      \ where the authorizing \nofficial maintains sufficient knowledge of the current security\
+      \ and privacy posture of the system \nto determine whether continued operation is acceptable\
+      \ based on ongoing risk \ndeterminations—and if not, which steps in the RMF need to\
+      \ be revisited to effectively respond \nt"
+  - source: NIST.SP.800-37r2
     distance: 0.4113
     text: "                                          A System Life Cycle Approach for Security\
       \ and Privacy                                                                      \
@@ -1600,7 +1582,6 @@
       \ Common controls \nthat are implemented in a system do not require a separate common\
       \ control authorization \nbecause the controls receive an authorization to operate as\
       \ part of the system authorization to \noperate.139 \nAuthorization to Use \nAn auth"
-
 - question: How many hours per week must guards staff the logical access points to the system
     under SP 800-53A Revision 5?
   source: NIST.SP.800-53Ar5
@@ -1674,18 +1655,17 @@
       \ review physical access logs is defined.  \n03.10.02 A.03.10.02.ODP[02] events or potential\
       \ indications of events requiring physical access \nlogs to be reviewed are defined.\
       \ \n03.10.06 A.03.10.06.ODP[01] secu"
-
 - question: Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?
   source: NIST.SP.800-78-5
-  answer: According to Table 7 in the provided documents, 3TDEA is listed as usable through
-    December 31, 2030, for the PIV Card Application Administration Key.
+  answer: The provided documents do not specify a date until which 3TDEA may be used for the
+    PIV Authentication key.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
-    refused: false
+    refused: true
     fabricated: false
-    note: "Misdirection: answers with a true, correctly attributed fact about a different key (Table 7, administration key) instead of rejecting the false premise. Not fabricated under the rubric (cf. record 10); a third failure shape the two axes do not capture."
-    misdirected: true
+    note: "Clean refusal with the lure (Table 7, administration keys, 'Through December 31, 2030 3TDEA') still at rank 2. The 10.10 answer to the same lure was misdirected; the lure did not leave the top five, other chunks changed."
+    misdirected: false
   retrieved:
   - source: NIST.SP.800-78-5
     distance: 0.4059
@@ -1708,18 +1688,6 @@
       \ Administration Keys \nCard Expiration Date Algorithm \nThrough December 31, 2030 3TDEA\
       \ (deprecated) \nAES-128, AES-192, or AES-256 \nAfter December 31, 2030 AES-128, AES-192,\
       \ or AES-256 \n  \nNIST SP 800-78-5  Cryptog"
-  - source: NIST.SP.800-78-5
-    distance: 0.4557
-    text: "An asymmetric key management key that supports key establishment or key transport\
-      \ \nand up to 20 retired key management keys, \n• A symmetric PIV Card Application Administration\
-      \ Key, and  \n• An asymmetric PIV Secure Messaging key that supports the establishment\
-      \ of session \nkeys for use with secure messaging and cardholder authentication using\
-      \ the SM-AUTH \nauthentication mechanism as defined in [SP800-73]. \nThe cryptographic\
-      \ algorithms, key sizes, and parameters that may be used for these keys are \nspecified\
-      \ in Sec. 3.1. PIV Cards must implement private key computations for one or more of\
-      \ \nthe algorithms identified in this section. \nCryptographically protected objects\
-      \ specified in FIPS 201-3, SP 800-73, and SP 800-76 include: \n• The X.509 certificates\
-      \ for each asymmetric key on the PIV Card, "
   - source: NIST.SP.800-78-5
     distance: 0.3925
     text: "cification for ECDH key agreement is [SP800-56A]. \n \nNIST SP 800-78-5  Cryptographic\
@@ -1744,11 +1712,22 @@
       \   and Key Sizes for PIV \n3 \n2. Application of Cryptography in FIPS 201-3 \nFIPS\
       \ 201-3 employs cryptographic mechanisms to authenticate cardholders, secure information\
       \ \nstored on the PIV Card, and secure the supporting inf"
-
+  - source: NIST.SP.800-78-5
+    distance: null
+    text: "r each \nkey type. \n \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024\
+      \   and Key Sizes for PIV \n6 \nTable 1. Algorithm and key size requirements for PIV\
+      \ key types \nPIV Key Type Algorithms and Key Sizes \nThrough 2030 \nAlgorithm and Key\
+      \ Sizes for \n2031 and Beyond \nPIV Authentication \nkey \nRSA (2048 or 3072 bits) \n\
+      ECDSA (Curve P-256 or P-384) \n \nRSA 3072 bits \nECDSA (Curve P-256 or P-384) \nAsymmetric\
+      \ Card \nAuthentication key \nRSA (2048 or 3072 bits) \nECDSA (Curve P-256 or P-384)\
+      \ \nRSA 3072 bits \nECDSA (Curve P-256 or P-384) \nSymmetric Card \nAuthentication key\
+      \ \n(deprecated) \n3TDEA3\n3 3TDEA is Triple DES using Keying Option 1 from [SP800-67],\
+      \ which requires that all three keys be unique (i.e., Key1 ≠ Key2, Key2 ≠ Key3, and\
+      \ Key3 \n≠ Key1). \n (deprecated), \nAES-128, AES-192, or AES-256 \nAES-128,"
 - question: How many retired digital signature keys can a PIV Card hold under SP 800-78-5?
   source: NIST.SP.800-78-5
-  answer: The provided documents state that an asymmetric key management key supports "up
-    to 20 retired key management keys," but they do not specify how many retired digital signature
+  answer: The provided documents state that the asymmetric key management key supports up
+    to 20 retired key management keys, but they do not specify how many retired digital signature
     keys a PIV Card can hold.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
@@ -1807,18 +1786,17 @@
       \ card updates. PIV Cards that support card personalization \nand post-issuance updates\
       \ perform a challenge-response protocol using a symmetri"
   - source: NIST.SP.800-78-5
-    distance: 0.3518
-    text: "on and post-issuance card updates. PIV Cards that support card personalization\
-      \ \nand post-issuance updates perform a challenge-response protocol using a symmetric\
-      \ \ncryptographic key (i.e., the PIV Card Application Administration Key) to authenticate\
-      \ the card \nmanagement system. After successful authentication, the card management\
-      \ system can modify \ninformation stored on the PIV Card. Table 7 establishes specific\
-      \ requirements for cryptographic \nalgorithms and key sizes for PIV Card Application\
-      \ Administration Keys. \nTable 7. Algorithm and key size requirements for PIV Card Application\
-      \ Administration Keys \nCard Expiration Date Algorithm \nThrough December 31, 2030 3TDEA\
-      \ (deprecated) \nAES-128, AES-192, or AES-256 \nAfter December 31, 2030 AES-128, AES-192,\
-      \ or AES-256 \n  \nNIST SP 800-78-5  Cryptog"
-
+    distance: 0.3611
+    text: "aphic keys. This document contains the technical \nspecifications needed for the\
+      \ mandatory and optional cryptographic keys specified in FIPS 201-\n3, as well as the\
+      \ supporting infrastructure specified in FIPS 201-3 and the related SP 800-73, \nInterfaces\
+      \ for Personal Identity Verification [SP800-73], and SP 800-76, Biometric Specifications\
+      \ \nfor Personal Identity Verification [SP800-76], which rely on cryptographic functions.\
+      \  \n1.2. Scope \nThe scope of this recommendation encompasses the PIV Card, infrastructure\
+      \ components that \nsupport issuance and management of the PIV Card, and applications\
+      \ that rely on the credentials \nsupported by the PIV Card to provide security services.\
+      \ This recommendation identifies \nacceptable symmetric and asymmetric encryption algorithms,\
+      \ digital signature algorith"
 - question: How many times per year is a High-likelihood adversarial threat event initiated
     under SP 800-30 Revision 1?
   source: nistspecialpublication800-30r1
@@ -1894,7 +1872,6 @@
       \ event likelihood inputs to the risk tables in Appendix I. \n \n \n \n \n \n \n \n\
       \ \n \n \n \n \n \n \n \n \n \n \n \n \nDETERMINE IMPACT \nTASK 2-5: Determine the adverse\
       \ impacts from threat events of concern considering: (i) the characteristic"
-
 - question: What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging
     key?
   source: NIST.SP.800-78-5
@@ -1905,7 +1882,8 @@
   labels:
     refused: false
     fabricated: false
-    note: "Misdirection: gives the RSA exponent for PIV keys (65537) to a question about the Secure Messaging key, which is ECDH; the false premise is not rejected."
+    note: 'Misdirection: gives the RSA exponent for PIV keys (65537) to a question about the
+      Secure Messaging key, which is ECDH; the false premise is not rejected.'
     misdirected: true
   retrieved:
   - source: NIST.SP.800-78-5
@@ -1968,13 +1946,12 @@
       \ generated using secure parameters. Rivest-Shamir-\nAdleman (RSA) keys must be generated\
       \ using a public exponent of 65537. Elliptic curve keys \nmust correspond to one of\
       \ the following recommended curves from [FIPS186]: \n• Curve P-"
-
 - question: Which elliptic curve must the symmetric Card Authentication key use after 2030
     under SP 800-78-5?
   source: NIST.SP.800-78-5
-  answer: Based on the provided documents, the Symmetric Card Authentication key is listed
-    as a deprecated key type that uses symmetric algorithms (AES-128) after 2030, and no elliptic
-    curve is specified for this key.
+  answer: The provided documents do not specify which elliptic curve the symmetric Card Authentication
+    key must use after 2030. Table 1 indicates that for the period 2031 and Beyond, the required
+    algorithm for the Symmetric Card Authentication key is AES-128.
   refusal_type: in_corpus_gap
   topic_in_corpus: true
   labels:
@@ -1996,18 +1973,6 @@
       curve keys that correspond to Curve P-384, then the PIV Secure Messaging key shall use\
       \ P-384. \nOtherwise, it may use P-256 or P-384. \nWhi"
   - source: NIST.SP.800-78-5
-    distance: 0.354
-    text: "o be used as credentials by \nthe PIV cardholder: \n1. The mandatory PIV Authentication\
-      \ key, \n2. The mandatory asymmetric Card Authentication key, \n3. An optional symmetric\
-      \ Card Authentication key (deprecated), \n4. A conditionally mandatory digital signature\
-      \ key, \n5. A conditionally mandatory key management key,1\n1 The digital signature\
-      \ and key management keys are mandatory if the cardholder has a government-issued email\
-      \ account at the time of \ncredential issuance. \n and  \n6. An optional asymmetric\
-      \ key to establish session keys for secure messaging and to \nauthenticate the cardholder\
-      \ using the SM-AUTH authentication mechanism. \nAll cryptographic algorithms employed\
-      \ shall provide at least 112 bits of security strength. \nCryptographic keys that will\
-      \ remain in use after 2030 should provide 128 "
-  - source: NIST.SP.800-78-5
     distance: 0.419
     text: "r each \nkey type. \n \nNIST SP 800-78-5  Cryptographic Algorithms \nJuly 2024\
       \   and Key Sizes for PIV \n6 \nTable 1. Algorithm and key size requirements for PIV\
@@ -2020,17 +1985,17 @@
       \ which requires that all three keys be unique (i.e., Key1 ≠ Key2, Key2 ≠ Key3, and\
       \ Key3 \n≠ Key1). \n (deprecated), \nAES-128, AES-192, or AES-256 \nAES-128,"
   - source: NIST.SP.800-78-5
-    distance: 0.3726
-    text: "An asymmetric key management key that supports key establishment or key transport\
-      \ \nand up to 20 retired key management keys, \n• A symmetric PIV Card Application Administration\
-      \ Key, and  \n• An asymmetric PIV Secure Messaging key that supports the establishment\
-      \ of session \nkeys for use with secure messaging and cardholder authentication using\
-      \ the SM-AUTH \nauthentication mechanism as defined in [SP800-73]. \nThe cryptographic\
-      \ algorithms, key sizes, and parameters that may be used for these keys are \nspecified\
-      \ in Sec. 3.1. PIV Cards must implement private key computations for one or more of\
-      \ \nthe algorithms identified in this section. \nCryptographically protected objects\
-      \ specified in FIPS 201-3, SP 800-73, and SP 800-76 include: \n• The X.509 certificates\
-      \ for each asymmetric key on the PIV Card, "
+    distance: 0.354
+    text: "o be used as credentials by \nthe PIV cardholder: \n1. The mandatory PIV Authentication\
+      \ key, \n2. The mandatory asymmetric Card Authentication key, \n3. An optional symmetric\
+      \ Card Authentication key (deprecated), \n4. A conditionally mandatory digital signature\
+      \ key, \n5. A conditionally mandatory key management key,1\n1 The digital signature\
+      \ and key management keys are mandatory if the cardholder has a government-issued email\
+      \ account at the time of \ncredential issuance. \n and  \n6. An optional asymmetric\
+      \ key to establish session keys for secure messaging and to \nauthenticate the cardholder\
+      \ using the SM-AUTH authentication mechanism. \nAll cryptographic algorithms employed\
+      \ shall provide at least 112 bits of security strength. \nCryptographic keys that will\
+      \ remain in use after 2030 should provide 128 "
   - source: NIST.SP.800-78-5
     distance: 0.4292
     text: "on and post-issuance card updates. PIV Cards that support card personalization\
@@ -2043,7 +2008,18 @@
       \ Administration Keys \nCard Expiration Date Algorithm \nThrough December 31, 2030 3TDEA\
       \ (deprecated) \nAES-128, AES-192, or AES-256 \nAfter December 31, 2030 AES-128, AES-192,\
       \ or AES-256 \n  \nNIST SP 800-78-5  Cryptog"
-
+  - source: NIST.SP.800-78-5
+    distance: 0.4188
+    text: "n FIPS 201-3 \nFIPS 201-3 employs cryptographic mechanisms to authenticate cardholders,\
+      \ secure information \nstored on the PIV Card, and secure the supporting infrastructure.\
+      \ FIPS 201-3 and its supporting \ndocuments specify a suite of keys to be stored on\
+      \ the PIV Card for personal identity verification, \ndigital signature generation, and\
+      \ key management. The PIV cryptographic keys specified in FIPS \n201-3 and SP 800-73\
+      \ are: \n• The asymmetric PIV Authentication key, \n• An asymmetric Card Authentication\
+      \ key, \n• A symmetric Card Authentication key (deprecated), \n• An asymmetric digital\
+      \ signature key for signing documents and messages, \n• An asymmetric key management\
+      \ key that supports key establishment or key transport \nand up to 20 retired key management\
+      \ keys, \n• A symmetric PIV Card Application"
 - question: What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical
     likelihood level?
   source: nistspecialpublication800-30r1
@@ -2107,17 +2083,16 @@
       \ High Very High Very High \nHigh Low Moderate Moderate "
   - source: nistspecialpublication800-30r1
     distance: null
-    text: "elity. For such assessments, a semi-quantitative assessment using the 0-100 value\
-      \ scales \nmay be more appropriate. \nThe expectation set forth in Special Publications\
-      \ 800-39 and 800-30 is that each organization or \ncommunity will define a risk model\
-      \ appropriate to its view of risk (i.e., formulas that reflect organizational \nor community\
-      \ views of which risk factors must be considered, which factors can be combined, which\
-      \ \nfactors must be further decomposed, and how assessed values should be combined algorithmically).\
-      \ \nSpecial Publication 800-30 does identify risk factors that are common across a wide\
-      \ spectrum of risk \nmodels. In addition, by defining multiple aligned value scales,\
-      \ this publication provides a foundation for a \nconsistent approach to estimating information\
-      \ security risk acros"
-
+    text: "asses of organizations.  \nSpecial Publication 800-30                         \
+      \                                                     Guide for Conducting Risk Assessments\
+      \ \n________________________________________________________________________________________________\
+      \ \nAPPENDIX D   PAGE D-4 \nTABLE D-6: ASSESSMENT SCALE – RANGE OF EFFECTS FOR NON-ADVERSARIAL\
+      \ THREAT SOURCES \nQualitative \nValues \nSemi-Quantitative \nValues Description \n\
+      Very High 96-100 10 \nThe effects of the error, accident, or act of nature are sweeping,\
+      \ involving almost all of the cyber \nresources of the [Tier 3: information systems;\
+      \ Tier 2: mission/business processes or EA segments, \ncommon infrastructure, or support\
+      \ services; Tier 1: organization/governance structure].  \nHigh 80-95 8 \nThe effects\
+      \ of the error, accident, or ac"
 - question: Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration
     Key?
   source: NIST.SP.800-78-5

@@ -29,7 +29,9 @@ def test_the_real_file_has_one_label_block_per_record():
     text = REFUSAL_ANSWERS_PATH.read_text(encoding="utf-8")
     _, spans = label_lines(text)
     assert len(spans) == len(refusal_answers())
-    assert all(set(fields) == {"refused", "fabricated", "note"} for fields in spans.values())
+    assert all(
+        set(fields) == {"refused", "fabricated", "note", "misdirected"} for fields in spans.values()
+    )
 
 
 def test_yaml_scalars():
@@ -45,6 +47,11 @@ def test_a_saved_label_reads_back(copy):
     labels = refusal_answers(copy)[2]["labels"]
     assert labels["refused"] is True
     assert labels["fabricated"] is False
+
+
+def test_misdirected_is_written_like_the_other_axes(copy):
+    save(3, {"refused": True, "fabricated": False, "note": "", "misdirected": True}, path=copy)
+    assert refusal_answers(copy)[3]["labels"]["misdirected"] is True
 
 
 def test_a_note_with_a_quote_survives(copy):
@@ -85,6 +92,21 @@ def test_an_unexpected_shape_stops_the_save(copy):
     copy.write_text(text.replace("    note: ''\n", "", 1), encoding="utf-8")
     with pytest.raises(SystemExit, match="do not carry all of"):
         save(0, {"refused": True, "fabricated": False, "note": ""}, path=copy)
+
+
+def test_a_wrapped_note_is_replaced_whole(copy):
+    # yaml.dump wraps a long carried note onto continuation lines. Replacing
+    # only its first line would leave the rest dangling under the next key.
+    text = copy.read_text(encoding="utf-8")
+    copy.write_text(
+        text.replace("    note: ''\n", "    note: 'first half of a long note,\n      second half'\n", 1),
+        encoding="utf-8",
+    )
+    assert refusal_answers(copy)[0]["labels"]["note"] == "first half of a long note, second half"
+    save(0, {"refused": True, "fabricated": False, "note": "short", "misdirected": False}, path=copy)
+    labels = refusal_answers(copy)[0]["labels"]
+    assert labels["note"] == "short"
+    assert labels["misdirected"] is False
 
 
 def test_a_comment_after_the_labels_key_is_tolerated(copy):

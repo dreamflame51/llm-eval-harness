@@ -205,7 +205,15 @@ carried exactly 0).
 | `eval/dense_baseline/refusal_answers.yaml` | dense | 14.09 | 10/12 | 11/12 | 11/12 |
 | `eval/dense_baseline/refusal_answers.control.yaml` | dense | 16.09 | 10/12 | 11/12 | 11/12 |
 | `eval/prefence_baseline/refusal_answers.yaml` | hybrid | 16.09 | 10/12 | 11/12 | **9/12** |
-| `eval/refusal_answers.yaml` (current, fenced prompt, 29 questions) | hybrid | 07.10 + 10.10 | 26/29 | 25/29 | 26/29 |
+| `eval/prestopword_baseline/refusal_answers.yaml` (fenced prompt, 29 questions) | hybrid | 07.10 + 10.10 | 26/29 | 26/29 | 26/29 |
+| `eval/refusal_answers.yaml` (current, BM25 query without stopwords) | hybrid | 17.10, cold model | 26/29 | 27/29 | **27/29** |
+
+The last two rows differ in one retrieval change, and in one thing nobody had
+named: the 07.10 set was recorded without unloading the model, and on two of
+the ten records whose chunks did not change at all, a cold re-record words the
+answer differently. Two cold recordings on 17.10 agreed 29 of 29, byte for
+byte, so `record_answers.py` now unloads first and says so in the header
+([lessons #34](docs/lessons.md#34)).
 
 The middle row is a control, and it is there because a comparison between two
 recordings is not a comparison between two systems: the generator rewrites most
@@ -353,19 +361,22 @@ questions, decided separately by an LLM judge: `refused` from the answer alone,
 
 | | declined, invented nothing, not misdirected |
 |---|---|
-| hand labels | **26/29** |
-| judge, `qwen3:8b` | 26/29 - the same count from two different records (below) |
-| phrase list (tripwire) | 25/29 |
+| hand labels | **27/29** |
+| judge, `qwen3:8b` | 26/29 - one false alarm on `fabricated` (below) |
+| phrase list (tripwire) | 27/29 |
 
-by class, by the labels: `in_corpus_gap` 21/23, `out_of_corpus` 5/6.
+by class, by the labels: `in_corpus_gap` 22/23, `out_of_corpus` 5/6.
 Seventeen of the 29 are bait questions: thirteen written to provoke an
 invented figure, which gemma4 never produced, and four built on false premises.
-None of the three that are not clean fabricated. All three are **misdirected**
-- a true fact about a neighbouring object given as the answer: CBEFF for SP
-800-76, the administration-key 3TDEA date for the PIV Authentication key, and
-the RSA exponent 65537 for the Secure Messaging key, which is ECDH. The third
-axis exists for them ([lessons #32](docs/lessons.md#32)); neither judge has it
-yet.
+Neither of the two that are not clean fabricated. Both are **misdirected** - a
+true fact about a neighbouring object given as the answer: CBEFF for SP 800-76,
+and the RSA exponent 65537 for the Secure Messaging key, which is ECDH. The
+third axis exists for them ([lessons #32](docs/lessons.md#32)).
+
+The 3TDEA bait was the third until 17.10. Its lure - the administration-key
+row of Table 7, "Through December 31, 2030 3TDEA" - is still at rank 2 after
+the stopword change; one of the other four chunks was replaced, and the model
+now declines. The bait still tests what it was built to test.
 
 **These numbers do not move between runs.** The 29 answers are frozen in
 `eval/refusal_answers.yaml`, hand-labelled, and the judge's verdicts are
@@ -373,13 +384,13 @@ committed under `eval/judge_cache/`, so `refusal` reads them back without
 loading a model. Earlier refusal numbers in this README were samples of a
 drifting generator; these are not.
 
-**The judge is measured on one axis only.** Against the hand labels of 10.10,
+**The judge is measured on one axis only.** Against the hand labels of 18.10,
 on the current 29:
 
 | axis | `qwen3:8b` | `gemma4` |
 |---|---|---|
-| `refused` | 28/29, kappa 0.78 | **29/29, kappa 1.00** |
-| `fabricated` | 28/29, kappa undefined | 29/29, kappa undefined |
+| `refused` | 28/29, kappa 0.65 | **29/29, kappa 1.00** |
+| `fabricated` | 27/29, kappa undefined | 29/29, kappa undefined |
 
 Judge prompt version 3. Version 2 said a rejected false premise is a refusal and
 moved nothing it was aimed at; reading the cached verdicts showed why. The
@@ -389,13 +400,15 @@ two as "refused and not answered anyway". Version 3 defines answered_anyway as
 giving the value asked for, not restating context. gemma4 went from kappa 0.36
 to 1.00.
 
-`qwen3` disagrees twice, in opposite directions, and its clean count equals the
-human's for that reason only: it calls the CBEFF answer a refusal - with empty
-evidence, nothing in the answer declines - and raises a false alarm on
-fabricated for the SP 800-73 answer. The CBEFF answer is misdirected, and under
-the new definition a misdirected fact is not "the value asked for", so it no
-longer counts as answering. The `fabricated` row cannot be read: the hand
-labels hold no fabrication.
+`qwen3` disagrees three times: it calls the CBEFF answer a refusal - with empty
+evidence, nothing in the answer declines - and raises false alarms on
+fabricated for the SP 800-73 answer and for the symmetric Card Authentication
+key, whose answer names only AES-128 where the table also allows 192 and 256
+(incomplete, not invented). Until 17.10 the first two cancelled out and its
+clean count equalled the human's by accident. The CBEFF answer is misdirected,
+and under the new definition a misdirected fact is not "the value asked for",
+so it no longer counts as answering. The `fabricated` row cannot be read: the
+hand labels hold no fabrication.
 
 **The judge has a third axis, `misdirected`, kept out of the clean verdict.**
 Its prompt was tuned on dev only - two versions; qwen3 named both objects
@@ -409,6 +422,13 @@ read on test once:
 
 Three positives in the whole set: enough to see that gemma4 can do it and qwen3
 is erratic, not enough to put the axis into the headline number.
+
+On the 17.10 set the dev positive (3TDEA) is gone, so dev has no positives
+left to measure. On test (unchanged in prompt, re-read because 5 of its 14
+answers are new) both judges score 12/14, kappa 0.42: both catch 65537, both
+miss CBEFF, and both flag the retired-signature-keys answer, which names the
+mismatch ("up to 20 retired key management keys ... nothing on digital
+signature keys") - the MD2 case the prompt was tuned against.
 
 Until 10.10 this section reported `fabricated` kappas of -0.12 and 0.00
 against two hand-labelled fabrications, and called one of them the case the
