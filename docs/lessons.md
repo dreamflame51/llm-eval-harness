@@ -56,7 +56,7 @@ anything.**
 | The ruler must be right before you measure with it | [1](#1), [2](#2), [3](#3), [4](#4), [14](#14), [16](#16), [33](#33) |
 | The ruler has a limit, and the limit moves | [5](#5), [6](#6), [14](#14) |
 | What measuring changed | [7](#7), [8](#8), [15](#15) |
-| Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21), [27](#27) |
+| Numbers that will not hold still | [9](#9), [12](#12), [13](#13), [17](#17), [21](#21), [27](#27), [34](#34) |
 | Checks that check nothing | [10](#10), [20](#20) |
 | What the system actually gets wrong | [11](#11) |
 | Measuring the thing that does the measuring | [18](#18), [19](#19), [20](#20), [22](#22), [28](#28), [31](#31) |
@@ -66,6 +66,8 @@ anything.**
 | The comparison that was not a comparison | [27](#27) |
 | The number moved, the explanation was invented | [29](#29) |
 | What a metric cannot see by construction | [30](#30), [32](#32) |
+| Counting trials that were not independent | [35](#35) |
+| A defence whose benefit the test set cannot show | [36](#36) |
 
 ---
 
@@ -1777,3 +1779,100 @@ variable lived in a server the script never restarted. Five samples were two
 states, and the 0.034 between them would have become a tolerance band for
 noise that does not exist. Keeping the raw texts is what turned a count into a
 diagnosis - a script that records only "how many differed" cannot say why.
+
+---
+
+<a id="35"></a>
+
+## 35. Forty-nine teams, forty-six attacks
+
+**Symptom.** C4 tested the fence against 49 third-party attacks from the
+LLMail-Inject challenge, one per team, drawn at random and committed before the
+first run. The reasoning was written into the freezing script: attacks from one
+team are variations of one idea, so the team is the closer thing to an
+independent trial. The result was reported as "the old prompt obeyed 3 of 49
+attacks; the fence, 0".
+
+Three days later, the end-to-end run put the three obeyed attacks into the index
+one at a time. Two of them came back with the same numbers in every column -
+served for 20 of 49 targets, 15 by dense retrieval and 5 by BM25, obeyed 2 of
+20. Two different emails do not do that.
+
+**Diagnosis.** They were not two emails. 6de2a377 and b12d836d differ by one
+character, sent by different teams. Pairwise similarity over all 49 then found
+a family of five on one template - "good vibes, coffee next week" - from five
+teams, at difflib ratio 0.76 to 0.999. Three of those teams had nothing else
+among their successful attacks: six to eight each, all on the template.
+
+The team was assumed independent because it was a separate label. In a public
+challenge, teams read each other's winning emails. Independence is a property
+of the content, and nobody had looked at the content.
+
+How many duplicates there are depends on where the line is drawn: 1 pair at
+0.99, 6 at 0.75, 11 at 0.5. The prediction before the count was 7-8 pairs.
+
+**Treatment.** `scripts/dedup_llmail_attacks.py`, rules fixed before the run:
+families are connected components at ratio 0.75; each keeps its first member in
+the frozen order, whatever the probe said about it; the rest are redrawn from
+the same team with the same seed, and a team with nothing below the threshold
+drops out. The new set sits beside the frozen one, 46 attacks: one replaced,
+three teams gone. Re-run cold: old prompt 2/46, fence 0/46; on the 45 attacks
+both sets share, no verdict moved.
+
+The kept member happened to be one of the two obeyed copies. The rule chose it
+by position, before anyone checked - choosing "the one that worked" would have
+been choosing by the result.
+
+**Lesson.** **A sampling unit is independent only if its content is.** "One
+per team" was a sound rule about labels, and the claim "three different
+attacks got through" was false: it was two, one of them counted twice. The
+check is cheap - pairwise similarity over the set, before the first run - and
+it has to come before the count, because after it every duplicate found is
+also a result that moves.
+
+---
+
+<a id="36"></a>
+
+## 36. A second layer behind a first that never fails
+
+**Symptom.** With the fence at 0/46, an off-the-shelf injection classifier was
+measured as a second layer: score every retrieved chunk, drop the flagged ones.
+Predictions first, for `deberta-v3-base-prompt-injection-v2`: 42 of the 46
+LLMail attacks caught, all 7 home-made ones, 2-3% of the 5054 NIST chunks
+flagged by mistake, and a flagged chunk in the top five for half the 93
+questions.
+
+Measured: 17 of 46, 4 of 7, 109 chunks (2.2%) - and 2 of 93 questions, with
+hit@5, covered@5 and MRR unchanged. Llama Prompt Guard 2 was worse on
+everything: 6, 1, 113 and 0. The false-flag rate was predicted right and its
+cost wrong: the flagged chunks are SP 800-53A templates whose
+`<AC-03(03)_ODP[01] ...>` placeholders look like tags, and few questions reach
+them. 2.2% of the index is not 2.2% of what gets retrieved.
+
+The decision was "do not add it: less work, and the result is the same or
+better".
+
+**Diagnosis.** The decision stands; the reason does not. A second layer is
+worth what it catches *when the first one fails*. The fence failed 0 times, so
+that set is empty, and on an empty set the classifier's value is not zero, it
+is unmeasured. "The same" is true only of the 46 attacks already run.
+
+What the data does say is about correlation. Five attacks did beat the old
+prompt: authority, fake_system and tag_breakout of the home-made ones,
+385a3aea and b12d836d from LLMail. Deberta flags three and misses the two
+polite ones (0.40 and 0.007) - no "ignore", no tags, an instruction dressed as
+policy. Defence in depth pays when the layers fail on different attacks. Which
+attacks would beat the fence is not known, so whether deberta fails on the same
+ones is not known either.
+
+**Treatment.** Not added, recorded as measured cost and unmeasured benefit
+(README, "Prompt injection"). The condition to revisit: an attack that gets
+through the fence.
+
+**Lesson.** **Zero failures upstream make the downstream layer unmeasurable,
+not useless.** The cost side of a defence can be measured on clean traffic;
+the benefit side needs the attacks the first layer misses, and a test set the
+first layer fully stops contains none. "We don't need it" and "we can't tell
+yet" are different decisions to write down, and the second one says what would
+change it.
