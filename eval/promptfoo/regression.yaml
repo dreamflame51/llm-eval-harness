@@ -1,0 +1,26 @@
+# promptfoo regression run against the served pipeline (scripts/serve.py).
+# Run: scripts/promptfoo_regression.ps1 - it starts the server cold and sets
+# the environment (no telemetry, no sharing, the venv's Python).
+description: refusal regression through the HTTP endpoint
+
+prompts:
+  - "{{question}}"
+
+providers:
+  - id: http
+    label: serve.py
+    config:
+      url: http://127.0.0.1:8000/ask
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        question: "{{prompt}}"
+      transformResponse: json.answer
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://refusal_assert.py
+
+tests: file://tests.json

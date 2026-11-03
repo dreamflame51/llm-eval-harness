@@ -1,0 +1,387 @@
+[
+  {
+    "description": "refuse: What is the maximum time permitted between authorization rev",
+    "vars": {
+      "question": "What is the maximum time permitted between authorization reviews under SP 800-37r2?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What is the required minimum assessment frequency for contin",
+    "vars": {
+      "question": "What is the required minimum assessment frequency for continuous monitoring of common controls under SP 800-37r2?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What is the maximum allowable password length specified in S",
+    "vars": {
+      "question": "What is the maximum allowable password length specified in SP 800-63B?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What is the recommended minimum key size for AES in FIPS 197",
+    "vars": {
+      "question": "What is the recommended minimum key size for AES in FIPS 197?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What level of residual risk does SP 800-30 Revision 1 define",
+    "vars": {
+      "question": "What level of residual risk does SP 800-30 Revision 1 define as acceptable for a federal information system?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many hours of assessor training does SP 800-53A Revision",
+    "vars": {
+      "question": "How many hours of assessor training does SP 800-53A Revision 5 require before someone can conduct a control assessment?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What score must an organization achieve to pass an assessmen",
+    "vars": {
+      "question": "What score must an organization achieve to pass an assessment conducted under SP 800-171A Revision 3?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What is the minimum PIN length required for a PIV Card accor",
+    "vars": {
+      "question": "What is the minimum PIN length required for a PIV Card according to SP 800-78-5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What are the four security levels defined in FIPS 140-3 for ",
+    "vars": {
+      "question": "What are the four security levels defined in FIPS 140-3 for cryptographic modules?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: Which biometric data formats does SP 800-76 specify for PIV ",
+    "vars": {
+      "question": "Which biometric data formats does SP 800-76 specify for PIV cardholder authentication?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: Which PIV Card interfaces does SP 800-73 define, and which o",
+    "vars": {
+      "question": "Which PIV Card interfaces does SP 800-73 define, and which one is used for contactless authentication?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What identity proofing requirements does FIPS 201-3 impose b",
+    "vars": {
+      "question": "What identity proofing requirements does FIPS 201-3 impose before a PIV Card may be issued?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many days does an organization have to remediate a high-",
+    "vars": {
+      "question": "How many days does an organization have to remediate a high-severity assessment finding under SP 800-37r2?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What is the minimum number of assessors required for a syste",
+    "vars": {
+      "question": "What is the minimum number of assessors required for a system authorization under SP 800-37r2?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How long must assessment evidence be retained according to S",
+    "vars": {
+      "question": "How long must assessment evidence be retained according to SP 800-53A Revision 5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many days does an organization have to close a plan of a",
+    "vars": {
+      "question": "How many days does an organization have to close a plan of action item under SP 800-171A Revision 3?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What does a third-party assessment cost under SP 800-171A Re",
+    "vars": {
+      "question": "What does a third-party assessment cost under SP 800-171A Revision 3?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: For how many years is a PIV Authentication certificate valid",
+    "vars": {
+      "question": "For how many years is a PIV Authentication certificate valid according to SP 800-78-5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many incorrect PIN attempts does SP 800-78-5 allow befor",
+    "vars": {
+      "question": "How many incorrect PIN attempts does SP 800-78-5 allow before a PIV Card locks?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What percentage of controls must be tested every year under ",
+    "vars": {
+      "question": "What percentage of controls must be tested every year under SP 800-53A Revision 5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many hours of downtime are acceptable before an authoriz",
+    "vars": {
+      "question": "How many hours of downtime are acceptable before an authorization must be revisited under SP 800-37r2?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many hours per week must guards staff the logical access",
+    "vars": {
+      "question": "How many hours per week must guards staff the logical access points to the system under SP 800-53A Revision 5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: Until what date may 3TDEA be used for the PIV Authentication",
+    "vars": {
+      "question": "Until what date may 3TDEA be used for the PIV Authentication key under SP 800-78-5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many retired digital signature keys can a PIV Card hold ",
+    "vars": {
+      "question": "How many retired digital signature keys can a PIV Card hold under SP 800-78-5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: How many times per year is a High-likelihood adversarial thr",
+    "vars": {
+      "question": "How many times per year is a High-likelihood adversarial threat event initiated under SP 800-30 Revision 1?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What RSA public exponent does SP 800-78-5 require for the PI",
+    "vars": {
+      "question": "What RSA public exponent does SP 800-78-5 require for the PIV Secure Messaging key?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: Which elliptic curve must the symmetric Card Authentication ",
+    "vars": {
+      "question": "Which elliptic curve must the symmetric Card Authentication key use after 2030 under SP 800-78-5?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: What semi-quantitative value range does SP 800-30 Revision 1",
+    "vars": {
+      "question": "What semi-quantitative value range does SP 800-30 Revision 1 assign to the Critical likelihood level?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "refuse: Which elliptic curve does SP 800-78-5 require for the PIV Ca",
+    "vars": {
+      "question": "Which elliptic curve does SP 800-78-5 require for the PIV Card Application Administration Key?",
+      "expect_refusal": true
+    }
+  },
+  {
+    "description": "answer: What are the seven steps of the NIST Risk Management Framewo",
+    "vars": {
+      "question": "What are the seven steps of the NIST Risk Management Framework (RMF) described in SP 800-37 Revision 2?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is a common control according to SP 800-37 Revision 2?",
+    "vars": {
+      "question": "What is a common control according to SP 800-37 Revision 2?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the difference between a common control and a hybrid",
+    "vars": {
+      "question": "What is the difference between a common control and a hybrid control in the RMF?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the purpose of the Prepare step in the RMF?",
+    "vars": {
+      "question": "What is the purpose of the Prepare step in the RMF?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What key artifacts are included in an authorization package ",
+    "vars": {
+      "question": "What key artifacts are included in an authorization package under SP 800-37r2?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: According to SP 800-30 Revision 1, what are the four steps o",
+    "vars": {
+      "question": "According to SP 800-30 Revision 1, what are the four steps of the risk assessment process?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What are the four components of the overall risk management ",
+    "vars": {
+      "question": "What are the four components of the overall risk management process in SP 800-30r1?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: At which three organizational tiers can risk assessments be ",
+    "vars": {
+      "question": "At which three organizational tiers can risk assessments be applied according to SP 800-30r1?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What risk factors are considered when conducting a risk asse",
+    "vars": {
+      "question": "What risk factors are considered when conducting a risk assessment per SP 800-30?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the purpose of the risk framing component of the ris",
+    "vars": {
+      "question": "What is the purpose of the risk framing component of the risk management process?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the primary purpose of NIST SP 800-53A Revision 5?",
+    "vars": {
+      "question": "What is the primary purpose of NIST SP 800-53A Revision 5?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: Name the three primary assessment methods defined in SP 800-",
+    "vars": {
+      "question": "Name the three primary assessment methods defined in SP 800-53A.",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What does the Examine assessment method involve?",
+    "vars": {
+      "question": "What does the Examine assessment method involve?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the difference between the Examine and Test assessme",
+    "vars": {
+      "question": "What is the difference between the Examine and Test assessment methods in SP 800-53A?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: How do the depth and coverage attributes of assessment metho",
+    "vars": {
+      "question": "How do the depth and coverage attributes of assessment methods affect the assessment?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the purpose of NIST SP 800-171A Revision 3?",
+    "vars": {
+      "question": "What is the purpose of NIST SP 800-171A Revision 3?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What does CUI stand for and why is its protection important ",
+    "vars": {
+      "question": "What does CUI stand for and why is its protection important according to SP 800-171Ar3?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What flexibility does SP 800-171Ar3 give to assessors regard",
+    "vars": {
+      "question": "What flexibility does SP 800-171Ar3 give to assessors regarding rigor?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: How does SP 800-171Ar3 relate its assessment procedures to S",
+    "vars": {
+      "question": "How does SP 800-171Ar3 relate its assessment procedures to SP 800-53A?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: How many security requirement families are defined in SP 800",
+    "vars": {
+      "question": "How many security requirement families are defined in SP 800-171Ar3, and name them?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What is the scope of NIST SP 800-78-5?",
+    "vars": {
+      "question": "What is the scope of NIST SP 800-78-5?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: Which FIPS standard defines the requirements for PIV life-cy",
+    "vars": {
+      "question": "Which FIPS standard defines the requirements for PIV life-cycle activities that SP 800-78-5 supports?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What public exponent must be used when generating RSA keys f",
+    "vars": {
+      "question": "What public exponent must be used when generating RSA keys for PIV according to SP 800-78-5?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What algorithm and key-size options are permitted for the PI",
+    "vars": {
+      "question": "What algorithm and key-size options are permitted for the PIV Authentication key through 2030?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: What elliptic curves are recommended for PIV keys in SP 800-",
+    "vars": {
+      "question": "What elliptic curves are recommended for PIV keys in SP 800-78-5?",
+      "expect_refusal": false
+    }
+  },
+  {
+    "description": "answer: How does the Assess step of the RMF (SP 800-37r2) relate to ",
+    "vars": {
+      "question": "How does the Assess step of the RMF (SP 800-37r2) relate to the assessment methods defined in SP 800-53A?",
+      "expect_refusal": false
+    }
+  }
+]
