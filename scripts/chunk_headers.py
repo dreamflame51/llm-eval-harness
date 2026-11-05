@@ -29,9 +29,9 @@ Four records lost the hit (two original, one paraphrase, one partial), none
 won. A header names the document, and the document is not what is missing:
 3087 of the 5054 chunks are 800-53A, so "800-53A" in the query now matches
 three chunks in five equally, and in BM25 the header's words appear in every
-chunk and weigh almost nothing. In the vectors the shared header pulls chunks
-of one document toward each other, which costs the passages that were found on
-their content. Filtering by document (the other candidate) would leave the same
+chunk and weigh almost nothing. Why four were lost is not measured - which
+retriever dropped them was not checked; the guess is that a shared header pulls
+the vectors of one document toward each other. Filtering by document (the other candidate) would leave the same
 3087 to choose from. Not applied; the abstract miss stays a known limitation.
 """
 
